@@ -1,0 +1,14 @@
+[project]
+name = "py-cricinfo"
+dynamic = ["version", "dependencies"]
+
+[tool.setuptools.dynamic]
+version = { file = "version.txt" } 
+dependencies = {file = ["requirements.txt"]}
+
+[project.scripts]
+scorecard = 'cricinfo.output_scorecard:run'
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

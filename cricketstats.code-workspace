@@ -1,0 +1,43 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+  ],
+  "settings": {
+    "workbench.colorCustomizations": {
+      "activityBar.activeBackground": "#892bc8",
+      "activityBar.background": "#892bc8",
+      "activityBar.foreground": "#e7e7e7",
+      "activityBar.inactiveForeground": "#e7e7e799",
+      "activityBarBadge.background": "#34240b",
+      "activityBarBadge.foreground": "#e7e7e7",
+      "commandCenter.border": "#e7e7e799",
+      "sash.hoverBorder": "#892bc8",
+      "statusBar.background": "#6c229e",
+      "statusBar.foreground": "#e7e7e7",
+      "statusBarItem.hoverBackground": "#892bc8",
+      "statusBarItem.remoteBackground": "#6c229e",
+      "statusBarItem.remoteForeground": "#e7e7e7",
+      "titleBar.activeBackground": "#6c229e",
+      "titleBar.activeForeground": "#e7e7e7",
+      "titleBar.inactiveBackground": "#6c229e99",
+      "titleBar.inactiveForeground": "#e7e7e799"
+    },
+    "peacock.color": "#6c229e",
+    "autoDocstring.docstringFormat": "numpy",
+    "isort.args": ["-l", "100"]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "run.py",
+        "console": "integratedTerminal"
+      }
+    ]
+  }
+}
