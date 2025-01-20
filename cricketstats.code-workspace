@@ -26,7 +26,15 @@
     },
     "peacock.color": "#6c229e",
     "autoDocstring.docstringFormat": "numpy",
-    "isort.args": ["-l", "100"]
+    "isort.args": [
+      "-l",
+      "120",
+      "--profile=black"
+    ],
+    "black-formatter.args": [
+      "--line-length",
+      "120"
+    ],
   },
   "launch": {
     "version": "0.2.0",

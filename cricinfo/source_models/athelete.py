@@ -1,8 +1,9 @@
+from abc import ABC
 from typing import Optional
 
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl
 
-from cricinfo.source_models.common import Link, CCBaseModel, Ref
+from cricinfo.source_models.common import CCBaseModel, DisplayNameMixin, IDMixin, Link, NameMixin, RefMixin
 
 
 class Style(CCBaseModel):
@@ -14,14 +15,26 @@ class Headshot(BaseModel):
     href: HttpUrl
     rel: list[str]
 
-class AthleteLite(Ref):
-    id: int
-    display_name: str
-    first_name: Optional[str] = None
-    last_name: str
-    full_name: str
+class ShortNameMixin(BaseModel):
+    short_name: str
 
-class Athlete(AthleteLite):
+class FullNameMixin(BaseModel):
+    full_name: Optional[str] = Field(default=None) 
+
+class FirstNameMixin(BaseModel):
+    first_name: Optional[str] = Field(default=None) 
+
+class LastNameMixin(BaseModel):
+    last_name: str
+
+
+class AthleteCommon(RefMixin, IDMixin, FullNameMixin, DisplayNameMixin, ABC): ...
+
+class AthleteWithNameAndShortName(AthleteCommon, NameMixin, ShortNameMixin): ...
+
+class AthleteWithFirstAndLastName(AthleteCommon, FirstNameMixin, LastNameMixin): ...
+
+class Athlete(AthleteWithFirstAndLastName):
     guid: Optional[str] = None
     uid: str
     name: str

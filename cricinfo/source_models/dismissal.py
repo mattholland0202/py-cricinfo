@@ -2,12 +2,12 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from cricinfo.source_models.athelete import AthleteLite
+from cricinfo.source_models.athelete import AthleteWithFirstAndLastName
 from cricinfo.source_models.common import CCBaseModel
 
 
 class DismissalFielder(CCBaseModel):
-    athlete: AthleteLite
+    athlete: AthleteWithFirstAndLastName
     display_order: int
     is_keeper: int
     is_substitute: int
@@ -27,7 +27,7 @@ class DismissalDetails(CCBaseModel):
     over: DismissalDetailsOver
 
 class Dismissal(CCBaseModel):
-    bowler: Optional[AthleteLite] = None
+    bowler: Optional[AthleteWithFirstAndLastName] = None
     details: Optional[DismissalDetails] = None
     dismissal_card: str
     fielders: list[DismissalFielder]

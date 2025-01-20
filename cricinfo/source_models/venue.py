@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-from cricinfo.source_models.common import Ref, Link
+from cricinfo.source_models.common import RefMixin, Link
 
 class Address(BaseModel):
     city: str
@@ -16,5 +16,5 @@ class Venue(BaseModel):
     address: Address
     capacity: int
     grass: bool
-    images: list[Ref]
+    images: list[RefMixin]
     links: list[Link]

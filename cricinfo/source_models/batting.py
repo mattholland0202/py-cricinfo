@@ -41,7 +41,7 @@ class BattingDetails(CCBaseModel):
     order: int
     out_details: Dismissal
     pvp: BattingPvp
-    runs_summary: list[int]     # 8 values: dots, singles, twos, threes, fours, X, sixes, X
+    runs_summary: list[int|str]     # 8 values: dots, singles, twos, threes, fours, X, sixes, X
     dot_ball_percentage: int
     batting_recent: BattingRecent
     preferred_shot: Optional[PreferredShot] = None
@@ -50,7 +50,7 @@ class BattingDetails(CCBaseModel):
     wagonZone: list[WagonZone]  # 8 zones: clockwise from long leg
     wagon: Wagon
 
-    @computed_field(alias="dismissal_text")
+    @computed_field
     @property
     def dismissal_text(self) -> Optional[str]:
         return self.out_details and self.out_details.short_text.replace("&dagger;", "\u271D").strip()

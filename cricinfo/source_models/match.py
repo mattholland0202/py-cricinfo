@@ -1,7 +1,7 @@
 from pydantic import BaseModel, computed_field
 from typing import Optional
 
-from cricinfo.source_models import MatchNote, Official, Roster, Venue, CCBaseModel, Team, Ref
+from cricinfo.source_models import MatchNote, Official, Roster, Venue, CCBaseModel, TeamWithColorAndLogos, RefMixin
 
 class TeamWicketDetails(CCBaseModel):
     text: str
@@ -46,7 +46,7 @@ class TeamLinescore(CCBaseModel):
 class MatchCompetitor(CCBaseModel):
     id: int
     winner: bool
-    team: Team
+    team: TeamWithColorAndLogos
     score: str
     linescores: list[TeamLinescore]
 
@@ -75,7 +75,7 @@ class MatchHeader(CCBaseModel):
     def competition(self) -> MatchCompetiton:
         return self.competitions[0]
     
-    def get_batting_linescore_for_period(self, period: int) -> tuple[Team, TeamLinescore]:
+    def get_batting_linescore_for_period(self, period: int) -> tuple[TeamWithColorAndLogos, TeamLinescore]:
         for competitor in self.competition.competitors:
             for linescore in competitor.linescores:
                 if linescore.period == period and linescore.is_batting:

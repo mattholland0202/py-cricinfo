@@ -5,7 +5,7 @@ from pydantic import AliasChoices, BaseModel, Field, computed_field
 from cricinfo.source_models.athelete import Athlete
 from cricinfo.source_models.common import CCBaseModel, Position
 from cricinfo.source_models.linescores import LinescorePeriod
-from cricinfo.source_models.team import Team
+from cricinfo.source_models.team import TeamWithColorAndLogos
 
 
 class Player(CCBaseModel):
@@ -30,7 +30,7 @@ class Player(CCBaseModel):
         return self.position.abbreviation == "WK"
 
 class Roster(BaseModel):
-    home_or_away: Literal["home", "away"] = Field( validation_alias=AliasChoices('home_or_away', 'homeAway'))
+    home_or_away: Literal["home", "away"] = Field(validation_alias=AliasChoices('home_or_away', 'homeAway'))
     winner: bool
-    team: Team
+    team: TeamWithColorAndLogos
     players: list[Player] = Field(validation_alias=AliasChoices('players', 'roster'))
