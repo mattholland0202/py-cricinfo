@@ -35,6 +35,7 @@
       "--line-length",
       "120"
     ],
+    "editor.formatOnSave": true
   },
   "launch": {
     "version": "0.2.0",
@@ -45,6 +46,14 @@
         "request": "launch",
         "program": "run.py",
         "console": "integratedTerminal"
+      },
+      {
+        "name": "Debug: FastAPI",
+        "type": "debugpy",
+        "request": "launch",
+        "module": "uvicorn",
+        "args": ["run_api:app", "--reload"],
+        "jinja": true
       }
     ]
   }

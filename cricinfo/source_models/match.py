@@ -83,7 +83,7 @@ class MatchHeader(CCBaseModel):
 
 class MatchInfo(BaseModel):
     venue: Venue
-    attendance: int
+    attendance: Optional[int] = None
     officials: list[Official]
 
 class Match(CCBaseModel):

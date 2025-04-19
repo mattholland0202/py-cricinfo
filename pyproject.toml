@@ -1,10 +1,11 @@
 [project]
 name = "py-cricinfo"
-dynamic = ["version", "dependencies"]
+dynamic = ["version", "dependencies", "optional-dependencies"]
 
 [tool.setuptools.dynamic]
 version = { file = "version.txt" } 
 dependencies = {file = ["requirements.txt"]}
+optional-dependencies.api = { file = ["requirements-api.txt"] }
 
 [project.scripts]
 scorecard = 'cricinfo.output:print_scorecard'

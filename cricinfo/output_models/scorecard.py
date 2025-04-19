@@ -1,10 +1,10 @@
-import re
 from abc import ABC, abstractmethod
 from typing import Optional
 
 from prettytable import PrettyTable
 from pydantic import AliasChoices, BaseModel, Field, computed_field, model_validator
 
+from cricinfo.output_models.common import HeaderlessTableMixin, SNAKE_CASE_REGEX
 from cricinfo.source_models.athelete import Athlete
 from cricinfo.source_models.linescores import LinescorePeriod
 from cricinfo.source_models.match import Match
@@ -15,33 +15,52 @@ from cricinfo.source_models.team import TeamWithColorAndLogos
 RED = "\033[31m"
 RESET = "\033[0m"
 
-SNAKE_CASE_REGEX = re.compile(r"(?<!^)(?=[A-Z])")
-
-
-class HeaderlessTableMixin:
-    def print_headerless_table(self, rows: list[tuple[str, bool]]):
-        table = PrettyTable()
-        table.header = False
-        for row in rows:
-            table.add_row([row[0]], divider=row[1])
-        print(table)
-
 
 class PlayerInningsModel(BaseModel, ABC):
     order: int
 
-    def add_linescore_stats_as_properties(data: dict, *args):
+    def add_linescore_stats_as_properties(data: dict, *args) -> dict:
+        """
+        Add individual named stats matching supplied args to the data dictionary so they can be deserialized by Pydantic
+
+        Parameters
+        ----------
+        data : dict
+            The data to add keys to
+
+        Returns
+        -------
+        dict
+            The input data dictionary, with new keys added
+        """
         linescore: LinescorePeriod = data.get("linescore")
         if not linescore:
             return data
 
         for name in args:
+            if not isinstance(name, str):
+                raise TypeError("args to this function must be strings")
             name_split = str(name).split(".")
             stat_name = name_split[1] if len(name_split) > 1 else name_split[0]
             data[SNAKE_CASE_REGEX.sub("_", stat_name).lower()] = linescore.gs(name)
         return data
 
     def colour_row(self, row_items: list[str], colour: str) -> list[str]:
+        """
+        
+
+        Parameters
+        ----------
+        row_items : list[str]
+            _description_
+        colour : str
+            _description_
+
+        Returns
+        -------
+        list[str]
+            _description_
+        """
         return [f"{colour}{cell}{RESET}" for cell in row_items]
 
     @abstractmethod
@@ -110,9 +129,7 @@ class BowlingInnings(PlayerInningsModel):
     @model_validator(mode="before")
     @classmethod
     def create_bowling_attributes(cls, data: dict):
-        return cls.add_linescore_stats_as_properties(
-            data, "overs", "maidens", "conceded", "wickets", "bowling.order"
-        )
+        return cls.add_linescore_stats_as_properties(data, "overs", "maidens", "conceded", "wickets", "bowling.order")
 
     def add_to_table(self, table: PrettyTable):
         table.add_row(
@@ -137,12 +154,8 @@ class Innings(BaseModel, HeaderlessTableMixin):
 
     @computed_field
     @property
-    def score_summary(self) -> bool:
-        wickets_text = (
-            f" {self.batting_description}"
-            if self.batting_description == "all out"
-            else f"/{self.wickets}"
-        )
+    def score_summary(self) -> str:
+        wickets_text = f" {self.batting_description}" if self.batting_description == "all out" else f"/{self.wickets}"
         return f"{self.batting_score}{wickets_text}"
 
     def to_table(self):
@@ -161,9 +174,7 @@ class Innings(BaseModel, HeaderlessTableMixin):
             ["", "Dismissal"],
         )
 
-        self._print_player_innings_table(
-            ["", "Overs", "Maidens", "Runs", "Wickets"], self.bowlers
-        )
+        self._print_player_innings_table(["", "Overs", "Maidens", "Runs", "Wickets"], self.bowlers)
 
     def _print_player_innings_table(
         self,
@@ -194,7 +205,7 @@ class Scorecard(BaseModel, HeaderlessTableMixin):
         data["summary"] = match.header.summary
 
         innings = []
-        for i in range(1, 5):
+        for i in range(1, 3):       # TODO: Change this between 3 and 5 for limited overs vs test matches
             team_linescore = match.header.get_batting_linescore_for_period(i)
             innings.append(
                 Innings(
