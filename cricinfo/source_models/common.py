@@ -1,6 +1,5 @@
 from abc import ABC
 from typing import Optional
-
 from pydantic import AliasChoices, AliasGenerator, BaseModel, ConfigDict, Field, HttpUrl, model_validator
 from pydantic.alias_generators import to_camel
 
@@ -25,9 +24,7 @@ class PagingModel(CCBaseModel):
 
 
 class RefMixin(CCBaseModel):
-    ref: Optional[HttpUrl] = Field(
-        default=None, validation_alias=AliasChoices("ref", "$ref", "href")
-    )
+    ref: Optional[HttpUrl] = Field(default=None, validation_alias=AliasChoices("ref", "$ref", "href"))
 
 
 class IDMixin(BaseModel):
@@ -52,8 +49,8 @@ class Link(CCBaseModel):
     is_premium: Optional[bool] = None
 
 
-class Position(BaseModel):
+class Position(RefMixin):
     displayName: Optional[str] = None
-    name: str
     id: Optional[str] = None
+    name: str
     abbreviation: Optional[str] = None

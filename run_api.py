@@ -5,7 +5,7 @@ from cricinfo.api.endpoints.wrapper import router
 
 
 app = FastAPI(
-    version=get_settings().APP_VERSION,
+    version=get_settings().version,
     title="py-cricinfo API",
     swagger_ui_parameters={
         "defaultModelsExpandDepth": -1,

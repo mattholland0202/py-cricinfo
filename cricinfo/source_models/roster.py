@@ -8,7 +8,7 @@ from cricinfo.source_models.linescores import LinescorePeriod
 from cricinfo.source_models.team import TeamWithColorAndLogos
 
 
-class Player(CCBaseModel):
+class Player(CCBaseModel):  # TODO: Rename
     captain: bool
     active: bool
     active_name: str

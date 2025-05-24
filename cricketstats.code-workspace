@@ -35,7 +35,10 @@
       "--line-length",
       "120"
     ],
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+      },
   },
   "launch": {
     "version": "0.2.0",

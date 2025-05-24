@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, Path, status, Query
+import requests
+from fastapi import APIRouter, Depends, Path, Query, status
 
-from cricinfo.source_models.match import Match
 from cricinfo.output_models.scorecard import Scorecard
 from cricinfo.source_models.commentary import APIResponseCommentary
+from cricinfo.source_models.match import Match
+from cricinfo.source_models.player import Player
 from cricinfo.utils import load_dict_to_model
-
-import requests
+from cricinfo.core.query import get_player
 
 router = APIRouter(prefix="/wrapper", tags=["wrapper"])
 
@@ -39,9 +40,8 @@ async def team_players(team_id: int = Path(description="The Team ID")):
 
 
 @router.get("/player/{player_id}", responses={status.HTTP_200_OK: {"description": "The Player"}}, summary="Get Player")
-async def player(player_id: int = Path(description="The Player ID")):
-    response = requests.get(f"http://core.espnuk.org/v2/sports/cricket/teams/0/athletes/{player_id}").json()
-    return response
+async def player(player_id: int = Path(description="The Player ID")) -> Player:
+    return get_player(player_id)
 
 
 @router.get(

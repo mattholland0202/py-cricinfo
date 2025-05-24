@@ -43,3 +43,6 @@ class Athlete(AthleteWithFirstAndLastName):
     fielding_name: str
     headshot: Optional[Headshot] = None
     links: list[Link]
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.uid})"
