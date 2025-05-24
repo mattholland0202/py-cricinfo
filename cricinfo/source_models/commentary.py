@@ -11,6 +11,7 @@ class PlayType(BaseModel):
     id: str
     description: str
 
+
 class Bowler(BaseModel):
     athlete: Optional[Athlete] = Field(default=None)
     team: Team
@@ -20,6 +21,7 @@ class Bowler(BaseModel):
     overs: float
     conceded: int
 
+
 class Batsman(CCBaseModel):
     athlete: Athlete
     team: Team
@@ -28,6 +30,7 @@ class Batsman(CCBaseModel):
     fours: int
     runs: int
     sixes: int
+
 
 class Innings(CCBaseModel):
     id: str
@@ -56,6 +59,7 @@ class Innings(CCBaseModel):
     def score(self) -> str:
         return f"{self.runs}/{self.wickets}"
 
+
 class Over(CCBaseModel):
     ball: int
     balls: int
@@ -73,11 +77,14 @@ class Over(CCBaseModel):
     actual: float
     unique: float
 
+
 class BowlerAthlete(BaseModel):
     athlete: Athlete
 
+
 class BatsmanAthlete(BaseModel):
     athlete: Athlete
+
 
 class Dismissal(CCBaseModel):
     dismissal: bool
@@ -88,6 +95,7 @@ class Dismissal(CCBaseModel):
     text: str
     minutes: int
     retired_text: str
+
 
 class CommentaryItem(CCBaseModel):
     id: str
@@ -116,8 +124,10 @@ class CommentaryItem(CCBaseModel):
     dismissal: Dismissal
     bbb_timestamp: int
 
+
 class Commentary(PagingModel):
     items: list[CommentaryItem]
+
 
 class APIResponseCommentary(BaseModel):
     commentary: Commentary

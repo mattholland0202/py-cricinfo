@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.4]
+### Added
+- Better config for handling Cricinfo API routes
+- Models to represent a Player
+
+### Changed
+- Move to UV package manager
+- Format files with Ruff
+
 ## [0.0.3]
 ### Added
 - Optional package component to create a wrapper for useful Cricinfo APIs

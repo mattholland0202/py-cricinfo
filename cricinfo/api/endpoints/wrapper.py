@@ -1,12 +1,12 @@
 import requests
 from fastapi import APIRouter, Depends, Path, Query, status
 
+from cricinfo.core.query import get_player
 from cricinfo.output_models.scorecard import Scorecard
 from cricinfo.source_models.commentary import APIResponseCommentary
 from cricinfo.source_models.match import Match
 from cricinfo.source_models.player import Player
 from cricinfo.utils import load_dict_to_model
-from cricinfo.core.query import get_player
 
 router = APIRouter(prefix="/wrapper", tags=["wrapper"])
 

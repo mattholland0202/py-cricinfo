@@ -1,8 +1,6 @@
-from abc import ABC, abstractmethod
 from typing import Optional
 
-from prettytable import PrettyTable
-from pydantic import AliasChoices, BaseModel, Field, computed_field, model_validator
+from pydantic import BaseModel, model_validator
 
 from cricinfo.output_models.common import HeaderlessTableMixin
 from cricinfo.source_models.commentary import APIResponseCommentary

@@ -1,5 +1,6 @@
 from abc import ABC
 from typing import Optional
+
 from pydantic import AliasChoices, AliasGenerator, BaseModel, ConfigDict, Field, HttpUrl, model_validator
 from pydantic.alias_generators import to_camel
 

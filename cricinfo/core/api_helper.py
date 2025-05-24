@@ -3,7 +3,7 @@ import logging
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Type, TypeVar
+from typing import Type, TypeVar
 
 import requests
 from pydantic import BaseModel, ValidationError

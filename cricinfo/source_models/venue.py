@@ -1,6 +1,9 @@
-from pydantic import BaseModel
 from typing import Optional
-from cricinfo.source_models.common import RefMixin, Link
+
+from pydantic import BaseModel
+
+from cricinfo.source_models.common import Link, RefMixin
+
 
 class Address(BaseModel):
     city: str
@@ -8,6 +11,7 @@ class Address(BaseModel):
     zipCode: Optional[str] = None
     country: str
     summary: str
+
 
 class Venue(BaseModel):
     id: str

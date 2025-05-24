@@ -8,7 +8,9 @@ class TeamCommon(CCBaseModel, ABC):
     abbreviation: str
     display_name: str
 
+
 class TeamWithName(TeamCommon, NameMixin): ...
+
 
 class TeamWithColorAndLogos(TeamCommon):
     color: str

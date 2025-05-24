@@ -24,7 +24,8 @@ def print_scorecard(file_path: str = None):
 
 def print_ball_by_ball(file_path: str = None):
     """
-    Prints a page of ball by ball commentary of a match, either by passing a file path or loading from command line arguments
+    Prints a page of ball by ball commentary of a match, either by passing a file path or loading from command line
+    arguments
 
     Parameters
     ----------
@@ -36,6 +37,7 @@ def print_ball_by_ball(file_path: str = None):
     model = load_file_and_validate_to_model(file_path, APIResponseCommentary)
     for item in model.commentary.items:
         print(f"{item.over.overs}: {item.short_text} - {item.current_innings_score.score}")
+
 
 def parse_args():
     """

@@ -4,7 +4,7 @@ from typing import Optional
 from prettytable import PrettyTable
 from pydantic import AliasChoices, BaseModel, Field, computed_field, model_validator
 
-from cricinfo.output_models.common import HeaderlessTableMixin, SNAKE_CASE_REGEX
+from cricinfo.output_models.common import SNAKE_CASE_REGEX, HeaderlessTableMixin
 from cricinfo.source_models.athelete import Athlete
 from cricinfo.source_models.linescores import LinescorePeriod
 from cricinfo.source_models.match import Match
@@ -47,7 +47,7 @@ class PlayerInningsModel(BaseModel, ABC):
 
     def colour_row(self, row_items: list[str], colour: str) -> list[str]:
         """
-        
+
 
         Parameters
         ----------
@@ -81,7 +81,7 @@ class BattingInnings(PlayerInningsModel):
     @computed_field
     @property
     def player_display(self) -> str:
-        return f"{self.player.display_name}{' (c)' if self.captain else ''}{' \u271D' if self.keeper else ''}"
+        return f"{self.player.display_name}{' (c)' if self.captain else ''}{' \u271d' if self.keeper else ''}"
 
     @model_validator(mode="before")
     @classmethod
@@ -104,7 +104,7 @@ class BattingInnings(PlayerInningsModel):
                 [
                     self.player_display,
                     self.dismissal_text,
-                    f"{self.runs}{"*" if self.not_out else ''}",
+                    f"{self.runs}{'*' if self.not_out else ''}",
                     self.balls_faced,
                     self.fours,
                     self.sixes,
@@ -205,7 +205,7 @@ class Scorecard(BaseModel, HeaderlessTableMixin):
         data["summary"] = match.header.summary
 
         innings = []
-        for i in range(1, 3):       # TODO: Change this between 3 and 5 for limited overs vs test matches
+        for i in range(1, 3):  # TODO: Change this between 3 and 5 for limited overs vs test matches
             team_linescore = match.header.get_batting_linescore_for_period(i)
             innings.append(
                 Innings(

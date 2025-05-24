@@ -1,5 +1,6 @@
 import json
-from typing import Type, TypeVar, Any
+import tomllib
+from typing import Any, Type, TypeVar
 
 from pydantic import BaseModel, ValidationError
 
@@ -76,3 +77,25 @@ def load_dict_to_model(json_data: dict, type_to_parse: Type[T]) -> T:
         exit(1)
 
     return model
+
+
+def get_field_from_pyproject(field_name: str) -> str:
+    """
+    Get a specific field from the `project` section of the `pyproject.toml` file.
+
+    Parameters
+    ----------
+    field_name : str
+        The name of the field to retrieve from the `project` section
+
+    Returns
+    -------
+    str
+        The value of the specified field from the `project` section of `pyproject.toml`
+    """
+    with open("pyproject.toml", "rb") as f:
+        pyproject = tomllib.load(f)
+
+    project_section: dict = pyproject.get("project", {})
+
+    return project_section.get(field_name)

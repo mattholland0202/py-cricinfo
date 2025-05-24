@@ -23,14 +23,15 @@ class Player(CCBaseModel):  # TODO: Rename
     @property
     def athlete_name(self) -> str:
         return self.athlete.display_name
-    
+
     @computed_field
     @property
     def keeper(self) -> bool:
         return self.position.abbreviation == "WK"
 
+
 class Roster(BaseModel):
-    home_or_away: Literal["home", "away"] = Field(validation_alias=AliasChoices('home_or_away', 'homeAway'))
+    home_or_away: Literal["home", "away"] = Field(validation_alias=AliasChoices("home_or_away", "homeAway"))
     winner: bool
     team: TeamWithColorAndLogos
-    players: list[Player] = Field(validation_alias=AliasChoices('players', 'roster'))
+    players: list[Player] = Field(validation_alias=AliasChoices("players", "roster"))

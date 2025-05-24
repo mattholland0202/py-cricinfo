@@ -11,18 +11,23 @@ class Style(CCBaseModel):
     short_description: str
     type: str
 
+
 class Headshot(BaseModel):
     href: HttpUrl
     rel: list[str]
 
+
 class ShortNameMixin(BaseModel):
     short_name: str
 
+
 class FullNameMixin(BaseModel):
-    full_name: Optional[str] = Field(default=None) 
+    full_name: Optional[str] = Field(default=None)
+
 
 class FirstNameMixin(BaseModel):
-    first_name: Optional[str] = Field(default=None) 
+    first_name: Optional[str] = Field(default=None)
+
 
 class LastNameMixin(BaseModel):
     last_name: str
@@ -30,9 +35,12 @@ class LastNameMixin(BaseModel):
 
 class AthleteCommon(RefMixin, IDMixin, FullNameMixin, DisplayNameMixin, ABC): ...
 
+
 class AthleteWithNameAndShortName(AthleteCommon, NameMixin, ShortNameMixin): ...
 
+
 class AthleteWithFirstAndLastName(AthleteCommon, FirstNameMixin, LastNameMixin): ...
+
 
 class Athlete(AthleteWithFirstAndLastName):
     guid: Optional[str] = None

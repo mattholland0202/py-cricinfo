@@ -12,12 +12,15 @@ class DismissalFielder(CCBaseModel):
     is_keeper: int
     is_substitute: int
 
+
 class DismissalDetailsInnings(BaseModel):
     wickets: int
     runs: int
 
+
 class DismissalDetailsOver(BaseModel):
     overs: float
+
 
 class DismissalDetails(CCBaseModel):
     id: str
@@ -25,6 +28,7 @@ class DismissalDetails(CCBaseModel):
     short_text: str
     innings: DismissalDetailsInnings
     over: DismissalDetailsOver
+
 
 class Dismissal(CCBaseModel):
     bowler: Optional[AthleteWithFirstAndLastName] = None

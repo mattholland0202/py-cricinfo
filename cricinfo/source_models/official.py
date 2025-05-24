@@ -1,6 +1,6 @@
 from pydantic import BaseModel, HttpUrl
 
-from cricinfo.source_models.common import Link, CCBaseModel, Position
+from cricinfo.source_models.common import CCBaseModel, Link, Position
 
 
 class Flag(BaseModel):
@@ -9,6 +9,7 @@ class Flag(BaseModel):
     href: HttpUrl
     rel: list[str]
     width: int
+
 
 class Official(CCBaseModel):
     display_name: str
