@@ -1,10 +1,16 @@
+from enum import Enum, auto
 from functools import lru_cache
 
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings
 
 
-class APIRoutes(BaseModel):
+class BaseRoute(Enum):
+    core: str = auto()
+    site: str = auto()
+
+
+class CoreAPIRoutes(BaseModel):
     team: str = "events/0/teams/{team_id}"
     team_players: str = "cricket/teams/{team_id}/athletes"
     player: str = "teams/0/athletes/{player_id}"
@@ -15,8 +21,9 @@ class APIRoutes(BaseModel):
 
 
 class Settings(BaseSettings):
-    base_route_v2: str = "http://core.espnuk.org/v2/sports/cricket/"
-    routes: APIRoutes = APIRoutes()
+    core_base_route_v2: str = "http://core.espnuk.org/v2/sports/cricket/"
+    site_base_route_v2: str = "http://site.api.espn.com/apis/site/v2/sports/cricket/"
+    routes: CoreAPIRoutes = CoreAPIRoutes()
     api_response_output_folder: str = "responses"
 
 

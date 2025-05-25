@@ -8,7 +8,7 @@ from cricinfo.source_models.linescores import LinescorePeriod
 from cricinfo.source_models.team import TeamWithColorAndLogos
 
 
-class Player(CCBaseModel):  # TODO: Rename
+class MatchPlayer(CCBaseModel):
     captain: bool
     active: bool
     active_name: str
@@ -34,4 +34,4 @@ class Roster(BaseModel):
     home_or_away: Literal["home", "away"] = Field(validation_alias=AliasChoices("home_or_away", "homeAway"))
     winner: bool
     team: TeamWithColorAndLogos
-    players: list[Player] = Field(validation_alias=AliasChoices("players", "roster"))
+    players: list[MatchPlayer] = Field(validation_alias=AliasChoices("players", "roster"))

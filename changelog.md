@@ -7,9 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.4]
 ### Added
 - Better config for handling Cricinfo API routes
-- Models to represent a Player
+- Models to represent more API entities
 
 ### Changed
+- Move more logic into `Core` with Pydantic model parsing
 - Move to UV package manager
 - Format files with Ruff
 

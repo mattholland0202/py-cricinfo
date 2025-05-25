@@ -8,7 +8,7 @@ from cricinfo.output_models.common import SNAKE_CASE_REGEX, HeaderlessTableMixin
 from cricinfo.source_models.athelete import Athlete
 from cricinfo.source_models.linescores import LinescorePeriod
 from cricinfo.source_models.match import Match
-from cricinfo.source_models.roster import Player, Roster
+from cricinfo.source_models.roster import MatchPlayer, Roster
 from cricinfo.source_models.team import TeamWithColorAndLogos
 
 # ANSI escape codes for colors
@@ -228,7 +228,7 @@ class Scorecard(BaseModel, HeaderlessTableMixin):
             cls._enrich_player(innings, player)
 
     @classmethod
-    def _enrich_player(cls, innings: list[Innings], player: Player):
+    def _enrich_player(cls, innings: list[Innings], player: MatchPlayer):
         for linescore in player.linescores:
             if bool(linescore.batted) and bool(int(linescore.batted)):
                 bat = BattingInnings(

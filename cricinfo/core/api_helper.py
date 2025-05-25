@@ -8,14 +8,20 @@ from typing import Type, TypeVar
 import requests
 from pydantic import BaseModel, ValidationError
 
-from cricinfo.config import get_settings
+from cricinfo.config import BaseRoute, get_settings
 from cricinfo.utils import replace_empty_objects_with_null
 
 logger = logging.getLogger("cricinfo")
 T = TypeVar("T", bound=BaseModel)
 
 
-def get_and_parse(route: str, type_to_parse: Type[T], params: dict = None, null_out_empty_dicts: bool = False) -> T:
+def get_and_parse(
+    route: str,
+    type_to_parse: Type[T],
+    params: dict = None,
+    null_out_empty_dicts: bool = False,
+    base_route: BaseRoute = BaseRoute.core,
+) -> T:
     """
     Make a GET request to the API and parse the response to the supplied type
 
@@ -29,13 +35,14 @@ def get_and_parse(route: str, type_to_parse: Type[T], params: dict = None, null_
         Any parameters to fill in into the route, in a dictionary of key-value pairs, by default None
     null_out_empty_dicts : bool, optional
         Whether to replace any dictionaries that contain only None values with None, by default False
-
+    base_route: BaseRoute, optional
+        The base route to use for the API call, by default BaseRoute.core
     Returns
     -------
     T
         The response data parsed into the supplied model
     """
-    api_response = get_request(route, params)
+    api_response = get_request(route, params, base_route)
 
     if null_out_empty_dicts:
         api_response = replace_empty_objects_with_null(api_response)
@@ -47,7 +54,7 @@ def get_and_parse(route: str, type_to_parse: Type[T], params: dict = None, null_
         raise
 
 
-def get_request(route: str, params: dict[str, str] = None) -> dict:
+def get_request(route: str, params: dict[str, str] = None, base_route: BaseRoute = BaseRoute.core) -> dict:
     """
     Make a GET request to the Football Stats API
 
@@ -57,7 +64,8 @@ def get_request(route: str, params: dict[str, str] = None) -> dict:
         The route template to call
     params : dict[str, str], optional
         Any parameters to fill in into the route, in a dictionary of key-value pairs, by default None
-
+    base_route: BaseRoute, optional
+        The base route to use for the API call, by default BaseRoute.core
     Returns
     -------
     dict
@@ -77,7 +85,10 @@ def get_request(route: str, params: dict[str, str] = None) -> dict:
                 key = key + "}"
             route = route.replace(key, str(value))
 
-    base = get_settings().base_route_v2
+    if base_route == BaseRoute.core:
+        base = get_settings().core_base_route_v2
+    else:
+        base = get_settings().site_base_route_v2
     full_route = f"{base}{route}"
 
     logger.debug(f"Querying: {full_route}", extra={"cricket_stats.request_id": request_id})
@@ -108,7 +119,7 @@ def _output_response_to_file(json_content: dict, route: str) -> None:
     """
     folder = Path(get_settings().api_response_output_folder)
     today = datetime.today().strftime("%Y%m%d")
-    file_name = f"{datetime.now(UTC).time().strftime("%H%M%S")}_{route.replace('/', '_')}.json"
+    file_name = f"{datetime.now(UTC).time().strftime('%H%M%S')}_{route.replace('/', '_')}.json"
 
     folder = folder / today
     folder.mkdir(parents=True, exist_ok=True)

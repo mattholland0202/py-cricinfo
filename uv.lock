@@ -127,7 +127,6 @@ source = { virtual = "." }
 dependencies = [
     { name = "prettytable" },
     { name = "pydantic" },
-    { name = "ruff" },
 ]
 
 [package.optional-dependencies]
@@ -137,6 +136,9 @@ api = [
     { name = "requests" },
     { name = "uvicorn" },
 ]
+dev = [
+    { name = "ruff" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -145,10 +147,10 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.11.5" },
     { name = "pydantic-settings", marker = "extra == 'api'", specifier = ">=2.9.1" },
     { name = "requests", marker = "extra == 'api'", specifier = ">=2.32.3" },
-    { name = "ruff", extras = ["dev"], specifier = ">=0.2.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.11.0" },
     { name = "uvicorn", marker = "extra == 'api'", specifier = ">=0.34.2" },
 ]
-provides-extras = ["api"]
+provides-extras = ["api", "dev"]
 
 [[package]]
 name = "pydantic"

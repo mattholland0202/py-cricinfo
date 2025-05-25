@@ -28,6 +28,10 @@ class RefMixin(CCBaseModel):
     ref: Optional[HttpUrl] = Field(default=None, validation_alias=AliasChoices("ref", "$ref", "href"))
 
 
+class DateMixin(CCBaseModel):
+    date: Optional[str] = None
+
+
 class IDMixin(BaseModel):
     id: str
 
@@ -55,3 +59,6 @@ class Position(RefMixin):
     id: Optional[str] = None
     name: str
     abbreviation: Optional[str] = None
+
+
+class Event(RefMixin, DateMixin): ...
