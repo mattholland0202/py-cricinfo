@@ -1,10 +1,14 @@
 [project]
-name = "py-cricinfo"
-version = "0.0.5"
-description = "An API using py-cricinfo to collect data from ESPN Cricinfo"
+name = "pycricinfo"
+version = "0.0.6"
+description = "An API using pycricinfo to collect data from ESPN Cricinfo"
 readme = "readme.md"
 requires-python = ">=3.13"
 dependencies = ["prettytable>=3.16.0", "pydantic>=2.11.5"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project.optional-dependencies]
 api = [
@@ -36,7 +40,7 @@ docstring-code-format = true
 docstring-code-line-length = 88
 
 [tool.ruff.lint.isort]
-known-first-party = ["cricinfo"]
+known-first-party = ["pycricinfo"]
 
-[tool.setuptools]
-py-modules = ["cricinfo"]
+[tool.hatch.build.targets.wheel]
+packages = ["pycricinfo"]
