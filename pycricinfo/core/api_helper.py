@@ -8,8 +8,8 @@ from typing import Type, TypeVar
 import requests
 from pydantic import BaseModel, ValidationError
 
-from cricinfo.config import BaseRoute, get_settings
-from cricinfo.utils import replace_empty_objects_with_null
+from pycricinfo.config import BaseRoute, get_settings
+from pycricinfo.utils import replace_empty_objects_with_null
 
 logger = logging.getLogger("cricinfo")
 T = TypeVar("T", bound=BaseModel)

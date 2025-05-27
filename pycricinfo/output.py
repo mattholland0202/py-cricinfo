@@ -1,9 +1,9 @@
 import argparse
 
-from cricinfo.output_models.scorecard import Scorecard
-from cricinfo.source_models.commentary import APIResponseCommentary
-from cricinfo.source_models.match import Match
-from cricinfo.utils import load_file_and_validate_to_model
+from pycricinfo.output_models.scorecard import Scorecard
+from pycricinfo.source_models.commentary import APIResponseCommentary
+from pycricinfo.source_models.match import Match
+from pycricinfo.utils import load_file_and_validate_to_model
 
 
 def print_scorecard(file_path: str = None):

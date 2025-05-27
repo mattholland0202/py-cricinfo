@@ -2,8 +2,8 @@ from typing import Literal, Optional
 
 from pydantic import AliasChoices, BaseModel, Field, computed_field
 
-from cricinfo.source_models import CCBaseModel, MatchNote, Official, Roster, TeamWithColorAndLogos, Venue
-from cricinfo.source_models.common import RefMixin
+from pycricinfo.source_models import CCBaseModel, MatchNote, Official, Roster, TeamWithColorAndLogos, Venue
+from pycricinfo.source_models.common import RefMixin
 
 
 class TeamWicketDetails(CCBaseModel):
@@ -17,7 +17,7 @@ class TeamWicket(CCBaseModel):
     dismissal_card: str
     fours: int
     fow: str
-    minutes: Optional[int|str] = None   # TODO: Can be empty string - parse to null in that case
+    minutes: Optional[int | str] = None  # TODO: Can be empty string - parse to null in that case
     number: int
     over: float
     runs: int

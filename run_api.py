@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 
-from cricinfo.api.endpoints.wrapper import router
-from cricinfo.utils import get_field_from_pyproject
-
+from pycricinfo.api.endpoints.wrapper import router
+from pycricinfo.utils import get_field_from_pyproject
 
 app = FastAPI(
     version=get_field_from_pyproject("version"),

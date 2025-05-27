@@ -2,9 +2,9 @@ from typing import Optional
 
 from pydantic import AliasChoices, BaseModel, Field, computed_field
 
-from cricinfo.source_models import CCBaseModel, PagingModel
-from cricinfo.source_models.athelete import AthleteWithNameAndShortName as Athlete
-from cricinfo.source_models.team import TeamWithName as Team
+from pycricinfo.source_models import CCBaseModel, PagingModel
+from pycricinfo.source_models.athelete import AthleteWithNameAndShortName as Athlete
+from pycricinfo.source_models.team import TeamWithName as Team
 
 
 class PlayType(BaseModel):
@@ -93,7 +93,7 @@ class Dismissal(CCBaseModel):
     bowler: BowlerAthlete
     batsman: BatsmanAthlete
     text: str
-    minutes: Optional[int|str] = None   # TODO: Can be empty string - parse to null in that case
+    minutes: Optional[int | str] = None  # TODO: Can be empty string - parse to null in that case
     retired_text: str
 
 

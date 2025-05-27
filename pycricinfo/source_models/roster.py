@@ -2,10 +2,10 @@ from typing import Literal
 
 from pydantic import AliasChoices, BaseModel, Field, computed_field
 
-from cricinfo.source_models.athelete import Athlete
-from cricinfo.source_models.common import CCBaseModel, Position
-from cricinfo.source_models.linescores import LinescorePeriod
-from cricinfo.source_models.team import TeamWithColorAndLogos
+from pycricinfo.source_models.athelete import Athlete
+from pycricinfo.source_models.common import CCBaseModel, Position
+from pycricinfo.source_models.linescores import LinescorePeriod
+from pycricinfo.source_models.team import TeamWithColorAndLogos
 
 
 class MatchPlayer(CCBaseModel):

@@ -2,8 +2,8 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from cricinfo.source_models.athelete import AthleteWithFirstAndLastName
-from cricinfo.source_models.common import CCBaseModel
+from pycricinfo.source_models.athelete import AthleteWithFirstAndLastName
+from pycricinfo.source_models.common import CCBaseModel
 
 
 class DismissalFielder(CCBaseModel):

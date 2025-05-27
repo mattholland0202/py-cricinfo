@@ -1,9 +1,9 @@
-from cricinfo.config import BaseRoute, get_settings
-from cricinfo.output_models.scorecard import Scorecard
-from cricinfo.source_models.commentary import APIResponseCommentary, CommentaryItem
-from cricinfo.source_models.match import Match, MatchBasic
-from cricinfo.source_models.player import Player
-from cricinfo.source_models.team import TeamFull
+from pycricinfo.config import BaseRoute, get_settings
+from pycricinfo.output_models.scorecard import Scorecard
+from pycricinfo.source_models.commentary import APIResponseCommentary, CommentaryItem
+from pycricinfo.source_models.match import Match, MatchBasic
+from pycricinfo.source_models.player import Player
+from pycricinfo.source_models.team import TeamFull
 
 from .api_helper import get_and_parse
 

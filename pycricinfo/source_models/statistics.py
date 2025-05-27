@@ -2,9 +2,9 @@ from typing import Optional
 
 from pydantic import BaseModel, computed_field
 
-from cricinfo.source_models.batting import BattingDetails
-from cricinfo.source_models.bowling import BowlingDetails
-from cricinfo.source_models.common import CCBaseModel
+from pycricinfo.source_models.batting import BattingDetails
+from pycricinfo.source_models.bowling import BowlingDetails
+from pycricinfo.source_models.common import CCBaseModel
 
 
 class BasicStatistic(CCBaseModel):

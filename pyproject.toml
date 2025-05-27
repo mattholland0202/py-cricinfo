@@ -1,6 +1,6 @@
 [project]
 name = "py-cricinfo"
-version = "0.0.4"
+version = "0.0.5"
 description = "An API using py-cricinfo to collect data from ESPN Cricinfo"
 readme = "readme.md"
 requires-python = ">=3.13"
@@ -16,8 +16,8 @@ api = [
 dev = ["ruff>=0.11.0"]
 
 [project.scripts]
-scorecard = 'cricinfo.output:print_scorecard'
-ballbyball = 'cricinfo.output:print_ball_by_ball'
+scorecard = 'pycricinfo.output:print_scorecard'
+ballbyball = 'pycricinfo.output:print_ball_by_ball'
 
 [tool.ruff]
 line-length = 120
@@ -37,3 +37,6 @@ docstring-code-line-length = 88
 
 [tool.ruff.lint.isort]
 known-first-party = ["cricinfo"]
+
+[tool.setuptools]
+py-modules = ["cricinfo"]

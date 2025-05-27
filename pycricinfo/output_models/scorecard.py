@@ -4,12 +4,12 @@ from typing import Optional
 from prettytable import PrettyTable
 from pydantic import AliasChoices, BaseModel, Field, computed_field, model_validator
 
-from cricinfo.output_models.common import SNAKE_CASE_REGEX, HeaderlessTableMixin
-from cricinfo.source_models.athelete import AthleteWithFirstAndLastName
-from cricinfo.source_models.linescores import LinescorePeriod
-from cricinfo.source_models.match import Match
-from cricinfo.source_models.roster import MatchPlayer, Roster
-from cricinfo.source_models.team import TeamWithColorAndLogos
+from pycricinfo.output_models.common import SNAKE_CASE_REGEX, HeaderlessTableMixin
+from pycricinfo.source_models.athelete import AthleteWithFirstAndLastName
+from pycricinfo.source_models.linescores import LinescorePeriod
+from pycricinfo.source_models.match import Match
+from pycricinfo.source_models.roster import MatchPlayer, Roster
+from pycricinfo.source_models.team import TeamWithColorAndLogos
 
 # ANSI escape codes for colors
 RED = "\033[31m"
