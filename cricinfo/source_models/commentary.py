@@ -93,7 +93,7 @@ class Dismissal(CCBaseModel):
     bowler: BowlerAthlete
     batsman: BatsmanAthlete
     text: str
-    minutes: int
+    minutes: Optional[int|str] = None   # TODO: Can be empty string - parse to null in that case
     retired_text: str
 
 
@@ -116,13 +116,18 @@ class CommentaryItem(CCBaseModel):
     sequence: int
     athletes_involved: list[Athlete]
     bowler: Bowler
-    other_bowler: Bowler
+    other_bowler: Optional[Bowler] = None
     batsman: Batsman
     other_batsman: Batsman
     current_innings_score: Innings = Field(validation_alias=AliasChoices("current_innings_score", "innings"))
     over: Over
     dismissal: Dismissal
     bbb_timestamp: int
+
+    @computed_field
+    @property
+    def summary(self) -> str:
+        return f"{self.over.overs}: {self.short_text} - {self.current_innings_score.score}"
 
 
 class Commentary(PagingModel):

@@ -1,8 +1,9 @@
-from typing import Optional
+from typing import Literal, Optional
 
-from pydantic import BaseModel, computed_field
+from pydantic import AliasChoices, BaseModel, Field, computed_field
 
 from cricinfo.source_models import CCBaseModel, MatchNote, Official, Roster, TeamWithColorAndLogos, Venue
+from cricinfo.source_models.common import RefMixin
 
 
 class TeamWicketDetails(CCBaseModel):
@@ -16,7 +17,7 @@ class TeamWicket(CCBaseModel):
     dismissal_card: str
     fours: int
     fow: str
-    minutes: int
+    minutes: Optional[int|str] = None   # TODO: Can be empty string - parse to null in that case
     number: int
     over: float
     runs: int
@@ -56,6 +57,7 @@ class MatchCompetitor(CCBaseModel):
     team: TeamWithColorAndLogos
     score: str
     linescores: list[TeamLinescore]
+    home_or_away: Literal["home", "away"] = Field(validation_alias=AliasChoices("home_or_away", "homeAway"))
 
 
 class MatchStatus(CCBaseModel):
@@ -65,6 +67,7 @@ class MatchStatus(CCBaseModel):
 class MatchCompetiton(CCBaseModel):
     status: MatchStatus
     competitors: list[MatchCompetitor]
+    limited_overs: bool
 
 
 class MatchHeader(CCBaseModel):
@@ -104,3 +107,17 @@ class Match(CCBaseModel):
     # TODO: add debuts
     rosters: list[Roster]
     header: MatchHeader
+
+
+class MatchBasic(CCBaseModel):
+    id: int
+    name: str
+    description: str
+    short_name: str
+    short_description: str
+    season: RefMixin
+    season_type: RefMixin
+    # TODO: Add competitions
+    venues: list[RefMixin]
+    # TODO: links
+    # TODO: leagues

@@ -14,7 +14,7 @@ class CoreAPIRoutes(BaseModel):
     team: str = "events/0/teams/{team_id}"
     team_players: str = "cricket/teams/{team_id}/athletes"
     player: str = "teams/0/athletes/{player_id}"
-    match: str = "events/{match_id}"
+    match_basic: str = "events/{match_id}"
     match_team: str = "leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}"
     match_summary: str = "0/summary?event={match_id}"
     play_by_play_page: str = "0/playbyplay?event={match_id}&page={page}&period={innings}"

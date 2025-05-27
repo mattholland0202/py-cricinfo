@@ -5,7 +5,7 @@ from prettytable import PrettyTable
 from pydantic import AliasChoices, BaseModel, Field, computed_field, model_validator
 
 from cricinfo.output_models.common import SNAKE_CASE_REGEX, HeaderlessTableMixin
-from cricinfo.source_models.athelete import Athlete
+from cricinfo.source_models.athelete import AthleteWithFirstAndLastName
 from cricinfo.source_models.linescores import LinescorePeriod
 from cricinfo.source_models.match import Match
 from cricinfo.source_models.roster import MatchPlayer, Roster
@@ -68,7 +68,7 @@ class PlayerInningsModel(BaseModel, ABC):
 
 
 class BattingInnings(PlayerInningsModel):
-    player: Athlete
+    player: AthleteWithFirstAndLastName  # Could be full Athlete
     dismissal_text: str
     captain: bool
     keeper: bool
@@ -115,7 +115,7 @@ class BattingInnings(PlayerInningsModel):
 
 
 class BowlingInnings(PlayerInningsModel):
-    player: Athlete
+    player: AthleteWithFirstAndLastName  # Could be full Athlete
     overs: float | int
     maidens: int
     runs: int = Field(validation_alias=AliasChoices("runs", "conceded"))
@@ -205,7 +205,7 @@ class Scorecard(BaseModel, HeaderlessTableMixin):
         data["summary"] = match.header.summary
 
         innings = []
-        for i in range(1, 3):  # TODO: Change this between 3 and 5 for limited overs vs test matches
+        for i in range(1, 3 if match.header.competition.limited_overs else 5):
             team_linescore = match.header.get_batting_linescore_for_period(i)
             innings.append(
                 Innings(
