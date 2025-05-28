@@ -1,4 +1,6 @@
+import importlib.util
 import json
+import os
 import tomllib
 from typing import Any, Type, TypeVar
 
@@ -81,21 +83,59 @@ def load_dict_to_model(json_data: dict, type_to_parse: Type[T]) -> T:
 
 def get_field_from_pyproject(field_name: str) -> str:
     """
-    Get a specific field from the `project` section of the `pyproject.toml` file.
+    Get a specific field from package metadata.
+
+    First tries to use importlib.metadata, which works when the package is installed.
+    Falls back to reading pyproject.toml directly when running from source.
 
     Parameters
     ----------
     field_name : str
-        The name of the field to retrieve from the `project` section
+        The name of the field to retrieve (e.g., "version", "description")
 
     Returns
     -------
     str
-        The value of the specified field from the `project` section of `pyproject.toml`
+        The value of the specified field from package metadata
     """
-    with open("pyproject.toml", "rb") as f:
-        pyproject = tomllib.load(f)
+    # Common metadata field mappings
+    field_mappings = {
+        "version": "Version",
+        "description": "Summary",
+    }
 
-    project_section: dict = pyproject.get("project", {})
+    # Method 1: Try importlib.metadata (for installed packages)
+    if importlib.util.find_spec("importlib.metadata") is not None:
+        try:
+            from importlib.metadata import metadata
 
-    return project_section.get(field_name)
+            pkg_metadata = metadata("pycricinfo")
+            mapped_field = field_mappings.get(field_name, field_name.capitalize())
+            value = pkg_metadata.get(mapped_field, "")
+            if value:
+                return value
+        except (ImportError, KeyError):
+            pass
+
+    # Method 2: Try reading pyproject.toml directly (for development mode)
+    if importlib.util.find_spec("tomllib") is not None:
+        try:
+            # Find pyproject.toml by traversing up from current directory
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            while current_dir:
+                pyproject_path = os.path.join(current_dir, "pyproject.toml")
+                if os.path.exists(pyproject_path):
+                    with open(pyproject_path, "rb") as f:
+                        value = tomllib.load(f).get("project", {}).get(field_name, "")
+                        if value:
+                            return value
+
+                # Move up to parent directory
+                parent_dir = os.path.dirname(current_dir)
+                if parent_dir == current_dir:  # Reached root directory
+                    break
+                current_dir = parent_dir
+        except Exception:
+            pass
+
+    return ""  # Return empty string if all methods fail

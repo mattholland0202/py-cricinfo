@@ -122,8 +122,8 @@ wheels = [
 
 [[package]]
 name = "pycricinfo"
-version = "0.0.5"
-source = { virtual = "." }
+version = "0.0.7"
+source = { editable = "." }
 dependencies = [
     { name = "prettytable" },
     { name = "pydantic" },
