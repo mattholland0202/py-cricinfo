@@ -49,13 +49,12 @@
         "console": "integratedTerminal"
       },
       {
-        "name": "Debug: FastAPI",
+        "name": "Debug API",
         "type": "debugpy",
         "request": "launch",
-        "module": "uvicorn",
-        "args": ["run_api:app", "--reload"],
-        "jinja": true
-      }
+        "program": "pycricinfo/api/server.py",
+        "console": "integratedTerminal"
+      },
     ]
   }
 }
