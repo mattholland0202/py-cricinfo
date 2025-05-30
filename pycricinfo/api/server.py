@@ -1,7 +1,8 @@
 import uvicorn
 from fastapi import FastAPI
 
-from pycricinfo.api.endpoints.wrapper import router
+from pycricinfo.api.endpoints.raw import router as raw_router
+from pycricinfo.api.endpoints.wrapper import router as wrapper_router
 from pycricinfo.utils import get_field_from_pyproject
 
 app = FastAPI(
@@ -15,7 +16,8 @@ app = FastAPI(
     description=get_field_from_pyproject("description"),
 )
 
-app.include_router(router)
+app.include_router(wrapper_router)
+app.include_router(raw_router)
 
 
 def start_api():

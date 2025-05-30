@@ -18,6 +18,7 @@ class CoreAPIRoutes(BaseModel):
     match_team: str = "leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}"
     match_summary: str = "0/summary?event={match_id}"
     play_by_play_page: str = "0/playbyplay?event={match_id}&page={page}&period={innings}"
+    venue: str = "venues/{venue_id}"
 
 
 class Settings(BaseSettings):
