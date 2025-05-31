@@ -29,9 +29,7 @@ jobs:
           version: "0.7.9"
 
       - name: Set up Python
-        run: uv python install
-        with:
-          python-version-file: ".python-version"
+        run: uv python install 3.13 
 
       - name: Install the project
         run: uv sync --locked --all-extras --dev
