@@ -1,8 +1,8 @@
 {
-	"folders": [
-		{
-			"path": "."
-		}
+  "folders": [
+    {
+      "path": "."
+    }
   ],
   "settings": {
     "workbench.colorCustomizations": {
@@ -55,6 +55,15 @@
         "program": "pycricinfo/api/server.py",
         "console": "integratedTerminal"
       },
+    ]
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "njpwerner.autodocstring",
+      "charliermarsh.ruff",
+      "johnpapa.vscode-peacock",
+      "ms-python.isort"
     ]
   }
 }

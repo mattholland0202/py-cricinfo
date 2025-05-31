@@ -20,7 +20,7 @@ uv add pycricinfo
 ### Optional installation: API
 This project also comes with an optional dependency to run an API wrapper around Cricinfo, providing an OpenAPI specification via Swagger through `FastAPI`. Install this optional dependency with:
 ```
-pip install pycricinfo[api]
+pip install 'pycricinfo[api]'
 ```
 or
 ```

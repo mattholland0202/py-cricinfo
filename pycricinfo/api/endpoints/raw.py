@@ -2,7 +2,7 @@ import requests
 from fastapi import APIRouter, Depends, Path, Query, status
 
 from pycricinfo.config import BaseRoute, get_settings
-from pycricinfo.core.api_helper import get_request
+from pycricinfo.search.api_helper import get_request
 
 router = APIRouter(prefix="/raw", tags=["raw"])
 

@@ -20,10 +20,5 @@ app.include_router(wrapper_router)
 app.include_router(raw_router)
 
 
-def start_api():
-    """Start the FastAPI server with uvicorn."""
-    uvicorn.run("pycricinfo.api.server:app", host="0.0.0.0", port=8000, reload=True)
-
-
 if __name__ == "__main__":
-    start_api()
+    uvicorn.run("pycricinfo.api.server:app", host="0.0.0.0", port=8000, reload=True)

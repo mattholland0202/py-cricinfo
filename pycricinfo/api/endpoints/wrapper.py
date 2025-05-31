@@ -1,8 +1,8 @@
 import requests
 from fastapi import APIRouter, Depends, Path, Query, status
 
-from pycricinfo.core.query import get_match_basic, get_play_by_play, get_player, get_scorecard, get_team
 from pycricinfo.output_models.scorecard import Scorecard
+from pycricinfo.search.call_cricinfo_api import get_match_basic, get_play_by_play, get_player, get_scorecard, get_team
 from pycricinfo.source_models.commentary import CommentaryItem
 from pycricinfo.source_models.match import MatchBasic
 from pycricinfo.source_models.player import Player
