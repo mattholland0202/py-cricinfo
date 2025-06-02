@@ -4,8 +4,13 @@ version = "0.0.10"
 description = "An API using pycricinfo to collect data from ESPN Cricinfo"
 readme = "readme.md"
 requires-python = ">=3.13"
-dependencies = ["prettytable>=3.16.0", "pydantic>=2.11.5"]
-authors = [{ name="Matt Holland" }]
+dependencies = [
+  "prettytable>=3.16.0",
+  "pydantic>=2.11.5",
+  "pydantic-settings>=2.9.1",
+  "requests>=2.32.3",
+]
+authors = [{ name = "Matt Holland" }]
 license = { text = "MIT" }
 
 classifiers = [
@@ -27,10 +32,8 @@ build-backend = "hatchling.build"
 
 [project.optional-dependencies]
 api = [
-    "fastapi>=0.115.12",
-    "pydantic-settings>=2.9.1",
-    "requests>=2.32.3",
-    "uvicorn>=0.34.2",
+  "fastapi>=0.115.12",
+  "uvicorn>=0.34.2",
 ]
 dev = ["ruff>=0.11.0"]
 

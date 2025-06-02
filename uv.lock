@@ -127,13 +127,13 @@ source = { editable = "." }
 dependencies = [
     { name = "prettytable" },
     { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "requests" },
 ]
 
 [package.optional-dependencies]
 api = [
     { name = "fastapi" },
-    { name = "pydantic-settings" },
-    { name = "requests" },
     { name = "uvicorn" },
 ]
 dev = [
@@ -145,8 +145,8 @@ requires-dist = [
     { name = "fastapi", marker = "extra == 'api'", specifier = ">=0.115.12" },
     { name = "prettytable", specifier = ">=3.16.0" },
     { name = "pydantic", specifier = ">=2.11.5" },
-    { name = "pydantic-settings", marker = "extra == 'api'", specifier = ">=2.9.1" },
-    { name = "requests", marker = "extra == 'api'", specifier = ">=2.32.3" },
+    { name = "pydantic-settings", specifier = ">=2.9.1" },
+    { name = "requests", specifier = ">=2.32.3" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.11.0" },
     { name = "uvicorn", marker = "extra == 'api'", specifier = ">=0.34.2" },
 ]

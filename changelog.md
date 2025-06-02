@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Missing links, attributions & information in `pyproject` file
 - Detail to `readme.md`
 
+### Changed
+- Renamed some folders and added imports to improve ease of use
+
+### Fixed
+- Some imports were in the optional section that should have been in main
+
 ## [0.0.9]
 ### Added
 - Missing comments
