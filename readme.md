@@ -1,5 +1,8 @@
 # pycricinfo
 
+[![PyPI version](https://img.shields.io/pypi/v/pycricinfo)](https://pypi.org/project/pycricinfo/)
+[![Upload to PyPi](https://github.com/mattholland0202/py-cricinfo/actions/workflows/python-publish.yml/badge.svg)](https://github.com/mattholland0202/py-cricinfo/actions/workflows/python-publish.yml)
+
 A Python package using ESPNCricinfo's API to extract match, player & statistical data.
 
 Defines Pydantic models to represent data from the Cricinfo API, allowing easier interaction with the data in your code.
@@ -36,3 +39,14 @@ Installing the project adds 2 scripts:
 Installing the optional API dependency adds a further script:
 
 * `api`: Runs `uvicorn` to launch a `FastAPI` wrapper around the Cricinfo API, which will launch on port 8000, with the Swagger documentation available at `http://localhost:8000/docs`
+
+## Sample usage: In code
+Import one of the `get_` function from `pycricinfo.search`, for example:
+```python
+from pycricinfo.search import get_player
+
+
+def fetch_player_from_cricinfo(player_id: int):
+    cricinfo_player = get_player(player_id)
+    print(cricinfo_player.display_name)
+```

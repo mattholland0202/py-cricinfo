@@ -17,6 +17,7 @@ class CoreAPIRoutes(BaseModel):
     match_basic: str = "events/{match_id}"
     match_team: str = "leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}"
     match_summary: str = "0/summary?event={match_id}"
+    league: str = "leagues/{league_id}"
     play_by_play_page: str = "0/playbyplay?event={match_id}&page={page}&period={innings}"
     venue: str = "venues/{venue_id}"
 
@@ -26,6 +27,24 @@ class Settings(BaseSettings):
     site_base_route_v2: str = "http://site.api.espn.com/apis/site/v2/sports/cricket/"
     routes: CoreAPIRoutes = CoreAPIRoutes()
     api_response_output_folder: str = "responses"
+
+    match_classes: dict[int, str] = {
+        1: "Test",
+        2: "ODI",
+        3: "T20I",
+        4: "First Class",
+        5: "List A",
+        6: "T20",
+        8: "Women's Test",
+        9: "Women's ODI",
+        10: "Women's T20I",
+        11: "Combined Test, ODI and T20I",
+        12: "Combined First Class, List A and T20",
+        13: "All cricket, including minor cricket",
+        20: "Under 19s Youth Test",
+        21: "Under 19s Youth ODI",
+        23: "Women's T20",
+    }
 
 
 @lru_cache

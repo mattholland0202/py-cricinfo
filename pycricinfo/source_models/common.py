@@ -32,14 +32,6 @@ class DateMixin(CCBaseModel):
     date: Optional[str] = None
 
 
-class IDMixin(BaseModel):
-    id: str
-
-
-class NameMixin(BaseModel):
-    name: str
-
-
 class DisplayNameMixin(BaseModel):
     display_name: str
 

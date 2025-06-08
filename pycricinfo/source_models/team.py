@@ -2,7 +2,7 @@ from abc import ABC
 
 from pydantic import AliasChoices, Field
 
-from pycricinfo.source_models.common import CCBaseModel, Event, NameMixin, RefMixin
+from pycricinfo.source_models.common import CCBaseModel, Event, RefMixin
 
 
 class TeamCommon(CCBaseModel, ABC):
@@ -11,7 +11,8 @@ class TeamCommon(CCBaseModel, ABC):
     display_name: str
 
 
-class TeamWithName(TeamCommon, NameMixin): ...
+class TeamWithName(TeamCommon):
+    name: str = Field(description="The full name of the Team")
 
 
 class TeamWithColorAndLogos(TeamCommon):
@@ -25,6 +26,6 @@ class TeamFull(TeamWithName):
     short_display_name: str
     is_national: bool
     is_active: bool
-    classes: list[int]
+    classes: list[int] = Field(description="The classes of match that this Team plays in")
     current_match: Event = Field(default=None, validation_alias=AliasChoices("event"))
     current_players_link: RefMixin = Field(default=None, validation_alias=AliasChoices("athletes"))

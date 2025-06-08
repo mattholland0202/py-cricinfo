@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, HttpUrl
 
-from pycricinfo.source_models.common import CCBaseModel, DisplayNameMixin, IDMixin, Link, NameMixin, RefMixin
+from pycricinfo.source_models.common import CCBaseModel, DisplayNameMixin, Link, RefMixin
 
 
 class Style(CCBaseModel):
@@ -33,10 +33,12 @@ class LastNameMixin(BaseModel):
     last_name: str
 
 
-class AthleteCommon(RefMixin, IDMixin, FullNameMixin, DisplayNameMixin, ABC): ...
+class AthleteCommon(RefMixin, FullNameMixin, DisplayNameMixin, ABC):
+    id: str = Field(description="The unique identifier for the athlete")
 
 
-class AthleteWithNameAndShortName(AthleteCommon, NameMixin, ShortNameMixin): ...
+class AthleteWithNameAndShortName(AthleteCommon, ShortNameMixin):
+    name: str = Field(description="The full name of the athlete")
 
 
 class AthleteWithFirstAndLastName(AthleteCommon, FirstNameMixin, LastNameMixin): ...
