@@ -1,10 +1,11 @@
 [project]
 name = "pycricinfo"
-version = "0.0.11"
+version = "0.0.12"
 description = "An API using pycricinfo to collect data from ESPN Cricinfo"
 readme = "readme.md"
 requires-python = ">=3.13"
 dependencies = [
+  "beautifulsoup4>=4.13.4",
   "prettytable>=3.16.0",
   "pydantic>=2.11.5",
   "pydantic-settings>=2.9.1",
