@@ -1,20 +1,15 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Optional
 
-from prettytable import PrettyTable
-from pydantic import BaseModel, Field, computed_field, model_validator
+from pydantic import BaseModel, model_validator
 
 from pycricinfo.output_models.common import SNAKE_CASE_REGEX, HeaderlessTableMixin
-from pycricinfo.output_models.innings import BattingInnings, BowlingInnings, PlayerInningsCommon
+from pycricinfo.output_models.innings import BattingInnings, BowlingInnings, Innings, PlayerInningsCommon
 from pycricinfo.source_models.athelete import AthleteWithFirstAndLastName
 from pycricinfo.source_models.linescores import LinescorePeriod
 from pycricinfo.source_models.match import Match
 from pycricinfo.source_models.roster import MatchPlayer, Roster
 from pycricinfo.source_models.team import TeamWithColorAndLogos
-
-# ANSI escape codes for colors
-RED = "\033[31m"
-RESET = "\033[0m"
 
 
 class CricinfoPlayerInningsCommon(PlayerInningsCommon, ABC):
@@ -44,27 +39,6 @@ class CricinfoPlayerInningsCommon(PlayerInningsCommon, ABC):
             data[SNAKE_CASE_REGEX.sub("_", stat_name).lower()] = linescore.find(name)
         return data
 
-    def colour_row(self, row_items: list[str], colour: str) -> list[str]:
-        """
-
-
-        Parameters
-        ----------
-        row_items : list[str]
-            _description_
-        colour : str
-            _description_
-
-        Returns
-        -------
-        list[str]
-            _description_
-        """
-        return [f"{colour}{cell}{RESET}" for cell in row_items]
-
-    @abstractmethod
-    def add_to_table(self, table: PrettyTable): ...
-
 
 class CricinfoBattingInnings(BattingInnings, CricinfoPlayerInningsCommon):
     player: AthleteWithFirstAndLastName  # Could be full Athlete
@@ -84,21 +58,6 @@ class CricinfoBattingInnings(BattingInnings, CricinfoPlayerInningsCommon):
         )
         return data
 
-    def add_to_table(self, table: PrettyTable):
-        table.add_row(
-            self.colour_row(
-                [
-                    self.player_display,
-                    self.dismissal_text,
-                    f"{self.runs}{'*' if self.not_out else ''}",
-                    self.balls_faced,
-                    self.fours,
-                    self.sixes,
-                ],
-                RED if self.not_out else RESET,
-            )
-        )
-
 
 class CricinfoBowlingInnings(BowlingInnings, CricinfoPlayerInningsCommon):
     player: AthleteWithFirstAndLastName  # Could be full Athlete
@@ -108,65 +67,9 @@ class CricinfoBowlingInnings(BowlingInnings, CricinfoPlayerInningsCommon):
     def create_bowling_attributes(cls, data: dict):
         return cls.add_linescore_stats_as_properties(data, "overs", "maidens", "conceded", "wickets", "bowling.order")
 
-    def add_to_table(self, table: PrettyTable):
-        table.add_row(
-            [
-                self.player.display_name,
-                self.overs_display,
-                self.maidens,
-                self.runs,
-                self.wickets,
-            ]
-        )
 
-
-class Innings(BaseModel, HeaderlessTableMixin):
-    number: int
+class CricinfoInnings(Innings):
     team: TeamWithColorAndLogos
-    batting_score: int
-    wickets: int
-    batting_description: str
-    batters: list[CricinfoBattingInnings] = Field(default_factory=list)
-    bowlers: list[CricinfoBowlingInnings] = Field(default_factory=list)
-
-    @computed_field
-    @property
-    def score_summary(self) -> str:
-        wickets_text = f" {self.batting_description}" if self.batting_description == "all out" else f"/{self.wickets}"
-        return f"{self.batting_score}{wickets_text}"
-
-    def to_table(self):
-        self.print_headerless_table(
-            [
-                (
-                    f"Innings {self.number}: {self.team.display_name} {self.score_summary}",
-                    False,
-                )
-            ]
-        )
-
-        self._print_player_innings_table(
-            ["", "Dismissal", "Runs", "Balls", "4s", "6s"],
-            self.batters,
-            ["", "Dismissal"],
-        )
-
-        self._print_player_innings_table(["", "Overs", "Maidens", "Runs", "Wickets"], self.bowlers)
-
-    def _print_player_innings_table(
-        self,
-        field_names: list[str],
-        items: list[CricinfoPlayerInningsCommon],
-        field_names_to_left_align: list[str] = None,
-    ):
-        table = PrettyTable()
-        table.field_names = field_names
-        for name in field_names_to_left_align or []:
-            table.align[name] = "l"
-
-        for player in sorted(items, key=lambda b: b.order):
-            player.add_to_table(table)
-        print(table)
 
 
 class Scorecard(BaseModel, HeaderlessTableMixin):
@@ -174,6 +77,14 @@ class Scorecard(BaseModel, HeaderlessTableMixin):
     summary: Optional[str]
     innings: list[Innings]
 
+    def to_table(self):
+        self.print_headerless_table([(self.title, True), (self.summary, False)])
+
+        for innings in self.innings:
+            innings.to_table()
+
+
+class CricinfoScorecard(Scorecard):
     @model_validator(mode="before")
     @classmethod
     def create(cls, data: dict):
@@ -185,9 +96,10 @@ class Scorecard(BaseModel, HeaderlessTableMixin):
         for i in range(1, 3 if match.header.competition.limited_overs else 5):
             team_linescore = match.header.get_batting_linescore_for_period(i)
             innings.append(
-                Innings(
+                CricinfoInnings(
                     number=i,
                     team=team_linescore[0],
+                    team_name=team_linescore[0].display_name,
                     batting_score=team_linescore[1].runs,
                     wickets=team_linescore[1].wickets,
                     batting_description=team_linescore[1].description,
@@ -200,12 +112,12 @@ class Scorecard(BaseModel, HeaderlessTableMixin):
         return data
 
     @classmethod
-    def _enrich_roster(cls, innings: list[Innings], roster: Roster):
+    def _enrich_roster(cls, innings: list[CricinfoInnings], roster: Roster):
         for player in roster.players:
             cls._enrich_player(innings, player)
 
     @classmethod
-    def _enrich_player(cls, innings: list[Innings], player: MatchPlayer):
+    def _enrich_player(cls, innings: list[CricinfoInnings], player: MatchPlayer):
         for linescore in player.linescores:
             if bool(linescore.batted) and bool(int(linescore.batted)):
                 bat = CricinfoBattingInnings(
@@ -221,9 +133,3 @@ class Scorecard(BaseModel, HeaderlessTableMixin):
                     player=player.athlete, display_name=player.athlete.display_name, linescore=linescore
                 )
                 innings[linescore.period - 1].bowlers.append(bowl)
-
-    def to_table(self):
-        self.print_headerless_table([(self.title, True), (self.summary, False)])
-
-        for innings in self.innings:
-            innings.to_table()

@@ -1,7 +1,7 @@
 import requests
 from fastapi import APIRouter, Depends, Path, Query, status
 
-from pycricinfo.output_models.scorecard import Scorecard
+from pycricinfo.output_models.scorecard import CricinfoScorecard
 from pycricinfo.search.call_cricinfo_api import get_match_basic, get_play_by_play, get_player, get_scorecard, get_team
 from pycricinfo.source_models.commentary import CommentaryItem
 from pycricinfo.source_models.match import MatchBasic
@@ -61,7 +61,7 @@ async def get_match_team(
     responses={status.HTTP_200_OK: {"description": "The match summary"}},
     summary="Get a match summary",
 )
-async def scorecard(match_id: int = Path(description="The Match ID")) -> Scorecard:
+async def scorecard(match_id: int = Path(description="The Match ID")) -> CricinfoScorecard:
     return get_scorecard(match_id)
 
 

@@ -1,6 +1,6 @@
 import argparse
 
-from pycricinfo.output_models.scorecard import Scorecard
+from pycricinfo.output_models.scorecard import CricinfoScorecard
 from pycricinfo.source_models.commentary import APIResponseCommentary
 from pycricinfo.source_models.match import Match
 from pycricinfo.utils import load_file_and_validate_to_model
@@ -18,7 +18,7 @@ def print_scorecard(file_path: str = None):
     if not file_path:
         file_path = parse_args().input
     model = load_file_and_validate_to_model(file_path, Match)
-    sc = Scorecard(match=model)
+    sc = CricinfoScorecard(match=model)
     sc.to_table()
 
 

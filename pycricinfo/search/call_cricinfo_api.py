@@ -1,5 +1,5 @@
 from pycricinfo.config import BaseRoute, get_settings
-from pycricinfo.output_models.scorecard import Scorecard
+from pycricinfo.output_models.scorecard import CricinfoScorecard
 from pycricinfo.source_models.commentary import APIResponseCommentary, CommentaryItem
 from pycricinfo.source_models.match import Match, MatchBasic
 from pycricinfo.source_models.player import Player
@@ -79,7 +79,7 @@ def get_match(match_id: int) -> Match:
     )
 
 
-def get_scorecard(match_id: int) -> Scorecard:
+def get_scorecard(match_id: int) -> CricinfoScorecard:
     """
     Get a match and generate and return a scorecard for it.
 
@@ -94,7 +94,7 @@ def get_scorecard(match_id: int) -> Scorecard:
         A scorecard object containing match details and scores.
     """
     match = get_match(match_id)
-    return Scorecard(match=match)
+    return CricinfoScorecard(match=match)
 
 
 def get_play_by_play(match_id: int, page: int = 1, innings: int = 1) -> list[CommentaryItem]:
