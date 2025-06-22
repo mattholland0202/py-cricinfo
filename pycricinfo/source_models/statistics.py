@@ -88,7 +88,7 @@ class StatisticsCategory(BaseModel):
         first = next(iter(self.categories), None)
         return first
 
-    def gs(self, name: str) -> int | str | float:
+    def find(self, name: str) -> int | str | float:
         split: list[str] = name.split(".")
         if len(split) == 1:
             return self.general_category and self.general_category.get_stat(name)

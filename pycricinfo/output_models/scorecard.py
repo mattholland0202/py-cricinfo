@@ -2,9 +2,10 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from prettytable import PrettyTable
-from pydantic import AliasChoices, BaseModel, Field, computed_field, model_validator
+from pydantic import BaseModel, Field, computed_field, model_validator
 
 from pycricinfo.output_models.common import SNAKE_CASE_REGEX, HeaderlessTableMixin
+from pycricinfo.output_models.innings import BattingInnings, BowlingInnings, PlayerInningsCommon
 from pycricinfo.source_models.athelete import AthleteWithFirstAndLastName
 from pycricinfo.source_models.linescores import LinescorePeriod
 from pycricinfo.source_models.match import Match
@@ -16,9 +17,7 @@ RED = "\033[31m"
 RESET = "\033[0m"
 
 
-class PlayerInningsModel(BaseModel, ABC):
-    order: int
-
+class CricinfoPlayerInningsCommon(PlayerInningsCommon, ABC):
     def add_linescore_stats_as_properties(data: dict, *args) -> dict:
         """
         Add individual named stats matching supplied args to the data dictionary so they can be deserialized by Pydantic
@@ -42,7 +41,7 @@ class PlayerInningsModel(BaseModel, ABC):
                 raise TypeError("args to this function must be strings")
             name_split = str(name).split(".")
             stat_name = name_split[1] if len(name_split) > 1 else name_split[0]
-            data[SNAKE_CASE_REGEX.sub("_", stat_name).lower()] = linescore.gs(name)
+            data[SNAKE_CASE_REGEX.sub("_", stat_name).lower()] = linescore.find(name)
         return data
 
     def colour_row(self, row_items: list[str], colour: str) -> list[str]:
@@ -67,21 +66,8 @@ class PlayerInningsModel(BaseModel, ABC):
     def add_to_table(self, table: PrettyTable): ...
 
 
-class BattingInnings(PlayerInningsModel):
+class CricinfoBattingInnings(BattingInnings, CricinfoPlayerInningsCommon):
     player: AthleteWithFirstAndLastName  # Could be full Athlete
-    dismissal_text: str
-    captain: bool
-    keeper: bool
-    runs: int
-    balls_faced: Optional[int] = None
-    fours: Optional[int] = None
-    sixes: Optional[int] = None
-    not_out: bool = Field(validation_alias=AliasChoices("not_out", "notouts"))
-
-    @computed_field
-    @property
-    def player_display(self) -> str:
-        return f"{self.player.display_name}{' (c)' if self.captain else ''}{' \u271d' if self.keeper else ''}"
 
     @model_validator(mode="before")
     @classmethod
@@ -114,17 +100,8 @@ class BattingInnings(PlayerInningsModel):
         )
 
 
-class BowlingInnings(PlayerInningsModel):
+class CricinfoBowlingInnings(BowlingInnings, CricinfoPlayerInningsCommon):
     player: AthleteWithFirstAndLastName  # Could be full Athlete
-    overs: float | int
-    maidens: int
-    runs: int = Field(validation_alias=AliasChoices("runs", "conceded"))
-    wickets: int
-
-    @computed_field
-    @property
-    def overs_display(self) -> float | int:
-        return int(self.overs) if self.overs % 1 == 0 else self.overs
 
     @model_validator(mode="before")
     @classmethod
@@ -149,8 +126,8 @@ class Innings(BaseModel, HeaderlessTableMixin):
     batting_score: int
     wickets: int
     batting_description: str
-    batters: list[BattingInnings] = Field(default_factory=list)
-    bowlers: list[BowlingInnings] = Field(default_factory=list)
+    batters: list[CricinfoBattingInnings] = Field(default_factory=list)
+    bowlers: list[CricinfoBowlingInnings] = Field(default_factory=list)
 
     @computed_field
     @property
@@ -179,7 +156,7 @@ class Innings(BaseModel, HeaderlessTableMixin):
     def _print_player_innings_table(
         self,
         field_names: list[str],
-        items: list[PlayerInningsModel],
+        items: list[CricinfoPlayerInningsCommon],
         field_names_to_left_align: list[str] = None,
     ):
         table = PrettyTable()
@@ -187,8 +164,8 @@ class Innings(BaseModel, HeaderlessTableMixin):
         for name in field_names_to_left_align or []:
             table.align[name] = "l"
 
-        for batter in sorted(items, key=lambda b: b.order):
-            batter.add_to_table(table)
+        for player in sorted(items, key=lambda b: b.order):
+            player.add_to_table(table)
         print(table)
 
 
@@ -231,15 +208,18 @@ class Scorecard(BaseModel, HeaderlessTableMixin):
     def _enrich_player(cls, innings: list[Innings], player: MatchPlayer):
         for linescore in player.linescores:
             if bool(linescore.batted) and bool(int(linescore.batted)):
-                bat = BattingInnings(
+                bat = CricinfoBattingInnings(
                     player=player.athlete,
+                    display_name=player.athlete.display_name,
                     captain=player.captain,
                     keeper=player.keeper,
                     linescore=linescore,
                 )
                 innings[linescore.period - 1].batters.append(bat)
             elif bool(linescore.bowled) and bool(int(linescore.bowled)):
-                bowl = BowlingInnings(player=player.athlete, linescore=linescore)
+                bowl = CricinfoBowlingInnings(
+                    player=player.athlete, display_name=player.athlete.display_name, linescore=linescore
+                )
                 innings[linescore.period - 1].bowlers.append(bowl)
 
     def to_table(self):

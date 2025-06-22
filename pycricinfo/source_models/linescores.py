@@ -15,15 +15,15 @@ class LinescorePeriod(BaseModel):
     linescores: list[Linescore]
     statistics: StatisticsCategory
 
-    def gs(self, name: str) -> int | str | float:
-        return self.statistics.gs(name)
+    def find(self, name: str) -> int | str | float:
+        return self.statistics.find(name)
 
     @computed_field
     @property
     def batted(self) -> bool:
-        return self.gs("batted")
+        return self.find("batted")
 
     @computed_field
     @property
     def bowled(self) -> bool:
-        return self.gs("bowled")
+        return self.find("bowled")
