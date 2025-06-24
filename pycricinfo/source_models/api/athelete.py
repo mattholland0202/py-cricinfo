@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, HttpUrl
 
-from pycricinfo.source_models.common import CCBaseModel, DisplayNameMixin, Link, RefMixin
+from pycricinfo.source_models.api.common import CCBaseModel, DisplayNameMixin, Link, RefMixin
 
 
 class Style(CCBaseModel):

@@ -5,11 +5,11 @@ from pydantic import BaseModel, model_validator
 
 from pycricinfo.output_models.common import SNAKE_CASE_REGEX, HeaderlessTableMixin
 from pycricinfo.output_models.innings import BattingInnings, BowlingInnings, Innings, PlayerInningsCommon
-from pycricinfo.source_models.athelete import AthleteWithFirstAndLastName
-from pycricinfo.source_models.linescores import LinescorePeriod
-from pycricinfo.source_models.match import Match
-from pycricinfo.source_models.roster import MatchPlayer, Roster
-from pycricinfo.source_models.team import TeamWithColorAndLogos
+from pycricinfo.source_models.api.athelete import AthleteWithFirstAndLastName
+from pycricinfo.source_models.api.linescores import LinescorePeriod
+from pycricinfo.source_models.api.match import Match
+from pycricinfo.source_models.api.roster import MatchPlayer, Roster
+from pycricinfo.source_models.api.team import TeamWithColorAndLogos
 
 
 class CricinfoPlayerInningsCommon(PlayerInningsCommon, ABC):

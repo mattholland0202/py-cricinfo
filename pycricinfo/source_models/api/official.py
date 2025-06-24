@@ -1,6 +1,6 @@
 from pydantic import BaseModel, HttpUrl
 
-from pycricinfo.source_models.common import CCBaseModel, Link, Position
+from pycricinfo.source_models.api.common import CCBaseModel, Link, Position
 
 
 class Flag(BaseModel):

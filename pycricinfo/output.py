@@ -1,8 +1,8 @@
 import argparse
 
 from pycricinfo.output_models.scorecard import CricinfoScorecard
-from pycricinfo.source_models.commentary import APIResponseCommentary
-from pycricinfo.source_models.match import Match
+from pycricinfo.source_models.api.commentary import APIResponseCommentary
+from pycricinfo.source_models.api.match import Match
 from pycricinfo.utils import load_file_and_validate_to_model
 
 

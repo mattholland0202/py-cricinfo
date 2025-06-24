@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import AliasChoices, BaseModel, Field, model_validator
 
-from pycricinfo.source_models.common import CCBaseModel
+from pycricinfo.source_models.api.common import CCBaseModel
 
 
 class BowlingDetailsToHand(CCBaseModel):

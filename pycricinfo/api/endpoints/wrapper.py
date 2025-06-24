@@ -3,10 +3,10 @@ from fastapi import APIRouter, Depends, Path, Query, status
 
 from pycricinfo.output_models.scorecard import CricinfoScorecard
 from pycricinfo.search.call_cricinfo_api import get_match_basic, get_play_by_play, get_player, get_scorecard, get_team
-from pycricinfo.source_models.commentary import CommentaryItem
-from pycricinfo.source_models.match import MatchBasic
-from pycricinfo.source_models.player import Player
-from pycricinfo.source_models.team import TeamFull
+from pycricinfo.source_models.api.commentary import CommentaryItem
+from pycricinfo.source_models.api.match import MatchBasic
+from pycricinfo.source_models.api.player import Player
+from pycricinfo.source_models.api.team import TeamFull
 
 router = APIRouter(prefix="/wrapper", tags=["wrapper"])
 

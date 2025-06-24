@@ -2,7 +2,7 @@ from abc import ABC
 
 from pydantic import AliasChoices, Field
 
-from pycricinfo.source_models.common import CCBaseModel, Event, RefMixin
+from pycricinfo.source_models.api.common import CCBaseModel, Event, RefMixin
 
 
 class TeamCommon(CCBaseModel, ABC):

@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from pycricinfo.source_models.common import Link, RefMixin
+from pycricinfo.source_models.api.common import Link, RefMixin
 
 
 class Address(BaseModel):

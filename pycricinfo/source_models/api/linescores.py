@@ -1,6 +1,6 @@
 from pydantic import AliasChoices, BaseModel, Field, computed_field
 
-from pycricinfo.source_models.statistics import StatisticsCategory
+from pycricinfo.source_models.api.statistics import StatisticsCategory
 
 
 class Linescore(BaseModel):

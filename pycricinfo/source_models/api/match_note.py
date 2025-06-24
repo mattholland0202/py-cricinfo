@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import Field, HttpUrl
 
-from pycricinfo.source_models.common import CCBaseModel
+from pycricinfo.source_models.api.common import CCBaseModel
 
 
 class MatchNote(CCBaseModel):
