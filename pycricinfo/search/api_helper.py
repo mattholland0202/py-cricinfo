@@ -77,13 +77,7 @@ def get_request(route: str, params: dict[str, str] = None, base_route: BaseRoute
         "cricket_stats.request_route_template": route,
     }
 
-    if params:
-        for key, value in params.items():
-            if not key.startswith("{"):
-                key = "{" + key
-            if not key.endswith("}"):
-                key = key + "}"
-            route = route.replace(key, str(value))
+    route = format_route(route, params)
 
     if base_route == BaseRoute.core:
         base = get_settings().core_base_route_v2
@@ -104,6 +98,31 @@ def get_request(route: str, params: dict[str, str] = None, base_route: BaseRoute
         raise Exception(f"Status Code '{response.status_code}' returned for '{full_route}'")
 
     return json_content
+
+
+def format_route(route: str, params: dict[str, str] = {}) -> str:
+    """
+    Format the route with the provided parameters
+
+    Parameters
+    ----------
+    route : str
+        The route template to format
+    params : dict[str, str]
+        The parameters to fill in into the route
+
+    Returns
+    -------
+    str
+        The formatted route
+    """
+    for key, value in params.items():
+        if not key.startswith("{"):
+            key = "{" + key
+        if not key.endswith("}"):
+            key = key + "}"
+        route = route.replace(key, str(value))
+    return route
 
 
 def _output_response_to_file(json_content: dict, route: str) -> None:

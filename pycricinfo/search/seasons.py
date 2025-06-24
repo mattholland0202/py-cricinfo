@@ -1,14 +1,32 @@
 import re
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
 
 from pycricinfo.config import get_settings
+from pycricinfo.search.api_helper import format_route
 
 
-def get_matches_in_season(season_name: str, fetch: bool = True):
+def get_matches_in_season(season_name: str | int, fetch: bool = True) -> list[dict[str, str]]:
+    """
+    Get the Cricinfo web page which lists all series in a given season, and parse out their details.
+
+    Parameters
+    ----------
+    season_name : str | int
+        The name of the season to get matches for, e.g. "2024" or "2020-21"
+    fetch : bool, optional
+        Whether to fetch the page from the web or use a cached version which already exists at the calculated file
+        path, by default True
+
+    Returns
+    -------
+    list[dict[str, str]]
+        A list of dictionaries, each containing the title, id, link, and summary_url of a series in the season.
+    """
+    season_name = quote(str(season_name))
     folder = Path(get_settings().api_response_output_folder)
     folder = folder / "seasons"
     folder.mkdir(parents=True, exist_ok=True)
@@ -17,17 +35,16 @@ def get_matches_in_season(season_name: str, fetch: bool = True):
     if fetch:
         session = requests.Session()
 
-        session.headers["User-Agent"] = (
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0"
+        route = format_route(
+            get_settings().pages_base_route + get_settings().page_routes.season,
+            {"season_name": season_name},
         )
 
-        session.headers["Referer"] = "https://www.espncricinfo.com/ci/engine/series/index.html"
+        session.headers["User-Agent"] = get_settings().page_headers.user_agent
+        session.headers["Referer"] = urljoin(route, urlparse(route).path)
+        session.headers["Accept"] = get_settings().page_headers.accept
 
-        session.headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-
-        season_page = session.get(
-            f"https://www.espncricinfo.com/ci/engine/series/index.html?season={quote(str(season_name))};view=season"
-        ).content
+        season_page = session.get(route).content
 
         with open(file_path, "w") as file:
             file.write(str(season_page))
@@ -35,7 +52,20 @@ def get_matches_in_season(season_name: str, fetch: bool = True):
     return parse_season_html(file_path)
 
 
-def parse_season_html(file_path: Path):
+def parse_season_html(file_path: Path) -> list[dict[str, str]]:
+    """
+    Parse the content of the Cricinfo season page HTML file to extract series details.
+
+    Parameters
+    ----------
+    file_path : Path
+        The path to the HTML file containing the season page content.
+
+    Returns
+    -------
+    list[dict[str, str]]
+        A list of dictionaries, each containing the title, id, link, and summary_url of a series in the season.
+    """
     with open(file_path, "r") as file:
         content = file.read()
 

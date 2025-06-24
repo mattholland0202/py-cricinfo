@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.12]
 ### Added
 - Parse Cricinfo season page to print all series in a season
+- Generic models for Scorecards indepdent of Cricinfo, so they can be used elsewhere
 
 ## [0.0.11]
 ### Added

@@ -22,10 +22,23 @@ class CoreAPIRoutes(BaseModel):
     venue: str = "venues/{venue_id}"
 
 
+class PageRoutes(BaseModel):
+    season: str = "series/index.html?season={season_name};view=season"
+
+
+class PageHeaders(BaseModel):
+    user_agent: str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0"
+    accept: str = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+
+
 class Settings(BaseSettings):
     core_base_route_v2: str = "http://core.espnuk.org/v2/sports/cricket/"
     site_base_route_v2: str = "http://site.api.espn.com/apis/site/v2/sports/cricket/"
+    pages_base_route: str = "https://www.espncricinfo.com/ci/engine/"
+
     routes: CoreAPIRoutes = CoreAPIRoutes()
+    page_routes: PageRoutes = PageRoutes()
+    page_headers: PageHeaders = PageHeaders()
     api_response_output_folder: str = "responses"
 
     match_classes: dict[int, str] = {
