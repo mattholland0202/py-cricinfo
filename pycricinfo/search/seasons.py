@@ -7,9 +7,10 @@ from bs4 import BeautifulSoup
 
 from pycricinfo.config import get_settings
 from pycricinfo.search.api_helper import format_route
+from pycricinfo.source_models.pages.series import Series
 
 
-def get_matches_in_season(season_name: str | int, fetch: bool = True) -> list[dict[str, str]]:
+def get_matches_in_season(season_name: str | int, fetch: bool = True) -> list[Series]:
     """
     Get the Cricinfo web page which lists all series in a given season, and parse out their details.
 
@@ -23,8 +24,8 @@ def get_matches_in_season(season_name: str | int, fetch: bool = True) -> list[di
 
     Returns
     -------
-    list[dict[str, str]]
-        A list of dictionaries, each containing the title, id, link, and summary_url of a series in the season.
+    list[Series]
+        A list of Series, with values for the title, id, link, and summary_url of a series in the season.
     """
     season_name = quote(str(season_name))
     folder = Path(get_settings().api_response_output_folder)
@@ -52,7 +53,7 @@ def get_matches_in_season(season_name: str | int, fetch: bool = True) -> list[di
     return parse_season_html(file_path)
 
 
-def parse_season_html(file_path: Path) -> list[dict[str, str]]:
+def parse_season_html(file_path: Path) -> list[Series]:
     """
     Parse the content of the Cricinfo season page HTML file to extract series details.
 
@@ -63,8 +64,8 @@ def parse_season_html(file_path: Path) -> list[dict[str, str]]:
 
     Returns
     -------
-    list[dict[str, str]]
-        A list of dictionaries, each containing the title, id, link, and summary_url of a series in the season.
+    list[Series]
+        A list of Series, with values for the title, id, link, and summary_url of a series in the season.
     """
     with open(file_path, "r") as file:
         content = file.read()
@@ -88,6 +89,6 @@ def parse_season_html(file_path: Path) -> list[dict[str, str]]:
 
         link = anchor.get("href", "")
 
-        series_list.append({"title": title, "id": series_id, "link": link, "summary_url": summary_url})
+        series_list.append(Series(title=title, id=series_id, link=link, summary_url=summary_url))
 
     return series_list
