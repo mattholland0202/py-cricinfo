@@ -2,9 +2,12 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from prettytable import PrettyTable
-from pydantic import AliasChoices, BaseModel, Field, computed_field
+from pydantic import AliasChoices, BaseModel, Field, computed_field, model_validator
 
-from pycricinfo.output_models.common import HeaderlessTableMixin
+from pycricinfo.output_models.common import SNAKE_CASE_REGEX, HeaderlessTableMixin
+from pycricinfo.source_models.api.athelete import AthleteWithFirstAndLastName
+from pycricinfo.source_models.api.linescores import PlayerMatchInningsDetails
+from pycricinfo.source_models.api.team import TeamWithColorAndLogos
 
 # ANSI escape codes for colors
 RED = "\033[31m"
@@ -130,7 +133,6 @@ class Innings(BaseModel, HeaderlessTableMixin):
     team_name: str
     batting_score: int
     wickets: int
-    batting_description: str
     batters: list[BattingInnings] = Field(default_factory=list)
     bowlers: list[BowlingInnings] = Field(default_factory=list)
 
@@ -145,7 +147,7 @@ class Innings(BaseModel, HeaderlessTableMixin):
         str
             The score summary in the format "<runs>/<wickets>" or "<runs> all out" as appropriate.
         """
-        wickets_text = f" {self.batting_description}" if self.batting_description == "all out" else f"/{self.wickets}"
+        wickets_text = f" {'all out'}" if self.wickets == 10 else f"/{self.wickets}"
         return f"{self.batting_score}{wickets_text}"
 
     def to_table(self):
@@ -196,3 +198,99 @@ class Innings(BaseModel, HeaderlessTableMixin):
         for player in sorted(items, key=lambda b: b.order):
             player.add_to_table(table)
         print(table)
+
+
+class CricinfoPlayerInningsCommon(PlayerInningsCommon, ABC):
+    def add_linescore_stats_as_properties(data: dict, *args) -> dict:
+        """
+        Add individual named stats matching supplied args to the data dictionary, so they become keys which can be
+        deserialized into a Pydantic model, by matching strings passed in as arguments to keys in the player's
+        statistics list for this innings.
+
+        Parameters
+        ----------
+        data : dict
+            The data to add keys to
+
+        Returns
+        -------
+        dict
+            The input data dictionary, with new keys added
+        """
+        linescore: PlayerMatchInningsDetails = data.get("linescore")
+        if not linescore:
+            return data
+
+        for name in args:
+            if not isinstance(name, str):
+                raise TypeError("args to this function must be strings")
+            name_split = str(name).split(".")
+            stat_name = name_split[1] if len(name_split) > 1 else name_split[0]
+            data[SNAKE_CASE_REGEX.sub("_", stat_name).lower()] = linescore.find(name)
+        return data
+
+
+class CricinfoBattingInnings(BattingInnings, CricinfoPlayerInningsCommon):
+    player: AthleteWithFirstAndLastName  # Could be full Athlete
+
+    @model_validator(mode="before")
+    @classmethod
+    def create_batting_attributes(cls, data: dict) -> dict:
+        """
+        Run before Pydantic validation to create the required fields in the data dictionary.
+
+        Find the batting statistics in the linescore and add them as properties to the data dictionary.
+
+        Parameters
+        ----------
+        data : dict
+            The input data being validated into this model. It should contain a "linescore" key with a
+            PlayerMatchInningsDetails object.
+
+        Returns
+        -------
+        dict
+            The transformed data dictionary with the required fields for a CricinfoBattingInnings, which Pydantic can
+            now validate.
+        """
+        data = cls.add_linescore_stats_as_properties(
+            data,
+            "batting.dismissal_text",
+            "runs",
+            "ballsFaced",
+            "notouts",
+            "batting.order",
+            "fours",
+            "sixes",
+        )
+        return data
+
+
+class CricinfoBowlingInnings(BowlingInnings, CricinfoPlayerInningsCommon):
+    player: AthleteWithFirstAndLastName  # Could be full Athlete
+
+    @model_validator(mode="before")
+    @classmethod
+    def create_bowling_attributes(cls, data: dict):
+        """
+        Run before Pydantic validation to create the required fields in the data dictionary.
+
+        Find the bowling statistics in the linescore and add them as properties to the data dictionary.
+
+        Parameters
+        ----------
+        data : dict
+            The input data being validated into this model. It should contain a "linescore" key with a
+            PlayerMatchInningsDetails object.
+
+        Returns
+        -------
+        dict
+            The transformed data dictionary with the required fields for a CricinfoBowlingInnings, which Pydantic can
+            now validate.
+        """
+        return cls.add_linescore_stats_as_properties(data, "overs", "maidens", "conceded", "wickets", "bowling.order")
+
+
+class CricinfoInnings(Innings):
+    team: TeamWithColorAndLogos

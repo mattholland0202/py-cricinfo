@@ -14,7 +14,7 @@ class HeaderlessTableMixin:
         ----------
         rows : list[tuple[str, bool]]
             The rows of data to print. Each tuple contains the data to print,
-            and whether to include a divider between tows
+            and whether to include a divider after the row (True) or not (False).
         """
         table = PrettyTable()
         table.header = False

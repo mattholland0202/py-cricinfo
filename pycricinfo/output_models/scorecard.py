@@ -1,80 +1,19 @@
-from abc import ABC
 from typing import Optional
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, model_validator
 
-from pycricinfo.output_models.common import SNAKE_CASE_REGEX, HeaderlessTableMixin
-from pycricinfo.output_models.innings import BattingInnings, BowlingInnings, Innings, PlayerInningsCommon
-from pycricinfo.source_models.api.athelete import AthleteWithFirstAndLastName
-from pycricinfo.source_models.api.linescores import LinescorePeriod
+from pycricinfo.output_models.common import HeaderlessTableMixin
+from pycricinfo.output_models.innings import CricinfoBattingInnings, CricinfoBowlingInnings, CricinfoInnings, Innings
 from pycricinfo.source_models.api.match import Match
-from pycricinfo.source_models.api.roster import MatchPlayer, Roster
-from pycricinfo.source_models.api.team import TeamWithColorAndLogos
-
-
-class CricinfoPlayerInningsCommon(PlayerInningsCommon, ABC):
-    def add_linescore_stats_as_properties(data: dict, *args) -> dict:
-        """
-        Add individual named stats matching supplied args to the data dictionary so they can be deserialized by Pydantic
-
-        Parameters
-        ----------
-        data : dict
-            The data to add keys to
-
-        Returns
-        -------
-        dict
-            The input data dictionary, with new keys added
-        """
-        linescore: LinescorePeriod = data.get("linescore")
-        if not linescore:
-            return data
-
-        for name in args:
-            if not isinstance(name, str):
-                raise TypeError("args to this function must be strings")
-            name_split = str(name).split(".")
-            stat_name = name_split[1] if len(name_split) > 1 else name_split[0]
-            data[SNAKE_CASE_REGEX.sub("_", stat_name).lower()] = linescore.find(name)
-        return data
-
-
-class CricinfoBattingInnings(BattingInnings, CricinfoPlayerInningsCommon):
-    player: AthleteWithFirstAndLastName  # Could be full Athlete
-
-    @model_validator(mode="before")
-    @classmethod
-    def create_batting_attributes(cls, data: dict):
-        data = cls.add_linescore_stats_as_properties(
-            data,
-            "batting.dismissal_text",
-            "runs",
-            "ballsFaced",
-            "notouts",
-            "batting.order",
-            "fours",
-            "sixes",
-        )
-        return data
-
-
-class CricinfoBowlingInnings(BowlingInnings, CricinfoPlayerInningsCommon):
-    player: AthleteWithFirstAndLastName  # Could be full Athlete
-
-    @model_validator(mode="before")
-    @classmethod
-    def create_bowling_attributes(cls, data: dict):
-        return cls.add_linescore_stats_as_properties(data, "overs", "maidens", "conceded", "wickets", "bowling.order")
-
-
-class CricinfoInnings(Innings):
-    team: TeamWithColorAndLogos
+from pycricinfo.source_models.api.roster import MatchPlayer, TeamLineup
 
 
 class Scorecard(BaseModel, HeaderlessTableMixin):
-    title: Optional[str]
-    summary: Optional[str]
+    title: Optional[str] = Field(
+        description="The title for the scorecard, usually match details, including teams"
+        "and dates. e.g.) 3rd Test, West Indies tour of England at Birmingham, Jul 26-28 2024 "
+    )
+    summary: Optional[str] = Field(description="A summary of the result of the match, e.g.) 'India won by 5 wickets'")
     innings: list[Innings]
 
     def to_table(self):
@@ -87,8 +26,32 @@ class Scorecard(BaseModel, HeaderlessTableMixin):
 class CricinfoScorecard(Scorecard):
     @model_validator(mode="before")
     @classmethod
-    def create(cls, data: dict):
+    def create(cls, data: dict) -> dict:
+        """
+        Run before Pydantic validation to create the required fields in the data dictionary.
+
+        Transforms input data into a Scorecard, extracting details from a Match object.
+
+        Parameters
+        ----------
+        data : dict
+            The input data being validated into this model. It should contain a "match" key with a Match object.
+
+        Raises
+        ------
+        ValueError
+            If the "match" key is not present in the input data.
+
+        Returns
+        -------
+        dict
+            The transformed data dictionary with the required fields for a CricinfoScorecard, which Pydantic can
+            now validate.
+        """
         match: Match = data["match"]
+        if not match:
+            raise ValueError("Match data is required to create a CricinfoScorecard.")
+
         data["title"] = match.header.title
         data["summary"] = match.header.summary
 
@@ -102,22 +65,43 @@ class CricinfoScorecard(Scorecard):
                     team_name=team_linescore[0].display_name,
                     batting_score=team_linescore[1].runs,
                     wickets=team_linescore[1].wickets,
-                    batting_description=team_linescore[1].description,
                 )
             )
         for roster in match.rosters:
-            cls._enrich_roster(innings, roster)
+            cls._enrich_innings_with_lineups(innings, roster)
 
         data["innings"] = innings
         return data
 
     @classmethod
-    def _enrich_roster(cls, innings: list[CricinfoInnings], roster: Roster):
-        for player in roster.players:
-            cls._enrich_player(innings, player)
+    def _enrich_innings_with_lineups(cls, innings: list[CricinfoInnings], lineup: TeamLineup):
+        """
+        Enrich the innings with player data from the team lineup. The innings will be updated in
+        place, adding batters and bowlers based on the players in the lineup.
+
+        Parameters
+        ----------
+        innings : list[CricinfoInnings]
+            All innings in the match, which will be enriched with player data.
+        lineup : TeamLineup
+            The team lineup containing player data to enrich the innings with.
+        """
+        for player in lineup.players:
+            cls._enrich_innings_for_player(innings, player)
 
     @classmethod
-    def _enrich_player(cls, innings: list[CricinfoInnings], player: MatchPlayer):
+    def _enrich_innings_for_player(cls, innings: list[CricinfoInnings], player: MatchPlayer):
+        """
+        Enrich the innings with data for a specific player. The innings will be updated in
+        place, adding batters or bowlers records based on this player's data.
+
+        Parameters
+        ----------
+        innings : list[CricinfoInnings]
+            All innings in the match, which will be enriched with player data.
+        player : MatchPlayer
+            The player whose data will be used to enrich the innings.
+        """
         for linescore in player.linescores:
             if bool(linescore.batted) and bool(int(linescore.batted)):
                 bat = CricinfoBattingInnings(

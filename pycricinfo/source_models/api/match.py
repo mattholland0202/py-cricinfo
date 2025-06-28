@@ -5,7 +5,7 @@ from pydantic import AliasChoices, BaseModel, Field, computed_field
 from pycricinfo.source_models.api.common import CCBaseModel, RefMixin
 from pycricinfo.source_models.api.match_note import MatchNote
 from pycricinfo.source_models.api.official import Official
-from pycricinfo.source_models.api.roster import Roster
+from pycricinfo.source_models.api.roster import TeamLineup
 from pycricinfo.source_models.api.team import TeamWithColorAndLogos
 from pycricinfo.source_models.api.venue import Venue
 
@@ -109,7 +109,7 @@ class Match(CCBaseModel):
     notes: list[MatchNote]
     game_info: MatchInfo
     # TODO: add debuts
-    rosters: list[Roster]
+    rosters: list[TeamLineup]
     header: MatchHeader
 
 
