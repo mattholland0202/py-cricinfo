@@ -37,6 +37,7 @@ class PlayerInningsCommon(BaseModel, ABC):
 
     @abstractmethod
     def add_to_table(self, table: PrettyTable): ...
+    """ Abstract method which will be implemented in the Batting and Bowling innings classes """
 
 
 class BattingInnings(PlayerInningsCommon):

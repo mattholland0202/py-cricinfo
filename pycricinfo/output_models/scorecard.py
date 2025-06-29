@@ -17,6 +17,9 @@ class Scorecard(BaseModel, HeaderlessTableMixin):
     innings: list[Innings]
 
     def to_table(self):
+        """
+        Print the scorecard as a PrettyTable, including the title and summary.
+        """
         self.print_headerless_table([(self.title, True), (self.summary, False)])
 
         for innings in self.innings:
