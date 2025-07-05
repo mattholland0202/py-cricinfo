@@ -2,6 +2,7 @@ from typing import Literal, Optional
 
 from pydantic import AliasChoices, BaseModel, Field, computed_field
 
+from pycricinfo.source_models.api.athelete import Athlete
 from pycricinfo.source_models.api.common import CCBaseModel, RefMixin
 from pycricinfo.source_models.api.match_note import MatchNote
 from pycricinfo.source_models.api.official import Official
@@ -42,16 +43,43 @@ class TeamLinescoreStatistics(CCBaseModel):
     # TODO: Add categories
 
 
+class PartnershipBatter(CCBaseModel):
+    athlete: Athlete
+    balls: str|int
+    runs: str|int
+
+
+class InningsState(BaseModel):
+    overs: str|float
+    runs: str|int
+    wickets: str|int
+
+
+class Partnership(RefMixin, CCBaseModel):
+    wicketNumber: int
+    wicketName: str
+    fowType: Literal["out", "end of innings"]
+    overs: float
+    runs: int
+    runRate: float
+    start: InningsState
+    end: InningsState
+    batsmen: list[PartnershipBatter]
+
+
 class TeamLinescore(CCBaseModel):
     period: int
     wickets: int
     runs: int
     overs: float
     is_batting: bool
+    fours: Optional[int] = None
+    sixes: Optional[int] = None
     description: str
     target: int
+    follow_on: int
     statistics: Optional[TeamLinescoreStatistics]
-    # TODO: add partnerships
+    partnerships: Optional[list[Partnership]] = None
     # TODO: add fow
 
 

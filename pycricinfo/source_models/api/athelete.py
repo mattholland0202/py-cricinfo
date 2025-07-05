@@ -48,7 +48,7 @@ class Athlete(AthleteWithFirstAndLastName):
     guid: Optional[str] = None
     uid: str
     name: str
-    style: list[Style]
+    style: Optional[list[Style]] = None
     batting_name: str
     fielding_name: str
     headshot: Optional[Headshot] = None

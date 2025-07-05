@@ -60,14 +60,15 @@ class CricinfoScorecard(Scorecard):
 
         innings = []
         for i in range(1, 3 if match.header.competition.limited_overs else 5):
-            team_linescore = match.header.get_batting_linescore_for_period(i)
+            team, linescore = match.header.get_batting_linescore_for_period(i)
             innings.append(
                 CricinfoInnings(
                     number=i,
-                    team=team_linescore[0],
-                    team_name=team_linescore[0].display_name,
-                    batting_score=team_linescore[1].runs,
-                    wickets=team_linescore[1].wickets,
+                    team=team,
+                    batting_team_name=team.display_name,
+                    batting_score=linescore.runs,
+                    wickets=linescore.wickets,
+                    overs=linescore.overs
                 )
             )
         for roster in match.rosters:

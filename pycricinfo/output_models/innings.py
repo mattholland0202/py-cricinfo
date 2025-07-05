@@ -37,6 +37,7 @@ class PlayerInningsCommon(BaseModel, ABC):
 
     @abstractmethod
     def add_to_table(self, table: PrettyTable): ...
+
     """ Abstract method which will be implemented in the Batting and Bowling innings classes """
 
 
@@ -131,9 +132,10 @@ class BowlingInnings(PlayerInningsCommon):
 
 class Innings(BaseModel, HeaderlessTableMixin):
     number: int
-    team_name: str
+    batting_team_name: str
     batting_score: int
     wickets: int
+    overs: Optional[float] = None
     batters: list[BattingInnings] = Field(default_factory=list)
     bowlers: list[BowlingInnings] = Field(default_factory=list)
 
@@ -159,7 +161,7 @@ class Innings(BaseModel, HeaderlessTableMixin):
         self.print_headerless_table(
             [
                 (
-                    f"Innings {self.number}: {self.team_name} {self.score_summary}",
+                    f"Innings {self.number}: {self.batting_team_name} {self.score_summary}",
                     False,
                 )
             ]
