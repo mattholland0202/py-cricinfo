@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.13]
 ### Added
 - Match Note types as an enum
-- Parse partnership data in Match
+- Parse partnership and fall of wicket data in Match
+- Overs to Scorecard output
+
+### Changed
+- Improved series page parsing to extract match types
 
 ## [0.0.12]
 ### Added

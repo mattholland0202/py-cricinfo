@@ -151,7 +151,8 @@ class Innings(BaseModel, HeaderlessTableMixin):
             The score summary in the format "<runs>/<wickets>" or "<runs> all out" as appropriate.
         """
         wickets_text = f" {'all out'}" if self.wickets == 10 else f"/{self.wickets}"
-        return f"{self.batting_score}{wickets_text}"
+        overs_text = f" ({self.overs} overs)" if self.overs is not None else ""
+        return f"{self.batting_score}{wickets_text}{overs_text}"
 
     def to_table(self):
         """
@@ -173,7 +174,7 @@ class Innings(BaseModel, HeaderlessTableMixin):
             ["", "Dismissal"],
         )
 
-        self._print_player_innings_table(["", "Overs", "Maidens", "Runs", "Wickets"], self.bowlers)
+        self._print_player_innings_table(["", "Overs", "Maidens", "Runs", "Wickets"], self.bowlers, [""])
 
     def _print_player_innings_table(
         self,

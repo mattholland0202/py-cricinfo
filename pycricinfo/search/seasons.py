@@ -4,13 +4,14 @@ from urllib.parse import quote, urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
+from bs4._typing import _OneElement, _QueryResults
 
 from pycricinfo.config import get_settings
 from pycricinfo.search.api_helper import format_route
-from pycricinfo.source_models.pages.series import Series
+from pycricinfo.source_models.pages.series import MatchSeries, MatchType
 
 
-def get_matches_in_season(season_name: str | int, fetch: bool = True) -> list[Series]:
+def get_matches_in_season(season_name: str | int, fetch: bool = True) -> list[MatchType]:
     """
     Get the Cricinfo web page which lists all series in a given season, and parse out their details.
 
@@ -53,7 +54,7 @@ def get_matches_in_season(season_name: str | int, fetch: bool = True) -> list[Se
     return parse_season_html(file_path)
 
 
-def parse_season_html(file_path: Path) -> list[Series]:
+def parse_season_html(file_path: Path) -> list[MatchType]:
     """
     Parse the content of the Cricinfo season page HTML file to extract series details.
 
@@ -74,21 +75,52 @@ def parse_season_html(file_path: Path) -> list[Series]:
 
     soup = BeautifulSoup(content, "html.parser")
 
-    series_blocks = soup.find_all("section", class_="series-summary-block collapsed")
+    section_heads = soup.find_all("div", class_="match-section-head")
 
-    series_list = []
+    match_types = []
+    for section in section_heads:
+        mt = _process_page_section(section)
+        if mt:
+            match_types.append(mt)
+
+    return match_types
+
+
+def _process_page_section(section: _OneElement) -> MatchType|None:
+    h2_tag = section.find("h2")
+    if h2_tag:
+        h2_text = h2_tag.text.strip()
+        match_type = MatchType(name=h2_text)
+
+        next_section = section.find_next_sibling("section", class_="series-summary-wrap")
+
+        if next_section:
+            series_blocks = next_section.find_all("section", class_="series-summary-block collapsed")
+
+            series = _process_series_blocks(series_blocks)
+            match_type.series = series
+        return match_type
+
+
+def _process_series_blocks(series_blocks: list[_QueryResults]) -> list[MatchSeries]:
+    series_for_type = []
     for block in series_blocks:
-        anchor = block.find("a")
+        if "data-series-id" not in block.attrs:
+            continue
 
-        title = anchor.contents[0]
-        title = re.sub(r"\\", "", title)
-        title = re.sub(r"\s{2,}|\n|\r", " ", title).strip()
+        series_id = block["data-series-id"]
 
-        series_id = block.get("data-series-id")
-        summary_url = block.get("data-summary-url")
+        # Try to find the series name
+        series_link = block.find("a")
+        if series_link:
+            title = series_link.contents[0]
+            title = re.sub(r"\\", "", title)
+            title = re.sub(r"\s{2,}|\n|\r", " ", title).strip()
 
-        link = anchor.get("href", "")
+            series_id = block.get("data-series-id")
+            summary_url = block.get("data-summary-url")
 
-        series_list.append(Series(title=title, id=series_id, link=link, summary_url=summary_url))
-
-    return series_list
+            link = series_link.get("href", "")
+            s = MatchSeries(title=title, id=series_id, link=link, summary_url=summary_url)
+            series_for_type.append(s)
+    return series_for_type

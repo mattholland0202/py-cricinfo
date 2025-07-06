@@ -56,15 +56,25 @@ class InningsState(BaseModel):
 
 
 class Partnership(RefMixin, CCBaseModel):
-    wicketNumber: int
-    wicketName: str
-    fowType: Literal["out", "end of innings"]
+    wicket_number: int
+    wicket_name: str
+    fow_type: Literal["out", "end of innings"]
     overs: float
     runs: int
-    runRate: float
+    run_rate: float
     start: InningsState
     end: InningsState
     batsmen: list[PartnershipBatter]
+
+
+class FallOfWicket(RefMixin, CCBaseModel):
+    wicket_number: int
+    wicket_over: float
+    fow_type: Literal["out", "end of innings"]
+    runs: int
+    runs_scored: int
+    balls_faced: int
+    athlete: Athlete
 
 
 class TeamLinescore(CCBaseModel):
@@ -80,7 +90,9 @@ class TeamLinescore(CCBaseModel):
     follow_on: int
     statistics: Optional[TeamLinescoreStatistics]
     partnerships: Optional[list[Partnership]] = None
-    # TODO: add fow
+    fall_of_wicket: Optional[list[FallOfWicket]] = Field(
+        default=None,
+        validation_alias=AliasChoices("fall_of_wicket", "fow"))
 
 
 class MatchCompetitor(CCBaseModel):
