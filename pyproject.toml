@@ -41,9 +41,9 @@ dev = [
 ]
 
 [project.scripts]
-scorecard = 'pycricinfo.output:print_scorecard'
-ballbyball = 'pycricinfo.output:print_ball_by_ball'
-api = 'pycricinfo.api.server:start_api'
+print_scorecard = 'pycricinfo.output:print_scorecard'
+print_ballbyball = 'pycricinfo.output:print_ball_by_ball'
+run_api = 'pycricinfo.api.server:start_api'
 
 [tool.ruff]
 line-length = 120

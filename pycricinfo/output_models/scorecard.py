@@ -60,6 +60,7 @@ class CricinfoScorecard(Scorecard):
 
         innings = []
         for i in range(1, 3 if match.header.competition.limited_overs else 5):
+            # TODO: Won't work for in progress matches
             team, linescore = match.header.get_batting_linescore_for_period(i)
             innings.append(
                 CricinfoInnings(

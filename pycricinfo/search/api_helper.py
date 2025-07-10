@@ -4,6 +4,7 @@ import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Type, TypeVar
+from urllib.parse import urljoin, urlparse
 
 import requests
 from pydantic import BaseModel, ValidationError
@@ -85,8 +86,13 @@ def get_request(route: str, params: dict[str, str] = None, base_route: BaseRoute
         base = get_settings().site_base_route_v2
     full_route = f"{base}{route}"
 
+    session = requests.Session()
+    session.headers["User-Agent"] = get_settings().page_headers.user_agent
+    session.headers["Referer"] = urljoin(route, urlparse(route).path)
+    session.headers["Accept"] = get_settings().page_headers.accept
+
     logger.debug(f"Querying: {full_route}", extra={"cricket_stats.request_id": request_id})
-    response = requests.get(full_route)
+    response = session.get(full_route)
 
     json_content: dict = response.json()
     response_logging_extras["cricket_stats.response_code"] = response.status_code

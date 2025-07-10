@@ -33,12 +33,26 @@ uv add pycricinfo --optional api
 ## Sample usage: CLI
 Installing the project adds 2 scripts:
 
-* `scorecard`: Pass a JSON file from the Cricinfo match summary API to the `--input` parameter to produce a scorecard in the CLI
-* `ballbyball`: Pass a JSON file from the Cricinfo 'play-by-play' API to the `--input` parameter to produce a sumary of each ball in the page of data in the CLI
+### `print_scorecard`
+Produces a match scorecard in the CLI.
+
+Parameters:
+* `--file`: A path to a JSON file from the Cricinfo match summary API
+* `--match_id`: The Cricinfo ID of a match while will be fetched from the summary API
+### `print_ballbyball` 
+Produces a summary of each ball in a page of data in the CLI.
+
+Parameters:
+* `--file`: A path to a JSON file from the Cricinfo 'play-by-play' API to the
+* `--match_id`: The Cricinfo ID of a match while will be fetched from the summary API
+* `--innings`: The innings of the game to get data from
+* `--page`: The page of commentary to return from that innings
+
 
 Installing the optional API dependency adds a further script:
 
-* `api`: Runs `uvicorn` to launch a `FastAPI` wrapper around the Cricinfo API, which will launch on port 8000, with the Swagger documentation available at `http://localhost:8000/docs`
+### `run_api`
+Runs `uvicorn` to launch a `FastAPI` wrapper around the Cricinfo API, which will launch on port 8000, with the Swagger documentation available at `http://localhost:8000/docs`
 
 ## Sample usage: In code
 Import one of the `get_` function from `pycricinfo.search`, for example:

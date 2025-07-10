@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Match Note types as an enum
 - Parse partnership and fall of wicket data in Match
 - Overs to Scorecard output
+- CLI parameters to fetch match from API to print, rather than only supporting existing files
 
 ### Changed
 - Improved series page parsing to extract match types
+- Changed script names
 
 ## [0.0.12]
 ### Added
