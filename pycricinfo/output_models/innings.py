@@ -50,7 +50,10 @@ class BattingInnings(PlayerInningsCommon):
     balls_faced: Optional[int] = None
     fours: Optional[int] = None
     sixes: Optional[int] = None
+    minutes: Optional[int] = None
+    sixes: Optional[int] = None
     not_out: bool = Field(validation_alias=AliasChoices("not_out", "notouts"))
+    strike_rate: Optional[float] = Field(validation_alias=AliasChoices("strike_rate", "strikeRate"))
 
     @computed_field
     @property
@@ -83,6 +86,8 @@ class BattingInnings(PlayerInningsCommon):
                     self.balls_faced,
                     self.fours,
                     self.sixes,
+                    self.minutes,
+                    self.strike_rate,
                 ],
                 RED if self.not_out else RESET,
             )
@@ -95,6 +100,16 @@ class BowlingInnings(PlayerInningsCommon):
     maidens: int
     runs: int = Field(validation_alias=AliasChoices("runs", "conceded"))
     wickets: int
+    dots: Optional[int] = None
+    no_balls: Optional[int] = Field(default=None, validation_alias=AliasChoices("no_balls", "noballs"))
+    wides: Optional[int] = None
+    economy_rate: Optional[float] = Field(validation_alias=AliasChoices("economy_rate", "economyRate"))
+    fours_conceded: Optional[int] = Field(
+        default=None, validation_alias=AliasChoices("fours_conceded", "foursConceded")
+    )
+    sixes_conceded: Optional[int] = Field(
+        default=None, validation_alias=AliasChoices("sixes_conceded", "sixesConceded")
+    )
 
     @computed_field
     @property
@@ -126,6 +141,12 @@ class BowlingInnings(PlayerInningsCommon):
                 self.maidens,
                 self.runs,
                 self.wickets,
+                self.economy_rate,
+                self.no_balls,
+                self.wides,
+                self.fours_conceded,
+                self.sixes_conceded,
+                self.dots,
             ]
         )
 
@@ -169,12 +190,16 @@ class Innings(BaseModel, HeaderlessTableMixin):
         )
 
         self._print_player_innings_table(
-            ["", "Dismissal", "Runs", "Balls", "4s", "6s"],
+            ["", "Dismissal", "Runs", "Balls", "4s", "6s", "Minutes", "SR"],
             self.batters,
             ["", "Dismissal"],
         )
 
-        self._print_player_innings_table(["", "Overs", "Maidens", "Runs", "Wickets"], self.bowlers, [""])
+        self._print_player_innings_table(
+            ["", "Overs", "Maidens", "Runs", "Wickets", "Economy", "No Balls", "Wides", "4s", "6s", "Dots"],
+            self.bowlers,
+            [""],
+        )
 
     def _print_player_innings_table(
         self,
@@ -207,9 +232,10 @@ class Innings(BaseModel, HeaderlessTableMixin):
 class CricinfoPlayerInningsCommon(PlayerInningsCommon, ABC):
     def add_linescore_stats_as_properties(data: dict, *args) -> dict:
         """
-        Add individual named stats matching supplied args to the data dictionary, so they become keys which can be
-        deserialized into a Pydantic model, by matching strings passed in as arguments to keys in the player's
-        statistics list for this innings.
+        Add items to the data dictionary so that extra keys can be deserialized into the Pydantic model.
+
+        Find items by looking up the strings passed in as arguments, either matching to keys in the player's
+        "general" statistics list for this innings, or to other parsed items in their batting or bowling innings.
 
         Parameters
         ----------
@@ -230,7 +256,10 @@ class CricinfoPlayerInningsCommon(PlayerInningsCommon, ABC):
                 raise TypeError("args to this function must be strings")
             name_split = str(name).split(".")
             stat_name = name_split[1] if len(name_split) > 1 else name_split[0]
-            data[SNAKE_CASE_REGEX.sub("_", stat_name).lower()] = linescore.find(name)
+
+            value = linescore.find(name)
+            if value is not None:
+                data[SNAKE_CASE_REGEX.sub("_", stat_name).lower()] = value
         return data
 
 
@@ -266,6 +295,8 @@ class CricinfoBattingInnings(BattingInnings, CricinfoPlayerInningsCommon):
             "batting.order",
             "fours",
             "sixes",
+            "minutes",
+            "strikeRate",
         )
         return data
 
@@ -293,7 +324,20 @@ class CricinfoBowlingInnings(BowlingInnings, CricinfoPlayerInningsCommon):
             The transformed data dictionary with the required fields for a CricinfoBowlingInnings, which Pydantic can
             now validate.
         """
-        return cls.add_linescore_stats_as_properties(data, "overs", "maidens", "conceded", "wickets", "bowling.order")
+        return cls.add_linescore_stats_as_properties(
+            data,
+            "overs",
+            "maidens",
+            "conceded",
+            "wickets",
+            "bowling.order",
+            "dots",
+            "noballs",
+            "wides",
+            "foursConceded",
+            "sixesConceded",
+            "economyRate",
+        )
 
 
 class CricinfoInnings(Innings):

@@ -1,5 +1,7 @@
 from argparse import ArgumentParser, Namespace
 
+from pydantic import ValidationError
+
 from pycricinfo.output_models.scorecard import CricinfoScorecard
 from pycricinfo.search.call_cricinfo_api import get_match, get_play_by_play
 from pycricinfo.source_models.api.commentary import APIResponseCommentary
@@ -37,8 +39,12 @@ def _print_scorecard_from_match_id(match_id: int):
 
 
 def _print_scorecard_from_match(match: Match):
-    sc = CricinfoScorecard(match=match)
-    sc.to_table()
+    try:
+        sc = CricinfoScorecard(match=match)
+        sc.to_table()
+    except ValidationError as validation_error:
+        print(validation_error.errors())
+        raise
 
 
 def parse_scorecard_args() -> Namespace:

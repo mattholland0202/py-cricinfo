@@ -71,7 +71,7 @@ class StatsCategory(BaseModel):
     ]
 
     def get_stat(self, name: str) -> int | str | float:
-        return next((s.display_value for s in self.stats if s.name == name), None)
+        return next((s.value for s in self.stats if s.name == name), None)
 
 
 class StatisticsCategory(BaseModel):
