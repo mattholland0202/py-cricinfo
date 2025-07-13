@@ -192,12 +192,12 @@ class Innings(BaseModel, HeaderlessTableMixin):
     batters: list[BattingInnings] = Field(default_factory=list)
     bowlers: list[BowlingInnings] = Field(default_factory=list)
 
-    extras: Optional[str] = None
-    byes: Optional[str] = None
-    wides: Optional[str] = None
-    legbyes: Optional[str] = None
-    noballs: Optional[str] = None
-    penalties: Optional[str] = None
+    extras: Optional[int] = None
+    byes: Optional[int] = None
+    wides: Optional[int] = None
+    legbyes: Optional[int] = None
+    noballs: Optional[int] = None
+    penalties: Optional[int] = None
 
     @computed_field
     @property
