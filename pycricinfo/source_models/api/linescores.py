@@ -1,12 +1,12 @@
 from pydantic import AliasChoices, BaseModel, Field, computed_field
 
-from pycricinfo.source_models.api.statistics import StatisticsCategory
+from pycricinfo.source_models.api.statistics import PlayerStatisticsCategory
 
 
 class PlayerMatchInningsDetails(BaseModel):
     period: int
     media_id: int = Field(validation_alias=AliasChoices("media_id", "mediaId"))
-    statistics: StatisticsCategory
+    statistics: PlayerStatisticsCategory
 
     def find(self, name: str) -> int | str | float:
         return self.statistics.find(name)

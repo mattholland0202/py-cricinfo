@@ -135,7 +135,7 @@ wheels = [
 
 [[package]]
 name = "pycricinfo"
-version = "0.0.13"
+version = "0.0.14"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },

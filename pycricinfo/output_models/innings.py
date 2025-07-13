@@ -160,6 +160,13 @@ class Innings(BaseModel, HeaderlessTableMixin):
     batters: list[BattingInnings] = Field(default_factory=list)
     bowlers: list[BowlingInnings] = Field(default_factory=list)
 
+    extras: Optional[str] = None
+    byes: Optional[str] = None
+    wides: Optional[str] = None
+    legbyes: Optional[str] = None
+    noballs: Optional[str] = None
+    penalties: Optional[str] = None
+
     @computed_field
     @property
     def score_summary(self) -> str:
@@ -175,6 +182,16 @@ class Innings(BaseModel, HeaderlessTableMixin):
         overs_text = f" ({self.overs} overs)" if self.overs is not None else ""
         return f"{self.batting_score}{wickets_text}{overs_text}"
 
+    @computed_field
+    @property
+    def extras_summary(self) -> str:
+        penalties_string = f" {self.penalties}p" if self.penalties != "0" else ""
+
+        return (
+            f"Extras: {self.extras or 0} "
+            f"({self.byes or 0}b {self.legbyes or 0}lb {self.wides or 0}w {self.noballs or 0}nb{penalties_string})"
+        )
+
     def to_table(self):
         """
         Print the innings details in PrettyTables. This will include the innings summary, followed by
@@ -185,7 +202,11 @@ class Innings(BaseModel, HeaderlessTableMixin):
                 (
                     f"Innings {self.number}: {self.batting_team_name} {self.score_summary}",
                     False,
-                )
+                ),
+                (
+                    self.extras_summary,
+                    False,
+                ),
             ]
         )
 

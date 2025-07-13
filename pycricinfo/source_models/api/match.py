@@ -1,58 +1,28 @@
+import re
 from typing import Literal, Optional
 
-from pydantic import AliasChoices, BaseModel, Field, computed_field
+from pydantic import AliasChoices, BaseModel, Field, computed_field, model_validator
 
 from pycricinfo.source_models.api.athelete import Athlete
 from pycricinfo.source_models.api.common import CCBaseModel, RefMixin
 from pycricinfo.source_models.api.match_note import MatchNote
 from pycricinfo.source_models.api.official import Official
 from pycricinfo.source_models.api.roster import TeamLineup
+from pycricinfo.source_models.api.statistics import TeamStatisticsCategory
 from pycricinfo.source_models.api.team import TeamWithColorAndLogos
 from pycricinfo.source_models.api.venue import Venue
 
 
-class TeamWicketDetails(CCBaseModel):
-    text: str
-    short_text: str
-
-
-class TeamWicket(CCBaseModel):
-    details: TeamWicketDetails
-    balls_faced: int
-    dismissal_card: str
-    fours: int
-    fow: str
-    minutes: Optional[int | str] = None  # TODO: Can be empty string - parse to null in that case
-    number: int
-    over: float
-    runs: int
-    short_text: str
-    sixes: int
-    strike_rate: float
-
-
-class TeamOver(CCBaseModel):
-    number: int
-    runs: int
-    wicket: list[TeamWicket]
-
-
-class TeamLinescoreStatistics(CCBaseModel):
-    name: str
-    overs: list[list[TeamOver]]
-    # TODO: Add categories
-
-
 class PartnershipBatter(CCBaseModel):
     athlete: Athlete
-    balls: str|int
-    runs: str|int
+    balls: str | int
+    runs: str | int
 
 
 class InningsState(BaseModel):
-    overs: str|float
-    runs: str|int
-    wickets: str|int
+    overs: str | float
+    runs: str | int
+    wickets: str | int
 
 
 class Partnership(RefMixin, CCBaseModel):
@@ -77,6 +47,9 @@ class FallOfWicket(RefMixin, CCBaseModel):
     athlete: Athlete
 
 
+SNAKE_CASE_REGEX = re.compile(r"(?<!^)(?=[A-Z])")
+
+
 class TeamLinescore(CCBaseModel):
     period: int
     wickets: int
@@ -88,11 +61,68 @@ class TeamLinescore(CCBaseModel):
     description: str
     target: int
     follow_on: int
-    statistics: Optional[TeamLinescoreStatistics]
+    statistics: Optional[TeamStatisticsCategory]
     partnerships: Optional[list[Partnership]] = None
     fall_of_wicket: Optional[list[FallOfWicket]] = Field(
-        default=None,
-        validation_alias=AliasChoices("fall_of_wicket", "fow"))
+        default=None, validation_alias=AliasChoices("fall_of_wicket", "fow")
+    )
+
+    extras: Optional[str] = None
+    byes: Optional[str] = None
+    wides: Optional[str] = None
+    legbyes: Optional[str] = None
+    noballs: Optional[str] = None
+    penalties: Optional[str] = None
+
+    def add_linescore_stats_as_properties(data: dict, *args) -> dict:
+        """
+        Add items to the data dictionary so that extra keys can be deserialized into the Pydantic model.
+
+        Find items by looking up the strings passed in as arguments, either matching to keys in the player's
+        "general" statistics list for this innings, or to other parsed items in their batting or bowling innings.
+
+        Parameters
+        ----------
+        data : dict
+            The data to add keys to
+
+        Returns
+        -------
+        dict
+            The input data dictionary, with new keys added
+        """
+        stats_dict: dict = data.get("statistics")
+        if not stats_dict:
+            return data
+
+        stats = TeamStatisticsCategory.model_validate(stats_dict)
+
+        for name in args:
+            if not isinstance(name, str):
+                raise TypeError("args to this function must be strings")
+            name_split = str(name).split(".")
+            stat_name = name_split[1] if len(name_split) > 1 else name_split[0]
+
+            value = stats.find(name)
+            if value is not None:
+                data[SNAKE_CASE_REGEX.sub("_", stat_name).lower()] = value
+        return data
+
+    @model_validator(mode="before")
+    @classmethod
+    def create_additional_attributes(cls, data: dict) -> dict:
+        data = cls.add_linescore_stats_as_properties(
+            data,
+            "bpo"
+            "byes",
+            "extras",
+            "legbyes",
+            "noballs",
+            "penalties",
+            "runRate",
+            "wides",
+        )
+        return data
 
 
 class MatchCompetitor(CCBaseModel):
@@ -121,6 +151,8 @@ class MatchHeader(CCBaseModel):
     short_name: str
     title: str
     competitions: list[MatchCompetiton]
+    # TODO: links
+    # TODO: leagues
 
     @computed_field
     @property
@@ -161,7 +193,4 @@ class MatchBasic(CCBaseModel):
     short_description: str
     season: RefMixin
     season_type: RefMixin
-    # TODO: Add competitions
     venues: list[RefMixin]
-    # TODO: links
-    # TODO: leagues
