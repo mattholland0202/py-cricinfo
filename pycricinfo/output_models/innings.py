@@ -6,12 +6,45 @@ from pydantic import AliasChoices, BaseModel, Field, computed_field, model_valid
 
 from pycricinfo.output_models.common import SNAKE_CASE_REGEX, HeaderlessTableMixin
 from pycricinfo.source_models.api.athelete import AthleteWithFirstAndLastName
-from pycricinfo.source_models.api.linescores import PlayerMatchInningsDetails
+from pycricinfo.source_models.api.linescores import BaseInningsDetails
 from pycricinfo.source_models.api.team import TeamWithColorAndLogos
 
 # ANSI escape codes for colors
 RED = "\033[31m"
 RESET = "\033[0m"
+
+class LinescoreStatsLookupMixin(BaseModel, ABC):
+    def add_linescore_stats_as_properties(data: dict, *args) -> dict:
+        """
+        Add items to the data dictionary so that extra keys can be deserialized into the Pydantic model.
+
+        Find items by looking up the strings passed in as arguments, either matching to keys in the player's
+        "general" statistics list for this innings, or to other parsed items in their batting or bowling innings.
+
+        Parameters
+        ----------
+        data : dict
+            The data to add keys to
+
+        Returns
+        -------
+        dict
+            The input data dictionary, with new keys added
+        """
+        linescore: BaseInningsDetails = data.get("linescore")
+        if not linescore:
+            return data
+
+        for name in args:
+            if not isinstance(name, str):
+                raise TypeError("args to this function must be strings")
+            name_split = str(name).split(".")
+            stat_name = name_split[1] if len(name_split) > 1 else name_split[0]
+
+            value = linescore.find(name)
+            if value is not None:
+                data[SNAKE_CASE_REGEX.sub("_", stat_name).lower()] = value
+        return data
 
 
 class PlayerInningsCommon(BaseModel, ABC):
@@ -37,7 +70,6 @@ class PlayerInningsCommon(BaseModel, ABC):
 
     @abstractmethod
     def add_to_table(self, table: PrettyTable): ...
-
     """ Abstract method which will be implemented in the Batting and Bowling innings classes """
 
 
@@ -250,41 +282,7 @@ class Innings(BaseModel, HeaderlessTableMixin):
         print(table)
 
 
-class CricinfoPlayerInningsCommon(PlayerInningsCommon, ABC):
-    def add_linescore_stats_as_properties(data: dict, *args) -> dict:
-        """
-        Add items to the data dictionary so that extra keys can be deserialized into the Pydantic model.
-
-        Find items by looking up the strings passed in as arguments, either matching to keys in the player's
-        "general" statistics list for this innings, or to other parsed items in their batting or bowling innings.
-
-        Parameters
-        ----------
-        data : dict
-            The data to add keys to
-
-        Returns
-        -------
-        dict
-            The input data dictionary, with new keys added
-        """
-        linescore: PlayerMatchInningsDetails = data.get("linescore")
-        if not linescore:
-            return data
-
-        for name in args:
-            if not isinstance(name, str):
-                raise TypeError("args to this function must be strings")
-            name_split = str(name).split(".")
-            stat_name = name_split[1] if len(name_split) > 1 else name_split[0]
-
-            value = linescore.find(name)
-            if value is not None:
-                data[SNAKE_CASE_REGEX.sub("_", stat_name).lower()] = value
-        return data
-
-
-class CricinfoBattingInnings(BattingInnings, CricinfoPlayerInningsCommon):
+class CricinfoBattingInnings(BattingInnings, LinescoreStatsLookupMixin):
     player: AthleteWithFirstAndLastName  # Could be full Athlete
 
     @model_validator(mode="before")
@@ -322,7 +320,7 @@ class CricinfoBattingInnings(BattingInnings, CricinfoPlayerInningsCommon):
         return data
 
 
-class CricinfoBowlingInnings(BowlingInnings, CricinfoPlayerInningsCommon):
+class CricinfoBowlingInnings(BowlingInnings, LinescoreStatsLookupMixin):
     player: AthleteWithFirstAndLastName  # Could be full Athlete
 
     @model_validator(mode="before")
@@ -361,5 +359,20 @@ class CricinfoBowlingInnings(BowlingInnings, CricinfoPlayerInningsCommon):
         )
 
 
-class CricinfoInnings(Innings):
+class CricinfoInnings(Innings, LinescoreStatsLookupMixin):
     team: TeamWithColorAndLogos
+
+    @model_validator(mode="before")
+    @classmethod
+    def create_innings_attributes(cls, data: dict):
+        return cls.add_linescore_stats_as_properties(
+            data,
+            "bpo",
+            "byes",
+            "extras",
+            "legbyes",
+            "noballs",
+            "penalties",
+            "runRate",
+            "wides",
+        )

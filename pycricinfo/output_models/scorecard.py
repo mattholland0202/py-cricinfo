@@ -70,12 +70,7 @@ class CricinfoScorecard(Scorecard):
                     batting_score=linescore.runs,
                     wickets=linescore.wickets,
                     overs=linescore.overs,
-                    extras=linescore.extras,
-                    byes=linescore.byes,
-                    wides=linescore.wides,
-                    legbyes=linescore.legbyes,
-                    noballs=linescore.noballs,
-                    penalties=linescore.penalties,
+                    linescore=linescore,
                 )
             )
         for roster in match.rosters:

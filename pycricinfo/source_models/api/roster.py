@@ -4,7 +4,7 @@ from pydantic import AliasChoices, BaseModel, Field, computed_field
 
 from pycricinfo.source_models.api.athelete import Athlete
 from pycricinfo.source_models.api.common import CCBaseModel, Position
-from pycricinfo.source_models.api.linescores import PlayerMatchInningsDetails
+from pycricinfo.source_models.api.linescores import PlayerInningsDetails
 from pycricinfo.source_models.api.team import TeamWithColorAndLogos
 
 
@@ -15,7 +15,7 @@ class MatchPlayer(CCBaseModel):
     starter: bool
     athlete: Athlete
     position: Position
-    linescores: list[PlayerMatchInningsDetails]
+    linescores: list[PlayerInningsDetails]
     subbedIn: bool
     subbedOut: bool
 
