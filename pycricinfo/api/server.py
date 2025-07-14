@@ -2,6 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from pycricinfo.api.endpoints.raw import router as raw_router
+from pycricinfo.api.endpoints.seasons import router as seasons_router
 from pycricinfo.api.endpoints.wrapper import router as wrapper_router
 from pycricinfo.utils import get_field_from_pyproject
 
@@ -18,6 +19,7 @@ app = FastAPI(
 
 app.include_router(wrapper_router)
 app.include_router(raw_router)
+app.include_router(seasons_router)
 
 
 if __name__ == "__main__":

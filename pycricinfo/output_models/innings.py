@@ -191,12 +191,11 @@ class Innings(BaseModel, HeaderlessTableMixin):
     overs: Optional[float] = None
     batters: list[BattingInnings] = Field(default_factory=list)
     bowlers: list[BowlingInnings] = Field(default_factory=list)
-
     extras: Optional[int] = None
     byes: Optional[int] = None
     wides: Optional[int] = None
-    legbyes: Optional[int] = None
-    noballs: Optional[int] = None
+    leg_byes: Optional[int] = Field(default=None, validation_alias=AliasChoices("legbyes", "leg_byes"))
+    no_balls: Optional[int] = Field(default=None, validation_alias=AliasChoices("noballs", "no_balls"))
     penalties: Optional[int] = None
 
     @computed_field
@@ -217,11 +216,21 @@ class Innings(BaseModel, HeaderlessTableMixin):
     @computed_field
     @property
     def extras_summary(self) -> str:
+        """
+        Get a summary of the extras for the innings, including byes, leg byes, wides, no balls,
+        and (if present) penalties.
+
+        Returns
+        -------
+        str
+            A string summarizing the extras in the format:
+            "Extras: <extras> (<byes>b <leg_byes>lb <wides>w <no_balls>nb <penalties>p)"
+        """
         penalties_string = f" {self.penalties}p" if self.penalties != "0" else ""
 
         return (
             f"Extras: {self.extras or 0} "
-            f"({self.byes or 0}b {self.legbyes or 0}lb {self.wides or 0}w {self.noballs or 0}nb{penalties_string})"
+            f"({self.byes or 0}b {self.leg_byes or 0}lb {self.wides or 0}w {self.no_balls or 0}nb{penalties_string})"
         )
 
     def to_table(self):
@@ -297,7 +306,7 @@ class CricinfoBattingInnings(BattingInnings, LinescoreStatsLookupMixin):
         ----------
         data : dict
             The input data being validated into this model. It should contain a "linescore" key with a
-            PlayerMatchInningsDetails object.
+            BaseInningsDetails object.
 
         Returns
         -------
@@ -325,7 +334,7 @@ class CricinfoBowlingInnings(BowlingInnings, LinescoreStatsLookupMixin):
 
     @model_validator(mode="before")
     @classmethod
-    def create_bowling_attributes(cls, data: dict):
+    def create_bowling_attributes(cls, data: dict) -> dict:
         """
         Run before Pydantic validation to create the required fields in the data dictionary.
 
@@ -335,7 +344,7 @@ class CricinfoBowlingInnings(BowlingInnings, LinescoreStatsLookupMixin):
         ----------
         data : dict
             The input data being validated into this model. It should contain a "linescore" key with a
-            PlayerMatchInningsDetails object.
+            BaseInningsDetails object.
 
         Returns
         -------
@@ -364,7 +373,24 @@ class CricinfoInnings(Innings, LinescoreStatsLookupMixin):
 
     @model_validator(mode="before")
     @classmethod
-    def create_innings_attributes(cls, data: dict):
+    def create_innings_attributes(cls, data: dict) -> dict:
+        """
+        Run before Pydantic validation to create the required fields in the data dictionary.
+
+        Find the innings statistics in the linescore and add them as properties to the data dictionary.
+
+        Parameters
+        ----------
+        data : dict
+            The input data being validated into this model. It should contain a "linescore" key with a
+            BaseInningsDetails object.
+
+        Returns
+        -------
+        dict
+            The transformed data dictionary with the required fields for a CricinfoInnings, which Pydantic can
+            now validate.
+        """
         return cls.add_linescore_stats_as_properties(
             data,
             "bpo",

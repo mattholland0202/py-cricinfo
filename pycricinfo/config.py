@@ -8,6 +8,7 @@ from pydantic_settings import BaseSettings
 class BaseRoute(Enum):
     core: str = auto()
     site: str = auto()
+    page: str = auto()
 
 
 class CoreAPIRoutes(BaseModel):
