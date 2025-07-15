@@ -1,9 +1,10 @@
 import json
 import logging
+import re
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Type, TypeVar
+from typing import Optional, Type, TypeVar
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -57,9 +58,9 @@ def get_and_parse(
 
 def get_request(
     route: str,
-    params: dict[str, str] = None,
+    params: Optional[dict[str, str]] = None,
     base_route: BaseRoute = BaseRoute.core,
-    responses_output_sub_folder: str = None,
+    response_output_sub_folder: str = None
 ) -> dict | str:
     """
     Make a GET request to the Football Stats API
@@ -83,7 +84,8 @@ def get_request(
         "cricket_stats.request_route_template": route,
     }
 
-    route = format_route(route, params)
+    if params:
+        route = format_route(route, params)
 
     if base_route == BaseRoute.core:
         base = get_settings().core_base_route_v2
@@ -105,13 +107,16 @@ def get_request(
     if base_route == BaseRoute.page:
         result: bytes = response.content
         logger.debug(json.dumps(f"Page fetched from: {full_route}"), extra=response_logging_extras)
-        output = output_for_file = str(result)
+        output = str(result)
+        output_for_file = re.sub(r"^b\'|\'$", "", output)
+        response_output_file_extension = "html"
     else:
         output = result = response.json()
         logger.debug(json.dumps(result, indent=4), extra=response_logging_extras)
         output_for_file = json.dumps(result, indent=4)
+        response_output_file_extension = "json"
 
-    _output_response_to_file(output_for_file, route, responses_output_sub_folder)
+    _output_response_to_file(output_for_file, route, response_output_sub_folder, response_output_file_extension)
 
     if response.status_code != 200:
         raise Exception(f"Status Code '{response.status_code}' returned for '{full_route}'")
@@ -144,9 +149,9 @@ def format_route(route: str, params: dict[str, str] = {}) -> str:
     return route
 
 
-def _output_response_to_file(response: str, route: str, sub_folder: str = None) -> None:
+def _output_response_to_file(response: str, route: str, sub_folder: str, file_extension: str) -> None:
     """
-    Output the JSON content of the API Sports response to a file
+    Output the content of the response to a file
 
     Parameters
     ----------
@@ -157,7 +162,7 @@ def _output_response_to_file(response: str, route: str, sub_folder: str = None) 
     """
     folder = Path(get_settings().api_response_output_folder)
     today = datetime.today().strftime("%Y%m%d")
-    file_name = f"{datetime.now(UTC).time().strftime('%H%M%S')}_{route.replace('/', '_')}.json"
+    file_name = f"{datetime.now(UTC).time().strftime('%H%M%S')}_{route.replace('/', '_')}.{file_extension}"
 
     if sub_folder:
         folder = folder / sub_folder

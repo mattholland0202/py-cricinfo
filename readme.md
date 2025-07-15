@@ -7,6 +7,9 @@ A Python package using ESPNCricinfo's API to extract match, player & statistical
 
 Defines Pydantic models to represent data from the Cricinfo API, allowing easier interaction with the data in your code.
 
+## Project status
+:warning: This project is still in pre-release and, whilst it still has a `0.0.X` version number, is liable to change in a breaking way with any release :warning:
+
 ## Installation
 Use your package manager of choice to install `pycricinfo`. For example:
 

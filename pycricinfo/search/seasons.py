@@ -8,7 +8,7 @@ from pycricinfo.search.api_helper import get_request
 from pycricinfo.source_models.pages.series import MatchSeries, MatchType
 
 
-def get_matches_in_season(season_name: str | int) -> list[MatchType]:
+def get_match_types_in_season(season_name: str | int) -> list[MatchType]:
     """
     Get the Cricinfo web page which lists all series in a given season, and parse out their details.
 
@@ -23,10 +23,10 @@ def get_matches_in_season(season_name: str | int) -> list[MatchType]:
         A list of match types, each containing a list of series in that match type for this season.
     """
     content = get_request(
-        route=get_settings().page_routes.season,
+        route=get_settings().page_routes.series_in_season,
         params={"season_name": season_name},
         base_route=BaseRoute.page,
-        responses_output_sub_folder="seasons",
+        response_output_sub_folder="seasons",
     )
 
     return parse_season_html(content)
@@ -54,30 +54,60 @@ def parse_season_html(content: str) -> list[MatchType]:
 
     match_types = []
     for section in section_heads:
-        mt = _process_page_section(section)
+        mt = _process_match_type_page_section(section)
         if mt:
             match_types.append(mt)
 
     return match_types
 
 
-def _process_page_section(section: _OneElement) -> MatchType | None:
+def _process_match_type_page_section(section: _OneElement) -> MatchType | None:
+    """
+    Each page section representing a type of match should contian a h2 tag with the match type name,
+    and then the following section will be a list of series of that type within the season
+
+    Parameters
+    ----------
+    section : _OneElement
+        The section of the series page for this match type
+
+    Returns
+    -------
+    MatchType | None
+        If the correct data was present, a parsed MatchType object, otherwise None
+    """
     h2_tag = section.find("h2")
-    if h2_tag:
-        h2_text = h2_tag.text.strip()
-        match_type = MatchType(name=h2_text)
+    if not h2_tag:
+        return
 
-        next_section = section.find_next_sibling("section", class_="series-summary-wrap")
+    h2_text = h2_tag.text.strip()
+    match_type = MatchType(name=h2_text)
 
-        if next_section:
-            series_blocks = next_section.find_all("section", class_="series-summary-block collapsed")
+    next_section = section.find_next_sibling("section", class_="series-summary-wrap")
 
-            series = _process_series_blocks(series_blocks)
-            match_type.series = series
-        return match_type
+    if next_section:
+        series_blocks = next_section.find_all("section", class_="series-summary-block collapsed")
+
+        series = _process_series_blocks(series_blocks)
+        match_type.series = series
+    return match_type
 
 
 def _process_series_blocks(series_blocks: list[_QueryResults]) -> list[MatchSeries]:
+    """
+    Process all sections matched by BeautifulSoup which have the classes representing series within a match type.
+    Iterate over the blocks and, within each, find the data for the series_id, title, and useful links.
+
+    Parameters
+    ----------
+    series_blocks : list[_QueryResults]
+        A list of blocks of data representing series in the match type
+
+    Returns
+    -------
+    list[MatchSeries]
+        A list of parsed series of matches
+    """
     series_for_type = []
     for block in series_blocks:
         if "data-series-id" not in block.attrs:
@@ -85,7 +115,6 @@ def _process_series_blocks(series_blocks: list[_QueryResults]) -> list[MatchSeri
 
         series_id = block["data-series-id"]
 
-        # Try to find the series name
         series_link = block.find("a")
         if series_link:
             title = series_link.contents[0]
@@ -99,3 +128,25 @@ def _process_series_blocks(series_blocks: list[_QueryResults]) -> list[MatchSeri
             s = MatchSeries(title=title, id=series_id, link=link, summary_url=summary_url)
             series_for_type.append(s)
     return series_for_type
+
+
+def extract_match_ids_from_series(series_id: int | str) -> list[int]:
+    content = get_request(
+        route=get_settings().page_routes.matches_in_series,
+        params={"series_id": series_id},
+        base_route=BaseRoute.page,
+        response_output_sub_folder="series",
+    )
+
+    soup = BeautifulSoup(content, "html.parser")
+    cricinfo_match_ids: list[int] = []
+    for anchor_tag in soup.find_all("a", href=True):
+        # A full link is expected to be of the form:
+        # https://www.espncricinfo.com/series/19430/scorecard/1187007/india-vs-south-africa-1st-test-icc-world-test-championship-2019-2021
+        href = anchor_tag["href"]
+
+        # Extract the number following "/scorecard", as this will be the match ID
+        found: re.Match = re.search(r"scorecard/(\d+)", href)
+        if found:
+            cricinfo_match_ids.append(int(found.group(1)))
+    return cricinfo_match_ids

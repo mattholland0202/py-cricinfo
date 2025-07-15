@@ -24,7 +24,8 @@ class CoreAPIRoutes(BaseModel):
 
 
 class PageRoutes(BaseModel):
-    season: str = "series/index.html?season={season_name};view=season"
+    series_in_season: str = "series/index.html?season={season_name};view=season"
+    matches_in_series: str = "match/index/series.html?series={series_id}"
 
 
 class PageHeaders(BaseModel):
