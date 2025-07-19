@@ -3,7 +3,7 @@ from typing import Literal
 from fastapi import APIRouter, Path, Query, status
 
 from pycricinfo.search.seasons import extract_match_ids_from_series, get_match_types_in_season
-from pycricinfo.source_models.pages.series import MatchType
+from pycricinfo.source_models.pages.series import MatchResult, MatchType
 
 router = APIRouter(prefix="/matches", tags=["matches"])
 
@@ -51,5 +51,5 @@ async def match_types_in_season(
     responses={status.HTTP_200_OK: {"description": "A list of IDs of the matches in the supplied series"}},
     summary="Get a list of IDs of the matches in the supplied series",
 )
-async def match_ids_in_series(series_id: int = Path(description="The ID of a series")) -> list[int]:
+async def match_ids_in_series(series_id: int = Path(description="The ID of a series")) -> list[MatchResult]:
     return extract_match_ids_from_series(series_id)
