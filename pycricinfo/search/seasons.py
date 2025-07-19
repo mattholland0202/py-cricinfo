@@ -149,4 +149,4 @@ def extract_match_ids_from_series(series_id: int | str) -> list[int]:
         found: re.Match = re.search(r"scorecard/(\d+)", href)
         if found:
             cricinfo_match_ids.append(int(found.group(1)))
-    return cricinfo_match_ids
+    return list(set(cricinfo_match_ids))
