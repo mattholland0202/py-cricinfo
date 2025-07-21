@@ -11,6 +11,7 @@ import requests
 from pydantic import BaseModel, ValidationError
 
 from pycricinfo.config import BaseRoute, get_settings
+from pycricinfo.exceptions import CricinfoAPIException
 from pycricinfo.utils import replace_empty_objects_with_null
 
 logger = logging.getLogger("cricinfo")
@@ -60,7 +61,7 @@ def get_request(
     route: str,
     params: Optional[dict[str, str]] = None,
     base_route: BaseRoute = BaseRoute.core,
-    response_output_sub_folder: str = None
+    response_output_sub_folder: str = None,
 ) -> dict | str:
     """
     Make a GET request to the Football Stats API
@@ -119,7 +120,15 @@ def get_request(
     _output_response_to_file(output_for_file, route, response_output_sub_folder, response_output_file_extension)
 
     if response.status_code != 200:
-        raise Exception(f"Status Code '{response.status_code}' returned for '{full_route}'")
+        logger.error(
+            f"Status Code '{response.status_code}' returned for '{full_route}'",
+            extra=response_logging_extras,
+        )
+        raise CricinfoAPIException(
+            status_code=response.status_code,
+            route=full_route,
+            content=output
+        )
 
     return output
 

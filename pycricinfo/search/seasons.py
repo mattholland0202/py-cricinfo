@@ -5,7 +5,7 @@ from bs4._typing import _OneElement, _QueryResults
 
 from pycricinfo.config import BaseRoute, get_settings
 from pycricinfo.search.api_helper import get_request
-from pycricinfo.source_models.pages.series import MatchResult, MatchSeries, MatchType
+from pycricinfo.source_models.pages.series import MatchSeries, MatchType
 
 
 def get_match_types_in_season(season_name: str | int) -> list[MatchType]:
@@ -128,54 +128,3 @@ def _process_series_blocks(series_blocks: list[_QueryResults]) -> list[MatchSeri
             s = MatchSeries(title=title, id=series_id, link=link, summary_url=summary_url)
             series_for_type.append(s)
     return series_for_type
-
-
-def clean_text(text: str):
-    """Remove line breaks, extra spaces and normalize whitespace"""
-    if not text:
-        return ""
-    text = text.replace('\\n', '')
-    return re.sub(r"\s+", " ", text).strip()
-
-
-def extract_match_ids_from_series(series_id: int | str) -> list[int]:
-    content = get_request(
-        route=get_settings().page_routes.matches_in_series,
-        params={"series_id": series_id},
-        base_route=BaseRoute.page,
-        response_output_sub_folder="series",
-    )
-
-    soup = BeautifulSoup(content, "html.parser")
-    matches: list[MatchResult] = []
-
-    match_blocks = soup.find_all("section", class_="default-match-block")
-
-    for match in match_blocks:
-        match_result_data = {}
-
-        match_link = match.select_one(".match-no a")
-        if match_link:
-            href = match_link.get("href", "")
-            scorecard_match = re.search(r"/scorecard/(\d+)/", href)
-            if scorecard_match:
-                match_result_data["id"] = scorecard_match.group(1)
-
-            match_result_data["description"] = clean_text(match_link.get_text())
-
-        innings1 = match.find("div", class_="innings-info-1")
-        if innings1:
-            match_result_data["innings_1_info"] = clean_text(innings1.get_text())
-
-        innings2 = match.find("div", class_="innings-info-2")
-        if innings2:
-            match_result_data["innings_2_info"] = clean_text(innings2.get_text())
-
-        status = match.find("div", class_="match-status")
-        if status:
-            match_result_data["status"] = clean_text(status.get_text())
-
-        if "id" in match_result_data:
-            matches.append(MatchResult(**match_result_data))
-
-    return matches

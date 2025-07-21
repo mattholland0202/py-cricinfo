@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Parse series page to extract a list of match IDs
 
+### Changed
+- Better exception handling to bring through Cricinfo API status code
+
 ## [0.0.14]
 ### Added
 - Extract extra fields to make a fuller scorecard
