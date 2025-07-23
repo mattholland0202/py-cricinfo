@@ -2,7 +2,7 @@ from typing import Literal, Optional
 
 from pydantic import AliasChoices, BaseModel, Field, computed_field
 
-from pycricinfo.source_models.api.common import CCBaseModel, RefMixin
+from pycricinfo.source_models.api.common import CCBaseModel
 from pycricinfo.source_models.api.linescores import TeamInningsDetails
 from pycricinfo.source_models.api.match_note import MatchNote
 from pycricinfo.source_models.api.official import Official
@@ -69,14 +69,3 @@ class Match(CCBaseModel):
     # TODO: add debuts
     rosters: list[TeamLineup]
     header: MatchHeader
-
-
-class MatchBasic(CCBaseModel):
-    id: int
-    name: str
-    description: str
-    short_name: str
-    short_description: str
-    season: RefMixin
-    season_type: RefMixin
-    venues: list[RefMixin]

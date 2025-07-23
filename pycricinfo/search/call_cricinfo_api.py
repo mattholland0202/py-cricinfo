@@ -1,7 +1,8 @@
 from pycricinfo.config import BaseRoute, get_settings
 from pycricinfo.output_models.scorecard import CricinfoScorecard
 from pycricinfo.source_models.api.commentary import APIResponseCommentary, CommentaryItem
-from pycricinfo.source_models.api.match import Match, MatchBasic
+from pycricinfo.source_models.api.match import Match
+from pycricinfo.source_models.api.match_basic import MatchBasic
 from pycricinfo.source_models.api.player import Player
 from pycricinfo.source_models.api.team import TeamFull
 
