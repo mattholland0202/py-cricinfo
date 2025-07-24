@@ -30,6 +30,10 @@ class MatchClass(CCBaseModel):
 
 class MatchCompetitionBasic(CCBaseModel):
     id: int
+    description: str
+    date: str
+    end_date: str
+    day_night: bool
     limited_overs: bool
     reduced_overs: bool
     match_class: MatchClass = Field(validation_alias=AliasChoices("match_class", "class"))

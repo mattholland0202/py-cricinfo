@@ -34,7 +34,7 @@ async def player(player_id: int = Path(description="The Player ID")) -> Player:
 
 
 @router.get(
-    "/match/{match_id}/basic",
+    "/match/{match_id}",
     responses={status.HTTP_200_OK: {"description": "The basic match data"}},
     summary="Get basic match data from the '/events' API",
 )
@@ -57,7 +57,7 @@ async def get_match_team(
 
 
 @router.get(
-    "/match/{match_id}/summary",
+    "/match_summary/{match_id}",
     responses={status.HTTP_200_OK: {"description": "The match summary"}},
     summary="Get a match summary",
 )
