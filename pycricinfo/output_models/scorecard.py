@@ -16,14 +16,14 @@ class Scorecard(BaseModel, HeaderlessTableMixin):
     summary: Optional[str] = Field(description="A summary of the result of the match, e.g.) 'India won by 5 wickets'")
     innings: list[Innings]
 
-    def to_table(self):
+    def to_table(self, **kwargs):
         """
         Print the scorecard as a PrettyTable, including the title and summary.
         """
         self.print_headerless_table([(self.title, True), (self.summary, False)])
 
         for innings in self.innings:
-            innings.to_table()
+            innings.to_table(**kwargs)
 
 
 class CricinfoScorecard(Scorecard):

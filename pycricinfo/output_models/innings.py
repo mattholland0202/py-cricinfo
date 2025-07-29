@@ -13,6 +13,7 @@ from pycricinfo.source_models.api.team import TeamWithColorAndLogos
 RED = "\033[31m"
 RESET = "\033[0m"
 
+
 class LinescoreStatsLookupMixin(BaseModel, ABC):
     def add_linescore_stats_as_properties(data: dict, *args) -> dict:
         """
@@ -69,7 +70,8 @@ class PlayerInningsCommon(BaseModel, ABC):
         return [f"{colour}{cell}{RESET}" for cell in row_items]
 
     @abstractmethod
-    def add_to_table(self, table: PrettyTable): ...
+    def add_to_table(self, table: PrettyTable, **kwargs): ...
+
     """ Abstract method which will be implemented in the Batting and Bowling innings classes """
 
 
@@ -83,9 +85,8 @@ class BattingInnings(PlayerInningsCommon):
     fours: Optional[int] = None
     sixes: Optional[int] = None
     minutes: Optional[int] = None
-    sixes: Optional[int] = None
     not_out: bool = Field(validation_alias=AliasChoices("not_out", "notouts"))
-    strike_rate: Optional[float] = Field(validation_alias=AliasChoices("strike_rate", "strikeRate"))
+    strike_rate: Optional[float] = Field(default=None, validation_alias=AliasChoices("strike_rate", "strikeRate"))
 
     @computed_field
     @property
@@ -100,7 +101,7 @@ class BattingInnings(PlayerInningsCommon):
         """
         return f"{self.display_name}{' (c)' if self.captain else ''}{' \u271d' if self.keeper else ''}"
 
-    def add_to_table(self, table: PrettyTable):
+    def add_to_table(self, table: PrettyTable, **kwargs):
         """
         Add the batting innings details as in row in a PrettyTable, colouring the row red if the player is not out.
 
@@ -109,18 +110,23 @@ class BattingInnings(PlayerInningsCommon):
         table : PrettyTable
             The PrettyTable instance to which the row will be added.
         """
+        row_data = [
+            self.player_display,
+            self.dismissal_text,
+            f"{self.runs}{'*' if self.not_out else ''}",
+            self.balls_faced,
+            self.fours,
+            self.sixes,
+        ]
+
+        if kwargs.get("include_batting_minutes"):
+            row_data.append(self.minutes)
+
+        row_data.append(self.strike_rate)
+
         table.add_row(
             self.colour_row(
-                [
-                    self.player_display,
-                    self.dismissal_text,
-                    f"{self.runs}{'*' if self.not_out else ''}",
-                    self.balls_faced,
-                    self.fours,
-                    self.sixes,
-                    self.minutes,
-                    self.strike_rate,
-                ],
+                row_data,
                 RED if self.not_out else RESET,
             )
         )
@@ -157,7 +163,7 @@ class BowlingInnings(PlayerInningsCommon):
         """
         return int(self.overs) if self.overs % 1 == 0 else self.overs
 
-    def add_to_table(self, table: PrettyTable):
+    def add_to_table(self, table: PrettyTable, **kwargs):
         """
         Add the bowling innings details as a row in a PrettyTable.
 
@@ -226,14 +232,14 @@ class Innings(BaseModel, HeaderlessTableMixin):
             A string summarizing the extras in the format:
             "Extras: <extras> (<byes>b <leg_byes>lb <wides>w <no_balls>nb <penalties>p)"
         """
-        penalties_string = f" {self.penalties}p" if self.penalties != "0" else ""
+        penalties_string = f" {self.penalties}p" if self.penalties and self.penalties != "0" else ""
 
         return (
             f"Extras: {self.extras or 0} "
             f"({self.byes or 0}b {self.leg_byes or 0}lb {self.wides or 0}w {self.no_balls or 0}nb{penalties_string})"
         )
 
-    def to_table(self):
+    def to_table(self, **kwargs):
         """
         Print the innings details in PrettyTables. This will include the innings summary, followed by
         batting and bowling tables.
@@ -251,16 +257,23 @@ class Innings(BaseModel, HeaderlessTableMixin):
             ]
         )
 
+        field_names = ["Player", "Dismissal", "Runs", "Balls", "4s", "6s"]
+        if kwargs.get("include_batting_minutes"):
+            field_names.append("Mins")
+        field_names.append("SR")
+
         self._print_player_innings_table(
-            ["", "Dismissal", "Runs", "Balls", "4s", "6s", "Minutes", "SR"],
+            field_names,
             self.batters,
             ["", "Dismissal"],
+            **kwargs
         )
 
         self._print_player_innings_table(
             ["", "Overs", "Maidens", "Runs", "Wickets", "Economy", "No Balls", "Wides", "4s", "6s", "Dots"],
             self.bowlers,
             [""],
+            **kwargs
         )
 
     def _print_player_innings_table(
@@ -268,6 +281,7 @@ class Innings(BaseModel, HeaderlessTableMixin):
         field_names: list[str],
         items: list[PlayerInningsCommon],
         field_names_to_left_align: list[str] = None,
+        **kwargs
     ):
         """
         Print a PrettyTable with the specified field names and items, representing either a Bowling or Batting innings.
@@ -287,7 +301,7 @@ class Innings(BaseModel, HeaderlessTableMixin):
             table.align[name] = "l"
 
         for player in sorted(items, key=lambda b: b.order):
-            player.add_to_table(table)
+            player.add_to_table(table, **kwargs)
         print(table)
 
 

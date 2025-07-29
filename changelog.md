@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Parse series page to extract a list of match IDs
 - Get extra fields from the basic match API which weren't previously being parsed
 - More raw routes - most of the routes required to get match data for a scorecard
+- Use arguments to decide whether to include batting minutes in output scorecard
 
 ### Changed
 - Better exception handling to bring through Cricinfo API status code

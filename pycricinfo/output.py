@@ -41,7 +41,7 @@ def _print_scorecard_from_match_id(match_id: int):
 def _print_scorecard_from_match(match: Match):
     try:
         sc = CricinfoScorecard(match=match)
-        sc.to_table()
+        sc.to_table(include_batting_minutes=True)
     except ValidationError as validation_error:
         print(validation_error.errors())
         raise
