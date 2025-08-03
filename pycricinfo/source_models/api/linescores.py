@@ -80,3 +80,8 @@ class TeamInningsDetails(BaseInningsDetails):
     fall_of_wicket: Optional[list[FallOfWicket]] = Field(
         default=None, validation_alias=AliasChoices("fall_of_wicket", "fow")
     )
+
+    @computed_field
+    @property
+    def declared(self) -> bool:
+        return self.description.lower() == "declared"

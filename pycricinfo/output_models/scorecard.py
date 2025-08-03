@@ -71,6 +71,8 @@ class CricinfoScorecard(Scorecard):
                     wickets=linescore.wickets,
                     overs=linescore.overs,
                     linescore=linescore,
+                    declared=linescore.declared,
+                    follow_on=linescore.follow_on,
                 )
             )
         for roster in match.rosters:

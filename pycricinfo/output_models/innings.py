@@ -172,27 +172,31 @@ class BowlingInnings(PlayerInningsCommon):
         table : PrettyTable
             The PrettyTable instance to which the row will be added.
         """
-        table.add_row(
-            [
-                self.display_name,
-                self.overs_display,
-                self.maidens,
-                self.runs,
-                self.wickets,
-                self.economy_rate,
-                self.no_balls,
-                self.wides,
-                self.fours_conceded,
-                self.sixes_conceded,
-                self.dots,
-            ]
-        )
+        row_data = [
+            self.display_name,
+            self.overs_display,
+            self.maidens,
+            self.runs,
+            self.wickets,
+            self.economy_rate,
+            self.no_balls,
+            self.wides,
+            self.fours_conceded,
+            self.sixes_conceded,
+        ]
+
+        if kwargs.get("include_bowling_dots"):
+            row_data.append(self.dots)
+
+        table.add_row(row_data)
 
 
 class Innings(BaseModel, HeaderlessTableMixin):
     number: int
     batting_team_name: str
     batting_score: int
+    declared: bool = Field(default=False)
+    follow_on: bool = Field(default=False)
     wickets: int
     overs: Optional[float] = None
     batters: list[BattingInnings] = Field(default_factory=list)
@@ -217,7 +221,12 @@ class Innings(BaseModel, HeaderlessTableMixin):
         """
         wickets_text = f" {'all out'}" if self.wickets == 10 else f"/{self.wickets}"
         overs_text = f" ({self.overs} overs)" if self.overs is not None else ""
-        return f"{self.batting_score}{wickets_text}{overs_text}"
+
+        return (
+            f"{self.batting_score}{wickets_text}"
+            f"{'d' if self.declared else ''}{' (f/o)' if self.follow_on else ''}"
+            f"{overs_text}"
+        )
 
     @computed_field
     @property
@@ -257,31 +266,25 @@ class Innings(BaseModel, HeaderlessTableMixin):
             ]
         )
 
-        field_names = ["Player", "Dismissal", "Runs", "Balls", "4s", "6s"]
+        batting_field_names = ["", "Dismissal", "Runs", "Balls", "4s", "6s"]
         if kwargs.get("include_batting_minutes"):
-            field_names.append("Mins")
-        field_names.append("SR")
+            batting_field_names.append("Mins")
+        batting_field_names.append("SR")
 
-        self._print_player_innings_table(
-            field_names,
-            self.batters,
-            ["", "Dismissal"],
-            **kwargs
-        )
+        self._print_player_innings_table(batting_field_names, self.batters, ["", "Dismissal"], **kwargs)
 
-        self._print_player_innings_table(
-            ["", "Overs", "Maidens", "Runs", "Wickets", "Economy", "No Balls", "Wides", "4s", "6s", "Dots"],
-            self.bowlers,
-            [""],
-            **kwargs
-        )
+        bowling_field_names = ["", "Overs", "Maidens", "Runs", "Wickets", "Economy", "No Balls", "Wides", "4s", "6s"]
+        if kwargs.get("include_bowling_dots"):
+            bowling_field_names.append("Dots")
+
+        self._print_player_innings_table(bowling_field_names, self.bowlers, [""], **kwargs)
 
     def _print_player_innings_table(
         self,
         field_names: list[str],
         items: list[PlayerInningsCommon],
         field_names_to_left_align: list[str] = None,
-        **kwargs
+        **kwargs,
     ):
         """
         Print a PrettyTable with the specified field names and items, representing either a Bowling or Batting innings.
