@@ -1,6 +1,6 @@
 [project]
 name = "pycricinfo"
-version = "0.0.16"
+version = "0.0.17"
 description = "An API using pycricinfo to collect data from ESPN Cricinfo"
 readme = "readme.md"
 requires-python = ">=3.13"
@@ -37,6 +37,7 @@ api = [
   "uvicorn>=0.34.2",
 ]
 dev = [
+    "pytest>=8.4.1",
     "ruff>=0.11.0",
 ]
 

@@ -34,7 +34,7 @@ class LastNameMixin(BaseModel):
 
 
 class AthleteCommon(RefMixin, FullNameMixin, DisplayNameMixin, ABC):
-    id: str = Field(description="The unique identifier for the athlete")
+    id: str|int = Field(description="The unique identifier for the athlete")
 
 
 class AthleteWithNameAndShortName(AthleteCommon, ShortNameMixin):

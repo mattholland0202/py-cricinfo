@@ -29,10 +29,13 @@ jobs:
           version: "0.7.9"
 
       - name: Set up Python
-        run: uv python install 3.13 
+        run: uv python install 3.13
 
       - name: Install the project
         run: uv sync --locked --all-extras --dev
+
+      - name: Run tests
+        run: uv run pytest tests/ -v
 
       - name: Build
         run: uv build

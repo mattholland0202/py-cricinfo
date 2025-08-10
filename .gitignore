@@ -142,6 +142,6 @@ dmypy.json
 **/credentials.txt
 .vscode/
 
-**/test_files
+tests/temp_test_files
 run.py
 /responses/*
