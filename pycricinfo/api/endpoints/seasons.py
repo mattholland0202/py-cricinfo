@@ -48,9 +48,9 @@ async def match_types_in_season(
 
 
 @router.get(
-    "/series/{series_id}",
+    "/series/{data_series_id}",
     responses={status.HTTP_200_OK: {"description": "A list of IDs of the matches in the supplied series"}},
     summary="Get a list of IDs of the matches in the supplied series",
 )
-async def match_ids_in_series(series_id: int = Path(description="The ID of a series")) -> list[MatchResult]:
-    return extract_match_ids_from_series(series_id)
+async def match_ids_in_series(data_series_id: int = Path(description="The ID of a series")) -> list[MatchResult]:
+    return extract_match_ids_from_series(data_series_id)

@@ -1,7 +1,7 @@
 from abc import ABC
 from typing import Literal, Optional
 
-from pydantic import AliasChoices, BaseModel, Field, computed_field
+from pydantic import AliasChoices, BaseModel, Field, computed_field, field_validator
 
 from pycricinfo.source_models.api.athelete import Athlete
 from pycricinfo.source_models.api.common import CCBaseModel, RefMixin
@@ -43,23 +43,33 @@ class InningsState(BaseModel):
     wickets: str | int
 
 
-class Partnership(RefMixin, CCBaseModel):
+class PartnershipFallOfWicketCommon(RefMixin, CCBaseModel, ABC):
     wicket_number: int
-    wicket_name: str
-    fow_type: Literal["out", "end of innings"]
-    overs: float
+    fow_type: Literal["out", "end of innings", "not out", "retired not out"]
     runs: int
+
+    @field_validator('fow_type', mode='before')
+    @classmethod
+    def strip_fow_type(cls, v):
+        """
+        In source data, fow_type has trailing whitespace on "retired not out", so trim it before validation.
+        """
+        if isinstance(v, str):
+            return v.strip()
+        return v
+
+
+class Partnership(PartnershipFallOfWicketCommon):
+    wicket_name: str
+    overs: float
     run_rate: float
     start: InningsState
     end: InningsState
     batsmen: list[PartnershipBatter]
 
 
-class FallOfWicket(RefMixin, CCBaseModel):
-    wicket_number: int
+class FallOfWicket(PartnershipFallOfWicketCommon):
     wicket_over: float
-    fow_type: Literal["out", "end of innings"]
-    runs: int
     runs_scored: int
     balls_faced: int
     athlete: Athlete

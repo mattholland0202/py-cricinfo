@@ -33,7 +33,7 @@ def _print_scorecard_from_file(file_path: str):
     _print_scorecard_from_match(model)
 
 
-def _print_scorecard_from_match_id(match_id: int):
+def _print_scorecard_from_match_id(match_id: int):  # TODO: Add series_id parameter
     model = get_match(match_id)
     _print_scorecard_from_match(model)
 

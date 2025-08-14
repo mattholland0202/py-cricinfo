@@ -61,7 +61,7 @@ def get_match_basic(match_id: int) -> MatchBasic:
     return get_and_parse(get_settings().routes.match_basic, MatchBasic, params={"match_id": match_id})
 
 
-def get_match(match_id: int) -> Match:
+def get_match(series_id: int, match_id: int) -> Match:
     """
     Get detailed match information by match ID.
 
@@ -76,11 +76,14 @@ def get_match(match_id: int) -> Match:
         A parsed Pydantic model representing the match details.
     """
     return get_and_parse(
-        get_settings().routes.match_summary, Match, params={"match_id": match_id}, base_route=BaseRoute.site
-    )
+        get_settings().routes.match_summary,
+        Match,
+        params={"series_id": series_id, "match_id": match_id},
+        base_route=BaseRoute.site,
+    )  # TODO: Add options to get without parsing, for use in calling apps
 
 
-def get_scorecard(match_id: int) -> CricinfoScorecard:
+def get_scorecard(series_id: int, match_id: int) -> CricinfoScorecard:
     """
     Get a match and generate and return a scorecard for it.
 
@@ -94,7 +97,7 @@ def get_scorecard(match_id: int) -> CricinfoScorecard:
     Scorecard
         A scorecard object containing match details and scores.
     """
-    match = get_match(match_id)
+    match = get_match(series_id, match_id)
     return CricinfoScorecard(match=match)
 
 

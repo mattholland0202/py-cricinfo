@@ -113,7 +113,7 @@ def _process_series_blocks(series_blocks: list[_QueryResults]) -> list[MatchSeri
         if "data-series-id" not in block.attrs:
             continue
 
-        series_id = block["data-series-id"]
+        data_series_id = block["data-series-id"]
 
         series_link = block.find("a")
         if series_link:
@@ -121,10 +121,16 @@ def _process_series_blocks(series_blocks: list[_QueryResults]) -> list[MatchSeri
             title = re.sub(r"\\", "", title)
             title = re.sub(r"\s{2,}|\n|\r", " ", title).strip()
 
-            series_id = block.get("data-series-id")
+            data_series_id = block.get("data-series-id")
             summary_url = block.get("data-summary-url")
 
             link = series_link.get("href", "")
-            s = MatchSeries(title=title, id=series_id, link=link, summary_url=summary_url)
+
+            series_id_regex_match = re.search(r"/series/[^/]+-(\d+)/", link)
+            series_id = int(series_id_regex_match.group(1))
+
+            s = MatchSeries(
+                title=title, data_series_id=data_series_id, link=link, summary_url=summary_url, series_id=series_id
+            )
             series_for_type.append(s)
     return series_for_type

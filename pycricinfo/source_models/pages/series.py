@@ -4,8 +4,9 @@ from pydantic import BaseModel, Field
 
 
 class MatchSeries(BaseModel):
+    series_id: int
+    data_series_id: int
     title: str
-    id: str
     link: str
     summary_url: str
 

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.17]
 ### Added
 - Unit tests for data loading
+- `series_id` parameter when fetching matches from Site API - just using 0 for that field has stopped working
+- Extract `series_id` when parsing season pages
 
 ## [0.0.16]
 ### Added
