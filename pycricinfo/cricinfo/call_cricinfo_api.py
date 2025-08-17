@@ -1,12 +1,11 @@
 from pycricinfo.config import BaseRoute, get_settings
+from pycricinfo.cricinfo.api_helper import get_and_parse, get_request
 from pycricinfo.output_models.scorecard import CricinfoScorecard
 from pycricinfo.source_models.api.commentary import APIResponseCommentary, CommentaryItem
 from pycricinfo.source_models.api.match import Match
 from pycricinfo.source_models.api.match_basic import MatchBasic
 from pycricinfo.source_models.api.player import Player
 from pycricinfo.source_models.api.team import TeamFull
-
-from .api_helper import get_and_parse
 
 
 def get_player(player_id: int) -> Player:
@@ -67,6 +66,9 @@ def get_match(series_id: int, match_id: int) -> Match:
 
     Parameters
     ----------
+    series_id : int
+        The ID of the series to which the match belongs.
+
     match_id : int
         The ID of the match to retrieve.
 
@@ -80,7 +82,32 @@ def get_match(series_id: int, match_id: int) -> Match:
         Match,
         params={"series_id": series_id, "match_id": match_id},
         base_route=BaseRoute.site,
-    )  # TODO: Add options to get without parsing, for use in calling apps
+    )
+
+
+def get_match_raw(series_id: int, match_id: int) -> dict:
+    """
+    Get raw match data by match ID.
+
+    Parameters
+    ----------
+    series_id : int
+        The ID of the series to which the match belongs.
+
+    match_id : int
+        The ID of the match to retrieve.
+
+    Returns
+    -------
+    dict
+        The raw match data as a dictionary.
+    """
+    return get_request(
+        get_settings().routes.match_summary,
+        params={"series_id": series_id, "match_id": match_id},
+        base_route=BaseRoute.site,
+        response_output_sub_folder="matches",
+    )
 
 
 def get_scorecard(series_id: int, match_id: int) -> CricinfoScorecard:

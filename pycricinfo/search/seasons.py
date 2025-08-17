@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from bs4._typing import _OneElement, _QueryResults
 
 from pycricinfo.config import BaseRoute, get_settings
-from pycricinfo.search.api_helper import get_request
+from pycricinfo.cricinfo.api_helper import get_request
 from pycricinfo.source_models.pages.series import MatchSeries, MatchType
 
 

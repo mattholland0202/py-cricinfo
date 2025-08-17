@@ -124,11 +124,7 @@ def get_request(
             f"Status Code '{response.status_code}' returned for '{full_route}'",
             extra=response_logging_extras,
         )
-        raise CricinfoAPIException(
-            status_code=response.status_code,
-            route=full_route,
-            content=output
-        )
+        raise CricinfoAPIException(status_code=response.status_code, route=full_route, content=output)
 
     return output
 
