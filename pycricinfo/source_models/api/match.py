@@ -50,7 +50,9 @@ class MatchHeader(CCBaseModel):
     def competition(self) -> MatchCompetiton:
         return self.competitions[0]
 
-    def get_batting_linescore_for_period(self, period: int) -> tuple[TeamWithColorAndLogos, TeamInningsDetails]:
+    def get_batting_linescore_for_period(
+        self, period: int
+    ) -> Optional[tuple[TeamWithColorAndLogos, TeamInningsDetails]]:
         for competitor in self.competition.competitors:
             for linescore in competitor.linescores:
                 if linescore.period == period and linescore.is_batting:

@@ -1,4 +1,5 @@
 import re
+from urllib.parse import quote
 
 from bs4 import BeautifulSoup
 from bs4._typing import _OneElement, _QueryResults
@@ -24,7 +25,7 @@ def get_match_types_in_season(season_name: str | int) -> list[MatchType]:
     """
     content = get_request(
         route=get_settings().page_routes.series_in_season,
-        params={"season_name": season_name},
+        params={"season_name": quote(str(season_name))},
         base_route=BaseRoute.page,
         response_output_sub_folder="seasons",
     )

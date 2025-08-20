@@ -1,6 +1,6 @@
 [project]
 name = "pycricinfo"
-version = "0.0.17"
+version = "0.0.18"
 description = "An API using pycricinfo to collect data from ESPN Cricinfo"
 readme = "readme.md"
 requires-python = ">=3.13"

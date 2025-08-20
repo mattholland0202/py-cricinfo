@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.18]
+### Fixed
+- Fetching seasons that span years - accepting strings and URL encoding slashes
+- Matches that were won by an innings (so did not have the full 4) can now be output as scorecards
+
 ## [0.0.17]
 ### Added
 - Unit tests for data loading
