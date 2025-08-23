@@ -1,5 +1,3 @@
-from typing import Literal
-
 from fastapi import APIRouter, Path, Query, status
 
 from pycricinfo.config import MatchTypeNames
@@ -20,15 +18,13 @@ router = APIRouter(prefix="", tags=["seasons"])
     summary="Get a list of match types, each containing a list of series in that match type for this season",
 )
 async def match_types_in_season(
-    season_name: int|str = Path(description='The name of the season to get matches for, e.g. "2024" or "2020-21"'),
-    match_type_name: Literal[tuple(c.value for c in MatchTypeNames)] = Query(   # type: ignore
-        default=None, description="Filter the response to just matches of the named type"),
+    season_name: int | str = Path(description='The name of the season to get matches for, e.g. "2024" or "2020-21"'),
+    match_type_name: MatchTypeNames = Query(
+        default=None, description="Filter the response to just matches of the named type"
+    ),
 ) -> list[MatchType]:
     season_name = season_name.replace("-", "/") if isinstance(season_name, str) else season_name
-    match_types = get_match_types_in_season(season_name)
-
-    if match_type_name:
-        match_types = [m for m in match_types if m.name.lower() == match_type_name.lower()]
+    match_types = get_match_types_in_season(season_name, match_type_name)
 
     return match_types
 

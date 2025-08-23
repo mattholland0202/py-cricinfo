@@ -1,15 +1,16 @@
 import re
+from typing import Optional
 from urllib.parse import quote
 
 from bs4 import BeautifulSoup
 from bs4._typing import _OneElement, _QueryResults
 
-from pycricinfo.config import BaseRoute, get_settings
+from pycricinfo.config import BaseRoute, MatchTypeNames, get_settings
 from pycricinfo.cricinfo.api_helper import get_request
 from pycricinfo.source_models.pages.series import MatchSeries, MatchType
 
 
-def get_match_types_in_season(season_name: str | int) -> list[MatchType]:
+def get_match_types_in_season(season_name: str | int, type_filter: Optional[MatchTypeNames] = None) -> list[MatchType]:
     """
     Get the Cricinfo web page which lists all series in a given season, and parse out their details.
 
@@ -30,7 +31,12 @@ def get_match_types_in_season(season_name: str | int) -> list[MatchType]:
         response_output_sub_folder="seasons",
     )
 
-    return parse_season_html(content)
+    match_types = parse_season_html(content)
+
+    if type_filter:
+        match_types = [m for m in match_types if m.name.lower() == type_filter.value.lower()]
+
+    return match_types
 
 
 def parse_season_html(content: str) -> list[MatchType]:
@@ -82,7 +88,7 @@ def _process_match_type_page_section(section: _OneElement) -> MatchType | None:
         return
 
     h2_text = h2_tag.text.strip()
-    match_type = MatchType(name=h2_text)
+    match_type = MatchType(name=h2_text)    # TODO: Store enum name in object
 
     next_section = section.find_next_sibling("section", class_="series-summary-wrap")
 
