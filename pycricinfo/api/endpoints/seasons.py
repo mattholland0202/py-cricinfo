@@ -7,7 +7,7 @@ from pycricinfo.search.seasons import get_match_types_in_season
 from pycricinfo.search.series import extract_match_ids_from_series
 from pycricinfo.source_models.pages.series import MatchResult, MatchType
 
-router = APIRouter(prefix="/matches", tags=["matches"])
+router = APIRouter(prefix="", tags=["seasons"])
 
 
 @router.get(

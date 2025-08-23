@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fetching seasons that span years - accepting strings and URL encoding slashes
 - Matches that were won by an innings (so did not have the full 4) can now be output as scorecards
 
+### Changed
+- Moved API routes into their own routers
+
 ## [0.0.17]
 ### Added
 - Unit tests for data loading

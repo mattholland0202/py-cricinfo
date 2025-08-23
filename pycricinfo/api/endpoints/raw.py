@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Path, Query, status
 from pycricinfo.config import BaseRoute, get_settings
 from pycricinfo.cricinfo.api_helper import get_request
 
-router = APIRouter(prefix="/raw", tags=["raw"])
+router = APIRouter(prefix="/raw", tags=["Cricinfo: API"])
 
 
 class PageAndInningsQueryParameters:
