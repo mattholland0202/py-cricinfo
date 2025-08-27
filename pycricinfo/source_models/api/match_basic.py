@@ -1,8 +1,6 @@
-from typing import Optional
-
 from pydantic import AliasChoices, Field
 
-from pycricinfo.source_models.api.common import CCBaseModel, RefMixin
+from pycricinfo.source_models.api.common import CCBaseModel, MatchClass, RefMixin
 from pycricinfo.source_models.api.venue import Venue
 
 
@@ -17,15 +15,6 @@ class MatchCompetitorBasic(CCBaseModel):
     leaders: RefMixin
     statistics: RefMixin
     record: RefMixin
-
-
-class MatchClass(CCBaseModel):
-    name: str
-    event_type: str
-    general_class_id: int
-    international_class_id: int
-    international_class_card: Optional[str] = None
-    general_class_card: Optional[str] = None
 
 
 class MatchCompetitionBasic(CCBaseModel):

@@ -54,3 +54,12 @@ class Position(RefMixin):
 
 
 class Event(RefMixin, DateMixin): ...
+
+
+class MatchClass(CCBaseModel):
+    name: str
+    event_type: str
+    general_class_id: int
+    general_class_card: Optional[str] = None
+    international_class_id: int
+    international_class_card: Optional[str] = None

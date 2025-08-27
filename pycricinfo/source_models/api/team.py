@@ -17,7 +17,7 @@ class TeamWithName(TeamCommon):
 
 
 class TeamWithColorAndLogos(TeamCommon):
-    color: str
+    color: str = Field(description="The hex colour for the Team", examples=["#790d1a"])
     logos: list[RefMixin]
 
 

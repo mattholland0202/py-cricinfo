@@ -1,3 +1,4 @@
+import html
 from typing import Optional
 
 from pydantic import BaseModel, Field, model_validator
@@ -55,12 +56,12 @@ class CricinfoScorecard(Scorecard):
         if not match:
             raise ValueError("Match data is required to create a CricinfoScorecard.")
 
-        data["title"] = match.header.title
-        data["summary"] = match.header.summary
+        data["title"] = html.unescape(match.header.title)
+        data["summary"] = html.unescape(match.header.summary)
 
         innings = []
         for i in range(1, 3 if match.header.competition.limited_overs else 5):
-            response = match.header.get_batting_linescore_for_period(i)
+            response = match.header.get_batting_innings_by_number(i)
             if not response:
                 continue
 

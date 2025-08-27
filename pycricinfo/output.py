@@ -2,8 +2,8 @@ from argparse import ArgumentParser, Namespace
 
 from pydantic import ValidationError
 
-from pycricinfo.output_models.scorecard import CricinfoScorecard
 from pycricinfo.cricinfo.call_cricinfo_api import get_match, get_play_by_play
+from pycricinfo.output_models.scorecard import CricinfoScorecard
 from pycricinfo.source_models.api.commentary import APIResponseCommentary
 from pycricinfo.source_models.api.match import Match
 from pycricinfo.utils import load_file_and_validate_to_model
@@ -30,6 +30,7 @@ def print_scorecard(file_path: str = None, match_id: int = None):
 
 def _print_scorecard_from_file(file_path: str):
     model = load_file_and_validate_to_model(file_path, Match)
+    # print(model.team_names)
     _print_scorecard_from_match(model)
 
 
