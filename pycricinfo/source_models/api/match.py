@@ -1,8 +1,10 @@
+from datetime import datetime
 from typing import Literal, Optional
 
 from pydantic import AliasChoices, BaseModel, Field, computed_field
 
-from pycricinfo.source_models.api.common import CCBaseModel, MatchClass
+from pycricinfo.source_models.api.common import CCBaseModel, Link, MatchClass
+from pycricinfo.source_models.api.league import League
 from pycricinfo.source_models.api.linescores import TeamInningsDetails
 from pycricinfo.source_models.api.match_note import MatchNote
 from pycricinfo.source_models.api.official import Official
@@ -33,6 +35,10 @@ class MatchCompetiton(CCBaseModel):
     limited_overs: bool
     reduced_overs: bool
     match_class: MatchClass = Field(validation_alias=AliasChoices("match_class", "class"))
+    date: datetime = Field(description="The start date and time of the match in UTC", examples=["2024-07-26T10:00:00Z"])
+    end_date: Optional[datetime] = Field(
+        default=None, description="The end date and time of the match in UTC", examples=["2024-07-30T16:00:00Z"]
+    )
 
 
 class MatchHeader(CCBaseModel):
@@ -46,9 +52,11 @@ class MatchHeader(CCBaseModel):
         examples=["3rd Test, West Indies tour of England at Birmingham, Jul 26-28 2024"],
     )
     description: str = Field(description="Should match the 'title' field")
-    competitions: list[MatchCompetiton]
-    # TODO: links
-    # TODO: leagues
+    competitions: list[MatchCompetiton] = Field(
+        description="Details of the competition/match. There is always only 1 item."
+    )
+    links: list[Link] = Field(description="Links related to the match")
+    leagues: list[League] = Field(description="The league(s) that this match is part of")
 
     @computed_field
     @property
@@ -93,7 +101,6 @@ class MatchInfo(BaseModel):
 class Match(CCBaseModel):
     notes: list[MatchNote]
     game_info: MatchInfo
-    # TODO: add debuts
     rosters: list[TeamLineup]
     header: MatchHeader
 

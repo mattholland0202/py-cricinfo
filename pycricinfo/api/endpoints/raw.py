@@ -172,7 +172,16 @@ async def match_play_by_play(
 @router.get(
     "/venue/{venue_id}",
     responses={status.HTTP_200_OK: {"description": "A Venue's data"}},
-    summary="Get a venue",
+    summary="Get a Venue",
 )
-async def venue(venue_id: int = Path(description="The Venuw ID")):
-    return get_request(get_settings().routes.venue, params={"match_id": venue_id})
+async def venue(venue_id: int = Path(description="The Venue ID")):
+    return get_request(get_settings().routes.venue, params={"venue_id": venue_id})
+
+
+@router.get(
+    "/league/{league_id}",
+    responses={status.HTTP_200_OK: {"description": "A League's data"}},
+    summary="Get a League",
+)
+async def league(league_id: int = Path(description="The League ID")):
+    return get_request(get_settings().routes.league, params={"league_id": league_id})
