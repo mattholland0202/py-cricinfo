@@ -6,7 +6,9 @@ from pydantic.alias_generators import to_camel
 
 
 class CCBaseModel(ABC, BaseModel):
-    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel), validate_by_name=True, validate_by_alias=True
+    )
 
     @model_validator(mode="before")
     @classmethod
@@ -61,5 +63,5 @@ class MatchClass(CCBaseModel):
     event_type: str
     general_class_id: int
     general_class_card: Optional[str] = None
-    international_class_id: int
+    international_class_id: Optional[int] = None
     international_class_card: Optional[str] = None

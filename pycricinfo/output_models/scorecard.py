@@ -57,7 +57,7 @@ class CricinfoScorecard(Scorecard):
             raise ValueError("Match data is required to create a CricinfoScorecard.")
 
         data["title"] = html.unescape(match.header.title)
-        data["summary"] = html.unescape(match.header.summary)
+        data["summary"] = html.unescape(match.summary)
 
         innings = []
         for i in range(1, 3 if match.header.competition.limited_overs else 5):

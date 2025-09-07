@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.20]
+### Added
+- Additional calculated properties onto Match model
+
+### Changed
+- Allow alias validation in all parsed models
+
 ## [0.0.19]
 ### Added
 - Parse some extra fields from Matches that were missed

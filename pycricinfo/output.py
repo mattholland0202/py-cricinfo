@@ -9,7 +9,7 @@ from pycricinfo.source_models.api.match import Match
 from pycricinfo.utils import load_file_and_validate_to_model
 
 
-def print_scorecard(file_path: str = None, match_id: int = None):
+def print_scorecard(file_path: str = None, match_id: int = None, series_id: int = None):
     """
     Prints the scorecard of a match, either by passing a file path or loading from command line arguments
 
@@ -23,19 +23,18 @@ def print_scorecard(file_path: str = None, match_id: int = None):
     if file_path or args.file:
         _print_scorecard_from_file(file_path or args.file)
     elif match_id or args.match_id:
-        _print_scorecard_from_match_id(match_id or args.match_id)
+        _print_scorecard_from_match_id(series_id or args.series_id, match_id or args.match_id)
     else:
         print("Please provide either a file path or a match ID.")
 
 
 def _print_scorecard_from_file(file_path: str):
     model = load_file_and_validate_to_model(file_path, Match)
-    # print(model.team_names)
     _print_scorecard_from_match(model)
 
 
-def _print_scorecard_from_match_id(match_id: int):  # TODO: Add series_id parameter
-    model = get_match(match_id)
+def _print_scorecard_from_match_id(series_id: int, match_id: int):
+    model = get_match(series_id, match_id)
     _print_scorecard_from_match(model)
 
 
@@ -59,6 +58,7 @@ def parse_scorecard_args() -> Namespace:
     """
     parser = ArgumentParser()
     parser.add_argument("--file", help="Path to a JSON file to parse and print from")
+    parser.add_argument("--series_id", help="ID of the series of the match to fetch from the API")
     parser.add_argument("--match_id", help="ID of the match to fetch from the API")
     args = parser.parse_args()
     return args

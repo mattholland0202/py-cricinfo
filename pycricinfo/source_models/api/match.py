@@ -60,12 +60,6 @@ class MatchHeader(CCBaseModel):
 
     @computed_field
     @property
-    def summary(self) -> bool:
-        """A summary of the result of the match, e.g.) 'England won by 5 wickets'"""
-        return self.competitions[0].status.summary
-
-    @computed_field
-    @property
     def competition(self) -> MatchCompetiton:
         """Source data has a list of competitions, but in reality there is only ever 1, so return it"""
         return self.competitions[0]
@@ -106,5 +100,21 @@ class Match(CCBaseModel):
 
     @computed_field
     @property
-    def team_names(self) -> list[str]:
-        return [competitor.team.display_name for competitor in self.header.competition.competitors]
+    def teams(self) -> list[MatchCompetitor]:
+        return self.header.competition.competitors
+
+    @computed_field
+    @property
+    def start_date(self) -> datetime:
+        return self.header.competition.date
+
+    @computed_field
+    @property
+    def is_international(self) -> bool:
+        return self.header.competition.match_class.international_class_id is not None
+
+    @computed_field
+    @property
+    def summary(self) -> bool:
+        """A summary of the result of the match, e.g.) 'England won by 5 wickets'"""
+        return self.header.competitions[0].status.summary
