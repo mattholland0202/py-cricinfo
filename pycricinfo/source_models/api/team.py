@@ -49,7 +49,7 @@ class TeamWicket(CCBaseModel):
     runs: int
     short_text: str
     sixes: int
-    strike_rate: float
+    strike_rate: float|str
 
 
 class TeamOver(CCBaseModel):

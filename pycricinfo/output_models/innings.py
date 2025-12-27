@@ -86,7 +86,7 @@ class BattingInnings(PlayerInningsCommon):
     sixes: Optional[int] = None
     minutes: Optional[int] = None
     not_out: bool = Field(validation_alias=AliasChoices("not_out", "notouts"))
-    strike_rate: Optional[float] = Field(default=None, validation_alias=AliasChoices("strike_rate", "strikeRate"))
+    strike_rate: Optional[float|str] = Field(default=None, validation_alias=AliasChoices("strike_rate", "strikeRate"))
 
     @computed_field
     @property

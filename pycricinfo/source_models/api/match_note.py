@@ -18,12 +18,13 @@ class MatchNoteType(Enum):
     MATCH_NOTE = "matchnote"
     CLOSE_OF_PLAY = "closeofplay"
     HOURS_OF_PLAY = "hoursofplay"
+    PLAYER_REPLACEMENT = "playerreplacement"
 
 
 class MatchNote(CCBaseModel):
     id: Optional[str | int] = Field(default=None)
-    day_number: Optional[str] = Field(default=None)
+    day_number: Optional[str | int] = Field(default=None)
     date: Optional[str] = Field(default=None)
-    text: str
+    text: Optional[str] = Field(default=None)
     type: MatchNoteType
     href: Optional[HttpUrl] = Field(default=None)

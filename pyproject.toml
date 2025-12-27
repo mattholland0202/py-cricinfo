@@ -1,6 +1,6 @@
 [project]
 name = "pycricinfo"
-version = "0.0.20"
+version = "0.0.21"
 description = "An API using pycricinfo to collect data from ESPN Cricinfo"
 readme = "readme.md"
 requires-python = ">=3.13"
@@ -11,6 +11,7 @@ dependencies = [
   "pydantic>=2.11.5",
   "pydantic-settings>=2.9.1",
   "requests>=2.32.3",
+  "rich>=14.2.0",
 ]
 authors = [{ name = "Matt Holland" }]
 license = { text = "MIT" }
@@ -35,6 +36,7 @@ build-backend = "hatchling.build"
 [project.optional-dependencies]
 api = [
   "fastapi>=0.115.12",
+  "fastapi-pagination>=0.15.0",
   "uvicorn>=0.34.2",
 ]
 dev = [
@@ -68,3 +70,8 @@ known-first-party = ["pycricinfo"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["pycricinfo"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+]

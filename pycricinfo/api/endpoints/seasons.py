@@ -3,7 +3,7 @@ from fastapi import APIRouter, Path, Query, status
 from pycricinfo.config import MatchTypeNames
 from pycricinfo.search.seasons import get_match_types_in_season
 from pycricinfo.search.series import extract_match_ids_from_series
-from pycricinfo.source_models.pages.series import MatchResult, MatchType
+from pycricinfo.source_models.pages.series import MatchResult, MatchTypeWithSeries
 
 router = APIRouter(prefix="", tags=["seasons"])
 
@@ -22,7 +22,7 @@ async def match_types_in_season(
     match_type_name: MatchTypeNames = Query(
         default=None, description="Filter the response to just matches of the named type"
     ),
-) -> list[MatchType]:
+) -> list[MatchTypeWithSeries]:
     season_name = season_name.replace("-", "/") if isinstance(season_name, str) else season_name
     match_types = get_match_types_in_season(season_name, match_type_name)
 

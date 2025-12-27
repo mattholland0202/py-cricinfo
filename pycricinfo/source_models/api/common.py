@@ -13,6 +13,9 @@ class CCBaseModel(ABC, BaseModel):
     @model_validator(mode="before")
     @classmethod
     def set_empty_dicts_to_none(self, data: dict):
+        if not data:
+            return data
+
         for k, v in data.items():
             if isinstance(v, dict) and len(v) == 0:
                 data[k] = None

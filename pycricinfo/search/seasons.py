@@ -7,10 +7,12 @@ from bs4._typing import _OneElement, _QueryResults
 
 from pycricinfo.config import BaseRoute, MatchTypeNames, get_settings
 from pycricinfo.cricinfo.api_helper import get_request
-from pycricinfo.source_models.pages.series import MatchSeries, MatchType
+from pycricinfo.source_models.pages.series import MatchSeries, MatchTypeWithSeries
 
 
-def get_match_types_in_season(season_name: str | int, type_filter: Optional[MatchTypeNames] = None) -> list[MatchType]:
+def get_match_types_in_season(
+    season_name: str | int, type_filter: Optional[MatchTypeNames] = None
+) -> list[MatchTypeWithSeries]:
     """
     Get the Cricinfo web page which lists all series in a given season, and parse out their details.
 
@@ -21,7 +23,7 @@ def get_match_types_in_season(season_name: str | int, type_filter: Optional[Matc
 
     Returns
     -------
-    list[MatchType]
+    list[MatchTypeWithSeries]
         A list of match types, each containing a list of series in that match type for this season.
     """
     content = get_request(
@@ -39,7 +41,7 @@ def get_match_types_in_season(season_name: str | int, type_filter: Optional[Matc
     return match_types
 
 
-def parse_season_html(content: str) -> list[MatchType]:
+def parse_season_html(content: str) -> list[MatchTypeWithSeries]:
     """
     Parse the content of the Cricinfo season page HTML file to extract series details.
 
@@ -68,7 +70,7 @@ def parse_season_html(content: str) -> list[MatchType]:
     return match_types
 
 
-def _process_match_type_page_section(section: _OneElement) -> MatchType | None:
+def _process_match_type_page_section(section: _OneElement) -> MatchTypeWithSeries | None:
     """
     Each page section representing a type of match should contian a h2 tag with the match type name,
     and then the following section will be a list of series of that type within the season
@@ -88,7 +90,7 @@ def _process_match_type_page_section(section: _OneElement) -> MatchType | None:
         return
 
     h2_text = h2_tag.text.strip()
-    match_type = MatchType(name=h2_text)    # TODO: Store enum name in object
+    match_type = MatchTypeWithSeries(name=h2_text)  # TODO: Store enum name in object
 
     next_section = section.find_next_sibling("section", class_="series-summary-wrap")
 

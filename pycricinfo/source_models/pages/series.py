@@ -11,7 +11,7 @@ class MatchSeries(BaseModel):
     summary_url: str
 
 
-class MatchType(BaseModel):
+class MatchTypeWithSeries(BaseModel):
     name: str
     series: Optional[list[MatchSeries]] = Field(default_factory=list)
 

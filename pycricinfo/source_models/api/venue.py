@@ -1,22 +1,20 @@
 from typing import Optional
 
-from pydantic import BaseModel
-
-from pycricinfo.source_models.api.common import Link, RefMixin
+from pycricinfo.source_models.api.common import CCBaseModel, Link, RefMixin
 
 
-class Address(BaseModel):
+class Address(CCBaseModel):
     city: str
     state: Optional[str] = None
-    zipCode: Optional[str] = None
+    zip_code: Optional[str] = None
     country: str
     summary: str
 
 
-class Venue(BaseModel):
+class Venue(CCBaseModel):
     id: str
-    fullName: str
-    shortName: str
+    full_name: str
+    short_name: str
     address: Address
     capacity: int
     grass: bool

@@ -145,3 +145,4 @@ dmypy.json
 tests/temp_test_files
 run.py
 /responses/*
+.ruff_cache/
