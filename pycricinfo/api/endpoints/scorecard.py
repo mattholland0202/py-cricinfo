@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Path, status
 
-from pycricinfo.cricinfo.call_cricinfo_api import (
+from pycricinfo.call_cricinfo_api import (
     get_scorecard,
 )
 from pycricinfo.models.output.scorecard import CricinfoScorecard

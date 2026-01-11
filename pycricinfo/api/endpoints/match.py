@@ -1,7 +1,7 @@
 import requests
 from fastapi import APIRouter, Path, status
 
-from pycricinfo.cricinfo.call_cricinfo_api import get_match, get_match_basic
+from pycricinfo.call_cricinfo_api import get_match, get_match_basic
 from pycricinfo.models.source.api.match import Match
 from pycricinfo.models.source.api.match_basic import MatchBasic
 

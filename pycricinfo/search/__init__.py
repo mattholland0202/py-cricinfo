@@ -1,4 +1,4 @@
-from pycricinfo.cricinfo.call_cricinfo_api import (
+from pycricinfo.call_cricinfo_api import (
     get_match,
     get_match_basic,
     get_play_by_play,

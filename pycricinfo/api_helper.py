@@ -86,7 +86,7 @@ def get_request(
     }
 
     if params:
-        route = format_route(route, params)
+        route = _format_route(route, params)
 
     if base_route == BaseRoute.core:
         base = get_settings().core_base_route_v2
@@ -129,7 +129,7 @@ def get_request(
     return output
 
 
-def format_route(route: str, params: dict[str, str] = {}) -> str:
+def _format_route(route: str, params: dict[str, str] = {}) -> str:
     """
     Format the route with the provided parameters
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Path, status
 
-from pycricinfo.cricinfo.call_cricinfo_api import get_player
+from pycricinfo.call_cricinfo_api import get_player
 from pycricinfo.models.source.api.player import Player
 
 router = APIRouter(prefix="/player", tags=["player"])

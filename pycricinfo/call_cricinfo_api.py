@@ -1,5 +1,5 @@
+from pycricinfo.api_helper import get_and_parse, get_request
 from pycricinfo.config import BaseRoute, get_settings
-from pycricinfo.cricinfo.api_helper import get_and_parse, get_request
 from pycricinfo.models.output.scorecard import CricinfoScorecard
 from pycricinfo.models.source.api.commentary import APIResponseCommentary, CommentaryItem
 from pycricinfo.models.source.api.match import Match

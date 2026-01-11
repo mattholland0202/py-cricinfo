@@ -2,8 +2,7 @@ import os
 
 import pytest
 
-from pycricinfo.models.source.api.match import Match
-from pycricinfo.models.source.api.match_basic import MatchBasic
+from pycricinfo.models.source import Match, MatchBasic
 from pycricinfo.utils import load_file_and_validate_to_model
 
 

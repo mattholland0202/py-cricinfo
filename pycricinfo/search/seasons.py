@@ -5,8 +5,8 @@ from urllib.parse import quote
 from bs4 import BeautifulSoup
 from bs4._typing import _OneElement, _QueryResults
 
+from pycricinfo.api_helper import get_request
 from pycricinfo.config import BaseRoute, MatchTypeNames, get_settings
-from pycricinfo.cricinfo.api_helper import get_request
 from pycricinfo.models.source.pages.series import MatchSeries, MatchTypeWithSeries
 
 

@@ -3,7 +3,7 @@ import re
 from bs4 import BeautifulSoup
 
 from pycricinfo.config import BaseRoute, get_settings
-from pycricinfo.cricinfo.api_helper import get_request
+from pycricinfo.api_helper import get_request
 from pycricinfo.models.source.pages.series import MatchResult
 
 
