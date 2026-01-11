@@ -7,7 +7,7 @@ from bs4._typing import _OneElement, _QueryResults
 
 from pycricinfo.config import BaseRoute, MatchTypeNames, get_settings
 from pycricinfo.cricinfo.api_helper import get_request
-from pycricinfo.source_models.pages.series import MatchSeries, MatchTypeWithSeries
+from pycricinfo.models.source.pages.series import MatchSeries, MatchTypeWithSeries
 
 
 def get_match_types_in_season(

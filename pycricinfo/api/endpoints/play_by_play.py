@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Path, Query, status
 
 from pycricinfo.cricinfo.call_cricinfo_api import get_play_by_play
-from pycricinfo.source_models.api.commentary import CommentaryItem
+from pycricinfo.models.source.api.commentary import CommentaryItem
 
 router = APIRouter(prefix="", tags=["play_by_play"])
 

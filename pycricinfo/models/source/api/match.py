@@ -3,14 +3,14 @@ from typing import Literal, Optional
 
 from pydantic import AliasChoices, BaseModel, Field, computed_field
 
-from pycricinfo.source_models.api.common import CCBaseModel, Link, MatchClass
-from pycricinfo.source_models.api.league import League
-from pycricinfo.source_models.api.linescores import TeamInningsDetails
-from pycricinfo.source_models.api.match_note import MatchNote
-from pycricinfo.source_models.api.official import Official
-from pycricinfo.source_models.api.roster import TeamLineup
-from pycricinfo.source_models.api.team import TeamWithColorAndLogos
-from pycricinfo.source_models.api.venue import Venue
+from pycricinfo.models.source.api.common import CCBaseModel, Link, MatchClass
+from pycricinfo.models.source.api.league import League
+from pycricinfo.models.source.api.linescores import TeamInningsDetails
+from pycricinfo.models.source.api.match_note import MatchNote
+from pycricinfo.models.source.api.official import Official
+from pycricinfo.models.source.api.roster import TeamLineup
+from pycricinfo.models.source.api.team import TeamWithColorAndLogos
+from pycricinfo.models.source.api.venue import Venue
 
 
 class MatchCompetitor(CCBaseModel):

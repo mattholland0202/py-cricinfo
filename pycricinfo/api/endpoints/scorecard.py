@@ -3,7 +3,7 @@ from fastapi import APIRouter, Path, status
 from pycricinfo.cricinfo.call_cricinfo_api import (
     get_scorecard,
 )
-from pycricinfo.output_models.scorecard import CricinfoScorecard
+from pycricinfo.models.output.scorecard import CricinfoScorecard
 
 router = APIRouter(prefix="/scorecard", tags=["scorecard"])
 

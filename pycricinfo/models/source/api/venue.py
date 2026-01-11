@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pycricinfo.source_models.api.common import CCBaseModel, Link, RefMixin
+from pycricinfo.models.source.api.common import CCBaseModel, Link, RefMixin
 
 
 class Address(CCBaseModel):

@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 
 from pycricinfo.config import BaseRoute, get_settings
 from pycricinfo.cricinfo.api_helper import get_request
-from pycricinfo.source_models.pages.series import MatchResult
+from pycricinfo.models.source.pages.series import MatchResult
 
 
 def _clean_text(text: str) -> str:

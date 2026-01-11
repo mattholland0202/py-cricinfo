@@ -3,9 +3,9 @@ from argparse import ArgumentParser, Namespace
 from pydantic import ValidationError
 
 from pycricinfo.cricinfo.call_cricinfo_api import get_match, get_play_by_play
-from pycricinfo.output_models.scorecard import CricinfoScorecard
-from pycricinfo.source_models.api.commentary import APIResponseCommentary
-from pycricinfo.source_models.api.match import Match
+from pycricinfo.models.output.scorecard import CricinfoScorecard
+from pycricinfo.models.source.api.commentary import APIResponseCommentary
+from pycricinfo.models.source.api.match import Match
 from pycricinfo.utils import load_file_and_validate_to_model
 
 

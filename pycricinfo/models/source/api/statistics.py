@@ -3,10 +3,10 @@ from typing import Optional
 
 from pydantic import BaseModel, computed_field
 
-from pycricinfo.source_models.api.batting import BattingDetails
-from pycricinfo.source_models.api.bowling import BowlingDetails
-from pycricinfo.source_models.api.common import CCBaseModel
-from pycricinfo.source_models.api.team import TeamOver
+from pycricinfo.models.source.api.batting import BattingDetails
+from pycricinfo.models.source.api.bowling import BowlingDetails
+from pycricinfo.models.source.api.common import CCBaseModel
+from pycricinfo.models.source.api.team import TeamOver
 
 
 class BasicStatistic(CCBaseModel):

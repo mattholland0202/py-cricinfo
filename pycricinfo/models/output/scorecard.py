@@ -3,10 +3,10 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, model_validator
 
-from pycricinfo.output_models.common import HeaderlessTableMixin
-from pycricinfo.output_models.innings import CricinfoBattingInnings, CricinfoBowlingInnings, CricinfoInnings, Innings
-from pycricinfo.source_models.api.match import Match
-from pycricinfo.source_models.api.roster import MatchPlayer, TeamLineup
+from pycricinfo.models.output.common import HeaderlessTableMixin
+from pycricinfo.models.output.innings import CricinfoBattingInnings, CricinfoBowlingInnings, CricinfoInnings, Innings
+from pycricinfo.models.source.api.match import Match
+from pycricinfo.models.source.api.roster import MatchPlayer, TeamLineup
 
 
 class Scorecard(BaseModel, HeaderlessTableMixin):

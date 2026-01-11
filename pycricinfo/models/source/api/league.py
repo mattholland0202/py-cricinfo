@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from pycricinfo.source_models.api.common import CCBaseModel, Link
+from pycricinfo.models.source.api.common import CCBaseModel, Link
 
 
 class League(CCBaseModel):

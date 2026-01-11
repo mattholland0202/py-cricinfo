@@ -4,10 +4,10 @@ from typing import Optional
 from prettytable import PrettyTable
 from pydantic import AliasChoices, BaseModel, Field, computed_field, model_validator
 
-from pycricinfo.output_models.common import SNAKE_CASE_REGEX, HeaderlessTableMixin
-from pycricinfo.source_models.api.athelete import AthleteWithFirstAndLastName
-from pycricinfo.source_models.api.linescores import BaseInningsDetails
-from pycricinfo.source_models.api.team import TeamWithColorAndLogos
+from pycricinfo.models.output.common import SNAKE_CASE_REGEX, HeaderlessTableMixin
+from pycricinfo.models.source.api.athelete import AthleteWithFirstAndLastName
+from pycricinfo.models.source.api.linescores import BaseInningsDetails
+from pycricinfo.models.source.api.team import TeamWithColorAndLogos
 
 # ANSI escape codes for colors
 RED = "\033[31m"
@@ -86,7 +86,7 @@ class BattingInnings(PlayerInningsCommon):
     sixes: Optional[int] = None
     minutes: Optional[int] = None
     not_out: bool = Field(validation_alias=AliasChoices("not_out", "notouts"))
-    strike_rate: Optional[float|str] = Field(default=None, validation_alias=AliasChoices("strike_rate", "strikeRate"))
+    strike_rate: Optional[float | str] = Field(default=None, validation_alias=AliasChoices("strike_rate", "strikeRate"))
 
     @computed_field
     @property

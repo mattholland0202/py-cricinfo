@@ -3,9 +3,9 @@ from typing import Literal, Optional
 
 from pydantic import AliasChoices, BaseModel, Field, computed_field, field_validator
 
-from pycricinfo.source_models.api.athelete import Athlete
-from pycricinfo.source_models.api.common import CCBaseModel, RefMixin
-from pycricinfo.source_models.api.statistics import PlayerStatisticsCategory, StatisticsCategory, TeamStatisticsCategory
+from pycricinfo.models.source.api.athelete import Athlete
+from pycricinfo.models.source.api.common import CCBaseModel, RefMixin
+from pycricinfo.models.source.api.statistics import PlayerStatisticsCategory, StatisticsCategory, TeamStatisticsCategory
 
 
 class BaseInningsDetails(CCBaseModel, ABC):
@@ -48,7 +48,7 @@ class PartnershipFallOfWicketCommon(RefMixin, CCBaseModel, ABC):
     fow_type: Literal["out", "end of innings", "not out", "retired not out"]
     runs: int
 
-    @field_validator('fow_type', mode='before')
+    @field_validator("fow_type", mode="before")
     @classmethod
     def strip_fow_type(cls, v):
         """

@@ -2,8 +2,8 @@ from typing import Optional
 
 from pydantic import BaseModel, computed_field, model_validator
 
-from pycricinfo.source_models.api.common import CCBaseModel
-from pycricinfo.source_models.api.dismissal import Dismissal
+from pycricinfo.models.source.api.common import CCBaseModel
+from pycricinfo.models.source.api.dismissal import Dismissal
 
 
 class BattingRecent(CCBaseModel):

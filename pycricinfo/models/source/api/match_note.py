@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import Field, HttpUrl
 
-from pycricinfo.source_models.api.common import CCBaseModel
+from pycricinfo.models.source.api.common import CCBaseModel
 
 
 class MatchNoteType(Enum):

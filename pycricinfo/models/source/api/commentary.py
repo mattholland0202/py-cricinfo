@@ -2,9 +2,9 @@ from typing import Optional
 
 from pydantic import AliasChoices, BaseModel, Field, computed_field
 
-from pycricinfo.source_models.api.athelete import AthleteWithNameAndShortName as Athlete
-from pycricinfo.source_models.api.common import CCBaseModel, PagingModel
-from pycricinfo.source_models.api.team import TeamWithName as Team
+from pycricinfo.models.source.api.athelete import AthleteWithNameAndShortName as Athlete
+from pycricinfo.models.source.api.common import CCBaseModel, PagingModel
+from pycricinfo.models.source.api.team import TeamWithName as Team
 
 
 class PlayType(BaseModel):

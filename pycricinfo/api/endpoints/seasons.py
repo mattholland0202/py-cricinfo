@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Path, Query, status
 
 from pycricinfo.config import MatchTypeNames
+from pycricinfo.models.source.pages.series import MatchResult, MatchTypeWithSeries
 from pycricinfo.search.seasons import get_match_types_in_season
 from pycricinfo.search.series import extract_match_ids_from_series
-from pycricinfo.source_models.pages.series import MatchResult, MatchTypeWithSeries
 
 router = APIRouter(prefix="", tags=["seasons"])
 

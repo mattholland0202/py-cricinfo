@@ -2,8 +2,8 @@ from typing import Optional
 
 from pydantic import Field
 
-from pycricinfo.source_models.api.athelete import Athlete
-from pycricinfo.source_models.api.common import Position, RefMixin
+from pycricinfo.models.source.api.athelete import Athlete
+from pycricinfo.models.source.api.common import Position, RefMixin
 
 
 class Player(Athlete):

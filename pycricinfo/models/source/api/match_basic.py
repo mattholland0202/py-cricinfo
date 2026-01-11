@@ -1,7 +1,7 @@
 from pydantic import AliasChoices, Field
 
-from pycricinfo.source_models.api.common import CCBaseModel, MatchClass, RefMixin
-from pycricinfo.source_models.api.venue import Venue
+from pycricinfo.models.source.api.common import CCBaseModel, MatchClass, RefMixin
+from pycricinfo.models.source.api.venue import Venue
 
 
 class MatchCompetitorBasic(CCBaseModel):

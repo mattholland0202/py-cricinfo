@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import AliasChoices, Field
 
-from pycricinfo.source_models.api.common import CCBaseModel, Event, RefMixin
+from pycricinfo.models.source.api.common import CCBaseModel, Event, RefMixin
 
 
 class TeamCommon(CCBaseModel, ABC):
@@ -49,7 +49,7 @@ class TeamWicket(CCBaseModel):
     runs: int
     short_text: str
     sixes: int
-    strike_rate: float|str
+    strike_rate: float | str
 
 
 class TeamOver(CCBaseModel):
