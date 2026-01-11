@@ -69,7 +69,6 @@
       "njpwerner.autodocstring",
       "charliermarsh.ruff",
       "johnpapa.vscode-peacock",
-      "ms-python.isort"
     ]
   }
 }
