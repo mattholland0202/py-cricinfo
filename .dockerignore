@@ -1,0 +1,71 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+_old.venv/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Documentation
+docs/
+README.md
+CHANGELOG.md
+
+# Test files
+tests/
+test_files/
+
+# Responses (cached data)
+responses/
+
+# Environment files
+.env.example
+
+# Ruff cache
+.ruff_cache/
+
+# Python version file
+.python-version
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Workspace file
+*.code-workspace

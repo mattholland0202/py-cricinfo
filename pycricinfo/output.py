@@ -25,7 +25,7 @@ def print_scorecard(file_path: str = None, match_id: int = None, series_id: int 
     elif match_id or args.match_id:
         _print_scorecard_from_match_id(series_id or args.series_id, match_id or args.match_id)
     else:
-        print("Please provide either a file path or a match ID.")
+        print("Please provide either a file path or match & series IDs")
 
 
 def _print_scorecard_from_file(file_path: str):
@@ -41,7 +41,7 @@ def _print_scorecard_from_match_id(series_id: int, match_id: int):
 def _print_scorecard_from_match(match: Match):
     try:
         sc = CricinfoScorecard(match=match)
-        sc.to_table(include_batting_minutes=False, include_bowling_dots=False)
+        sc.show(include_batting_minutes=False, include_bowling_dots=False)
     except ValidationError as validation_error:
         print(validation_error.errors())
         raise

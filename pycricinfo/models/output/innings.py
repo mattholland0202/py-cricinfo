@@ -248,7 +248,7 @@ class Innings(BaseModel, HeaderlessTableMixin):
             f"({self.byes or 0}b {self.leg_byes or 0}lb {self.wides or 0}w {self.no_balls or 0}nb{penalties_string})"
         )
 
-    def to_table(self, **kwargs):
+    def show(self, **kwargs):
         """
         Print the innings details in PrettyTables. This will include the innings summary, followed by
         batting and bowling tables.
