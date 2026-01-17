@@ -5,7 +5,7 @@
 
 A Python package extracting match, player & statistical data from [ESPNCricinfo](https://www.espncricinfo.com), either using their (otherwise undocumented) API, or by scraping pages.
 
-Defines [Pydantic](https://docs.pydantic.dev) models to represent data from the Cricinfo API, allowing easier interaction with the data in your code.
+Defines [Pydantic](https://docs.pydantic.dev) models to represent data from the API, allowing easier interaction with the data in your code.
 
 ## Project status
 :warning: This project is still in pre-release and, whilst it still has a `0.0.X` version number, is liable to change in a breaking way with any release :warning:
@@ -37,8 +37,8 @@ uv add pycricinfo --optional api
 Installing the project adds 2 scripts:
 
 ### `print_scorecard`
-Produces a match scorecard in the CLI.  
-Can either be output from an already fetched JSON file on disk, or fetched on demand from the API, by changing parameter options:
+Produces a match scorecard in the CLI, output using [PrettyTable](https://pypi.org/project/prettytable/).  
+Can either be from an already downloaded JSON file on disk, or fetched on demand from the API, by changing parameter options:
 
 * `--file`: A path to a JSON file from the Cricinfo match summary API
 

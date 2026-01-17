@@ -49,7 +49,11 @@ class LinescoreStatsLookupMixin(BaseModel, ABC):
 
 
 class PlayerInningsCommon(BaseModel, ABC):
-    order: int
+    """
+    Common base class shared between batting and bowling innings
+    """
+
+    order: int = Field(description="The order within the innings that this player batted or bowled")
 
     def colour_row(self, row_items: list[str], colour: str) -> list[str]:
         """

@@ -1,19 +1,10 @@
-from fastapi import APIRouter, Depends, Path, Query, status
+from fastapi import APIRouter, Depends, Path, status
 
+from pycricinfo.api.utils import PageAndInningsQueryParameters
 from pycricinfo.call_cricinfo_api import get_play_by_play
 from pycricinfo.models.source.api.commentary import CommentaryItem
 
 router = APIRouter(prefix="", tags=["play_by_play"])
-
-
-class PageAndInningsQueryParameters:
-    def __init__(
-        self,
-        page: int | None = Query(1, description="Which page of data to return"),
-        innings: int | None = Query(1, description="Which innings of the game to get data from"),
-    ):
-        self.page = page
-        self.innings = innings
 
 
 @router.get(

@@ -23,6 +23,12 @@ app = FastAPI(
         "tryItOutEnabled": True,
     },
     description=get_field_from_pyproject("description"),
+    openapi_tags=[
+        {
+            "name": "Cricinfo: API",
+            "description": "Endpoints direct from the Cricinfo API, without any additional processing",
+        },
+    ],
 )
 add_pagination(app)
 
