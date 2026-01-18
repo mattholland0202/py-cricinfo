@@ -1,3 +1,5 @@
+from typing import Annotated
+
 import requests
 from fastapi import APIRouter, Path, status
 
@@ -13,7 +15,7 @@ router = APIRouter(prefix="/match", tags=["match"])
     responses={status.HTTP_200_OK: {"description": "The basic match data"}},
     summary="Get basic match data from the '/events' API",
 )
-async def match_basic(match_id: int = Path(description="The Match ID")) -> MatchBasic:
+def match_basic(match_id: int = Path(description="The Match ID")) -> MatchBasic:
     return get_match_basic(match_id)
 
 
@@ -22,9 +24,7 @@ async def match_basic(match_id: int = Path(description="The Match ID")) -> Match
     responses={status.HTTP_200_OK: {"description": "The basic match data"}},
     summary="Get a match's Team",
 )
-async def get_match_team(
-    match_id: int = Path(description="The Match ID"), team_id: int = Path(description="The Team ID")
-):
+def get_match_team(match_id: int = Path(description="The Match ID"), team_id: int = Path(description="The Team ID")):
     response = requests.get(
         f"http://core.espnuk.org/v2/sports/cricket/leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}"
     ).json()
@@ -36,7 +36,8 @@ async def get_match_team(
     responses={status.HTTP_200_OK: {"description": "The match summary"}},
     summary="Get a match summary",
 )
-async def match(
-    series_id: int = Path(description="The Series ID"), match_id: int = Path(description="The Match ID")
+def match_api(
+    series_id: Annotated[int, Path(description="The Series ID")],
+    match_id: Annotated[int, Path(description="The Match ID")],
 ) -> Match:
     return get_match(series_id, match_id)

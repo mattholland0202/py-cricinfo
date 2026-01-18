@@ -24,9 +24,9 @@ class CCBaseModel(ABC, BaseModel):
 
 class PagingModel(CCBaseModel):
     count: int
-    pageIndex: int
-    pageSize: int
-    pageCount: int
+    page_index: int
+    page_size: int
+    page_count: int
 
 
 class RefMixin(CCBaseModel):

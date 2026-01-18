@@ -17,7 +17,7 @@ router = APIRouter(prefix="", tags=["seasons"])
     },
     summary="Get a list of match types, each containing a list of series in that match type for this season",
 )
-async def match_types_in_season(
+def match_types_in_season(
     season_name: int | str = Path(description='The name of the season to get matches for, e.g. "2024" or "2020-21"'),
     match_type_name: MatchTypeNames = Query(
         default=None, description="Filter the response to just matches of the named type"
@@ -34,5 +34,5 @@ async def match_types_in_season(
     responses={status.HTTP_200_OK: {"description": "A list of IDs of the matches in the supplied series"}},
     summary="Get a list of IDs of the matches in the supplied series",
 )
-async def match_ids_in_series(data_series_id: int = Path(description="The ID of a series")) -> list[MatchResult]:
+def match_ids_in_series(data_series_id: int = Path(description="The ID of a series")) -> list[MatchResult]:
     return extract_match_ids_from_series(data_series_id)

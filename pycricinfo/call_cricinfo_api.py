@@ -1,7 +1,7 @@
 from pycricinfo.api_helper import get_and_parse, get_request
 from pycricinfo.config import BaseRoute, get_settings
 from pycricinfo.models.output.scorecard import CricinfoScorecard
-from pycricinfo.models.source.api.commentary import APIResponseCommentary, CommentaryItem
+from pycricinfo.models.source.api.commentary import APIResponseCommentary, Commentary
 from pycricinfo.models.source.api.match import Match
 from pycricinfo.models.source.api.match_basic import MatchBasic
 from pycricinfo.models.source.api.player import Player
@@ -128,7 +128,7 @@ def get_scorecard(series_id: int, match_id: int) -> CricinfoScorecard:
     return CricinfoScorecard(match=match)
 
 
-def get_play_by_play(match_id: int, page: int = 1, innings: int = 1) -> list[CommentaryItem]:
+def get_play_by_play(match_id: int, innings: int = 1, page: int = 1) -> Commentary:
     """
     Get a page of ball-by-ball data for a match, processed into a list of CommentaryItems.
 
@@ -153,7 +153,7 @@ def get_play_by_play(match_id: int, page: int = 1, innings: int = 1) -> list[Com
         True,
         BaseRoute.site,
     )
-    return response.commentary.items if response and response.commentary else []
+    return response.commentary if response and response.commentary else []
 
 
 def get_play_by_play_raw(match_id: int, page: int = 1, innings: int = 1) -> dict:

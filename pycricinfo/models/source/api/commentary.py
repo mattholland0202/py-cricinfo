@@ -131,7 +131,7 @@ class CommentaryItem(CCBaseModel):
 
 
 class Commentary(PagingModel):
-    items: list[CommentaryItem]
+    deliveries: list[CommentaryItem] = Field(validation_alias=AliasChoices("items", "deliveries"))
 
 
 class APIResponseCommentary(BaseModel):

@@ -42,7 +42,7 @@ app.include_router(team_router)
 
 
 @app.exception_handler(CricinfoAPIException)
-async def my_custom_exception_handler(request: Request, exc: CricinfoAPIException):
+def my_custom_exception_handler(request: Request, exc: CricinfoAPIException):
     return JSONResponse(
         status_code=exc.status_code,
         content=exc.output(),
