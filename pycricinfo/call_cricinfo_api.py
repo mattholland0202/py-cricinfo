@@ -1,11 +1,7 @@
 from pycricinfo.api_helper import get_and_parse, get_request
 from pycricinfo.config import BaseRoute, get_settings
 from pycricinfo.models.output.scorecard import CricinfoScorecard
-from pycricinfo.models.source.api.commentary import APIResponseCommentary, Commentary
-from pycricinfo.models.source.api.match import Match
-from pycricinfo.models.source.api.match_basic import MatchBasic
-from pycricinfo.models.source.api.player import Player
-from pycricinfo.models.source.api.team import TeamFull
+from pycricinfo.models.source import APIResponseCommentary, Commentary, Match, MatchBasic, Player, TeamFull
 
 
 def get_player(player_id: int) -> Player:

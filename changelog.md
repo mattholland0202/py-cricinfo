@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.22]
 ### Added
 - Function to get a play-by-play page raw, without processing to Pydantic
+- Docker build and publishing process for the API
+
+### Changed
+- Restructure folders to put models in better locations, and make them available to import in a clearer way
 
 ## [0.0.21]
 ### Added
