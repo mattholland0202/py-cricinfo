@@ -1,0 +1,8 @@
+services:
+  pycricinfo-api:
+    build:
+      context: .
+    container_name: pycricinfo-api
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
