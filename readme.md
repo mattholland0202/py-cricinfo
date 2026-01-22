@@ -2,6 +2,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/pycricinfo)](https://pypi.org/project/pycricinfo/)
 [![Upload to PyPi](https://github.com/mattholland0202/py-cricinfo/actions/workflows/python-publish.yml/badge.svg)](https://github.com/mattholland0202/py-cricinfo/actions/workflows/python-publish.yml)
+[![Upload to ghcr.io](https://github.com/mattholland0202/py-cricinfo/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/mattholland0202/py-cricinfo/actions/workflows/docker-publish.yml)
 
 A Python package extracting match, player & statistical data from [ESPNCricinfo](https://www.espncricinfo.com), either using their (otherwise undocumented) API, or by scraping pages.
 
@@ -90,3 +91,9 @@ def fetch_player_from_cricinfo(player_id: int):
     cricinfo_player = get_player(player_id)
     print(cricinfo_player.display_name)
 ```
+
+## Docker
+
+A docker image is also produced which runs the project's API on port 8000.
+
+Run the included `docker-compose.yml` and browse to `http://localhost:8000/docs` for the Swagger interface.
