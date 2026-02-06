@@ -2,3 +2,4 @@
 
 from .call_cricinfo_api import *
 from .models.output import *
+from .types import *

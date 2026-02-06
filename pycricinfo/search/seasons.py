@@ -6,8 +6,9 @@ from bs4 import BeautifulSoup
 from bs4._typing import _OneElement, _QueryResults
 
 from pycricinfo.api_helper import get_request
-from pycricinfo.config import BaseRoute, MatchTypeNames, get_settings
+from pycricinfo.config import BaseRoute, get_settings
 from pycricinfo.models.source.pages.series import MatchSeries, MatchTypeWithSeries
+from pycricinfo.types.match_types import MatchTypeNames
 
 
 def get_match_types_in_season(
