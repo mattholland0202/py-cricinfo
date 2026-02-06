@@ -1,13 +1,12 @@
 import json
 import logging
-import re
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Optional, Type, TypeVar
 from urllib.parse import urljoin, urlparse
 
-import requests
+import aiohttp
 from pydantic import BaseModel, ValidationError
 
 from pycricinfo.config import BaseRoute, get_settings
@@ -18,7 +17,7 @@ logger = logging.getLogger("cricinfo")
 T = TypeVar("T", bound=BaseModel)
 
 
-def get_and_parse(
+async def get_and_parse(
     route: str,
     type_to_parse: Type[T],
     params: dict = None,
@@ -45,7 +44,7 @@ def get_and_parse(
     T
         The response data parsed into the supplied model
     """
-    api_response = get_request(route, params, base_route)
+    api_response = await get_request(route, params, base_route)
 
     if null_out_empty_dicts:
         api_response = replace_empty_objects_with_null(api_response)
@@ -57,7 +56,7 @@ def get_and_parse(
         raise
 
 
-def get_request(
+async def get_request(
     route: str,
     params: Optional[dict[str, str]] = None,
     base_route: BaseRoute = BaseRoute.core,
@@ -96,37 +95,39 @@ def get_request(
         base = get_settings().pages_base_route
     full_route = f"{base}{route}"
 
-    session = requests.Session()
-    session.headers["User-Agent"] = get_settings().page_headers.user_agent
-    session.headers["Referer"] = urljoin(route, urlparse(route).path)
-    session.headers["Accept"] = get_settings().page_headers.accept
+    headers = {
+        "User-Agent": get_settings().page_headers.user_agent,
+        "Referer": urljoin(route, urlparse(route).path),
+        "Accept": get_settings().page_headers.accept,
+    }
 
     logger.debug(f"Querying: {full_route}", extra={"cricket_stats.request_id": request_id})
-    response = session.get(full_route)
 
-    response_logging_extras["cricket_stats.response_code"] = response.status_code
-    if base_route == BaseRoute.page:
-        result: bytes = response.content
-        logger.debug(json.dumps(f"Page fetched from: {full_route}"), extra=response_logging_extras)
-        output = str(result)
-        output_for_file = re.sub(r"^b\'|\'$", "", output)
-        response_output_file_extension = "html"
-    else:
-        output = result = response.json()
-        logger.debug(json.dumps(result, indent=4), extra=response_logging_extras)
-        output_for_file = json.dumps(result, indent=4)
-        response_output_file_extension = "json"
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.get(full_route) as response:
+            response_logging_extras["cricket_stats.response_code"] = response.status
 
-    _output_response_to_file(output_for_file, route, response_output_sub_folder, response_output_file_extension)
+            if base_route == BaseRoute.page:
+                output = await response.text()
+                logger.debug(json.dumps(f"Page fetched from: {full_route}"), extra=response_logging_extras)
+                output_for_file = output
+                response_output_file_extension = "html"
+            else:
+                output = await response.json()
+                logger.debug(json.dumps(output, indent=4), extra=response_logging_extras)
+                output_for_file = json.dumps(output, indent=4)
+                response_output_file_extension = "json"
 
-    if response.status_code != 200:
-        logger.error(
-            f"Status Code '{response.status_code}' returned for '{full_route}'",
-            extra=response_logging_extras,
-        )
-        raise CricinfoAPIException(status_code=response.status_code, route=full_route, content=output)
+            _output_response_to_file(output_for_file, route, response_output_sub_folder, response_output_file_extension)
 
-    return output
+            if response.status != 200:
+                logger.error(
+                    f"Status Code '{response.status}' returned for '{full_route}'",
+                    extra=response_logging_extras,
+                )
+                raise CricinfoAPIException(status_code=response.status, route=full_route, content=output)
+
+            return output
 
 
 def _format_route(route: str, params: dict[str, str] = {}) -> str:

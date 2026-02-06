@@ -2,8 +2,8 @@ import re
 
 from bs4 import BeautifulSoup
 
-from pycricinfo.config import BaseRoute, get_settings
 from pycricinfo.api_helper import get_request
+from pycricinfo.config import BaseRoute, get_settings
 from pycricinfo.models.source.pages.series import MatchResult
 
 
@@ -27,7 +27,7 @@ def _clean_text(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def extract_match_ids_from_series(series_id: int | str) -> list[MatchResult]:
+async def extract_match_ids_from_series(series_id: int | str) -> list[MatchResult]:
     """
     Extract match IDs from a series by fetching the series page and parsing the matches.
 
@@ -41,7 +41,7 @@ def extract_match_ids_from_series(series_id: int | str) -> list[MatchResult]:
     list[MatchResult]
         A list of match results extracted from the series.
     """
-    content = get_request(
+    content = await get_request(
         route=get_settings().page_routes.matches_in_series,
         params={"series_id": series_id},
         base_route=BaseRoute.page,

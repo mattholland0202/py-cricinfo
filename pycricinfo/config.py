@@ -30,7 +30,7 @@ class PageRoutes(BaseModel):
 
 
 class PageHeaders(BaseModel):
-    user_agent: str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:146.0) Gecko/20100101 Firefox/146.0"
+    user_agent: str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:147.0) Gecko/20100101 Firefox/147.0"
     accept: str = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
 
 
@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     page_routes: PageRoutes = PageRoutes()
     page_headers: PageHeaders = PageHeaders()
     api_response_output_folder: str = "responses"
-    port: int = 8000
+    port: int = 8004
 
     match_classes: dict[int, str] = {
         1: "Test",

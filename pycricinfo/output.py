@@ -1,3 +1,4 @@
+import asyncio
 from argparse import ArgumentParser, Namespace
 
 from pydantic import ValidationError
@@ -34,7 +35,7 @@ def _print_scorecard_from_file(file_path: str):
 
 
 def _print_scorecard_from_match_id(series_id: int, match_id: int):
-    model = get_match(series_id, match_id)
+    model = asyncio.run(get_match(series_id, match_id))
     _print_scorecard_from_match(model)
 
 
@@ -99,7 +100,7 @@ def _print_ball_by_ball_from_file(file_path: str):
 
 
 def _print_ball_by_ball_from_match_id(match_id: int, innings: int, page: int):
-    model = get_play_by_play(match_id, innings, page)
+    model = asyncio.run(get_play_by_play(match_id, innings, page))
     _print_ball_by_ball_from_commentary_model(model)
 
 

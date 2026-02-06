@@ -1,4 +1,3 @@
-import requests
 from fastapi import APIRouter, Depends, Path, status
 
 from pycricinfo.api.utils import PageAndInningsQueryParameters
@@ -13,8 +12,8 @@ router = APIRouter(prefix="/raw", tags=["Cricinfo: API"])
     responses={status.HTTP_200_OK: {"description": "The basic match data"}},
     summary="Get basic match data from the '/events' API",
 )
-def match_basic(match_id: int = Path(description="The Match ID")):
-    return get_request(get_settings().routes.match_basic, params={"match_id": match_id})
+async def match_basic(match_id: int = Path(description="The Match ID")):
+    return await get_request(get_settings().routes.match_basic, params={"match_id": match_id})
 
 
 @router.get(
@@ -22,11 +21,12 @@ def match_basic(match_id: int = Path(description="The Match ID")):
     responses={status.HTTP_200_OK: {"description": "The basic match data"}},
     summary="Get a match's Team",
 )
-def match_team(match_id: int = Path(description="The Match ID"), team_id: int = Path(description="The Team ID")):
-    response = requests.get(
-        f"http://core.espnuk.org/v2/sports/cricket/leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}"
-    ).json()
-    return response
+async def match_team(match_id: int = Path(description="The Match ID"), team_id: int = Path(description="The Team ID")):
+    return await get_request(
+        "leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}",
+        {"match_id": match_id, "team_id": team_id},
+        BaseRoute.core,
+    )
 
 
 @router.get(
@@ -34,11 +34,14 @@ def match_team(match_id: int = Path(description="The Match ID"), team_id: int = 
     responses={status.HTTP_200_OK: {"description": "The basic match data"}},
     summary="Get a match Team's roster",
 )
-def match_team_roster(match_id: int = Path(description="The Match ID"), team_id: int = Path(description="The Team ID")):
-    response = requests.get(
-        f"http://core.espnuk.org/v2/sports/cricket/leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}/roster"
-    ).json()
-    return response
+async def match_team_roster(
+    match_id: int = Path(description="The Match ID"), team_id: int = Path(description="The Team ID")
+):
+    return await get_request(
+        "leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}/roster",
+        {"match_id": match_id, "team_id": team_id},
+        BaseRoute.core,
+    )
 
 
 @router.get(
@@ -46,14 +49,15 @@ def match_team_roster(match_id: int = Path(description="The Match ID"), team_id:
     responses={status.HTTP_200_OK: {"description": "The basic match data"}},
     summary="Get a match Team's innings",
 )
-def match_team_all_innings(
+async def match_team_all_innings(
     match_id: int = Path(description="The Match ID"),
     team_id: int = Path(description="The Team ID"),
 ):
-    response = requests.get(
-        f"http://core.espnuk.org/v2/sports/cricket/leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}/linescores"
-    ).json()
-    return response
+    return await get_request(
+        "leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}/linescores",
+        {"match_id": match_id, "team_id": team_id},
+        BaseRoute.core,
+    )
 
 
 @router.get(
@@ -61,15 +65,16 @@ def match_team_all_innings(
     responses={status.HTTP_200_OK: {"description": "The basic match data"}},
     summary="Get a match Team's innings",
 )
-def match_team_innings(
+async def match_team_innings(
     match_id: int = Path(description="The Match ID"),
     team_id: int = Path(description="The Team ID"),
     innings: int = Path(description="The innings number"),
 ):
-    response = requests.get(
-        f"http://core.espnuk.org/v2/sports/cricket/leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}/linescores/0/{innings}"
-    ).json()
-    return response
+    return await get_request(
+        "leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}/linescores/0/{innings}",
+        {"match_id": match_id, "team_id": team_id, "innings": innings},
+        BaseRoute.core,
+    )
 
 
 @router.get(
@@ -77,15 +82,16 @@ def match_team_innings(
     responses={status.HTTP_200_OK: {"description": "The basic match data"}},
     summary="Get a match Team's innings",
 )
-def match_player_all_innings(
+async def match_player_all_innings(
     match_id: int = Path(description="The Match ID"),
     team_id: int = Path(description="The Team ID"),
     player_id: int = Path(description="The Player ID"),
 ):
-    response = requests.get(
-        f"http://core.espnuk.org/v2/sports/cricket/leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}/roster/{player_id}/linescores"
-    ).json()
-    return response
+    return await get_request(
+        "leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}/roster/{player_id}/linescores",
+        {"match_id": match_id, "team_id": team_id, "player_id": player_id},
+        BaseRoute.core,
+    )
 
 
 @router.get(
@@ -93,8 +99,10 @@ def match_player_all_innings(
     responses={status.HTTP_200_OK: {"description": "The match summary"}},
     summary="Get a page of ball-by-ball data",
 )
-def match_play_by_play(match_id: int = Path(description="The Match ID"), pi: PageAndInningsQueryParameters = Depends()):
-    return get_request(
+async def match_play_by_play(
+    match_id: int = Path(description="The Match ID"), pi: PageAndInningsQueryParameters = Depends()
+):
+    return await get_request(
         get_settings().routes.play_by_play_page,
         {"match_id": match_id, "page": pi.page, "innings": pi.innings},
         BaseRoute.site,
@@ -106,8 +114,10 @@ def match_play_by_play(match_id: int = Path(description="The Match ID"), pi: Pag
     responses={status.HTTP_200_OK: {"description": "The match summary"}},
     summary="Get a match summary",
 )
-def match_summary(match_id: int = Path(description="The Match ID")):
-    return get_request(get_settings().routes.match_summary, params={"match_id": match_id}, base_route=BaseRoute.site)
+async def match_summary(match_id: int = Path(description="The Match ID")):
+    return await get_request(
+        get_settings().routes.match_summary, params={"match_id": match_id}, base_route=BaseRoute.site
+    )
 
 
 @router.get(
@@ -115,15 +125,16 @@ def match_summary(match_id: int = Path(description="The Match ID")):
     responses={status.HTTP_200_OK: {"description": "The basic match data"}},
     summary="Get a match Team's statistics",
 )
-def match_team_statistics(
+async def match_team_statistics(
     series_id: int = Path(description="The Series ID"),
     match_id: int = Path(description="The Match ID"),
     team_id: int = Path(description="The Team ID"),
 ):
-    response = requests.get(
-        f"http://core.espnuk.org/v2/sports/cricket/leagues/{series_id}/events/{match_id}/competitions/{match_id}/competitors/{team_id}/statistics"
-    ).json()
-    return response
+    return await get_request(
+        "leagues/{series_id}/events/{match_id}/competitions/{match_id}/competitors/{team_id}/statistics",
+        {"series_id": series_id, "match_id": match_id, "team_id": team_id},
+        BaseRoute.core,
+    )
 
 
 @router.get(
@@ -131,17 +142,27 @@ def match_team_statistics(
     responses={status.HTTP_200_OK: {"description": "The basic match data"}},
     summary="Get statistics for a player's innings",
 )
-def match_player_innings(
+async def match_player_innings(
     series_id: int = Path(description="The Series ID"),
     match_id: int = Path(description="The Match ID"),
     team_id: int = Path(description="The Team ID"),
     player_id: int = Path(description="The Player ID"),
     innings: int = Path(description="The innings number"),
 ):
-    response = requests.get(
-        f"http://core.espnuk.org/v2/sports/cricket/leagues/{series_id}/events/{match_id}/competitions/{match_id}/competitors/{team_id}/roster/{player_id}/linescores/0/{innings}/statistics/0"
-    ).json()
-    return response
+    return await get_request(
+        (
+            "leagues/{series_id}/events/{match_id}/competitions/{match_id}/competitors/"
+            "{team_id}/roster/{player_id}/linescores/0/{innings}/statistics/0"
+        ),
+        {
+            "series_id": series_id,
+            "match_id": match_id,
+            "team_id": team_id,
+            "player_id": player_id,
+            "innings": innings,
+        },
+        BaseRoute.core,
+    )
 
 
 @router.get(
@@ -149,8 +170,8 @@ def match_player_innings(
     responses={status.HTTP_200_OK: {"description": "A Venue's data"}},
     summary="Get a Venue",
 )
-def venue(venue_id: int = Path(description="The Venue ID")):
-    return get_request(get_settings().routes.venue, params={"venue_id": venue_id})
+async def venue(venue_id: int = Path(description="The Venue ID")):
+    return await get_request(get_settings().routes.venue, params={"venue_id": venue_id})
 
 
 @router.get(
@@ -158,8 +179,8 @@ def venue(venue_id: int = Path(description="The Venue ID")):
     responses={status.HTTP_200_OK: {"description": "A League's data"}},
     summary="Get a League",
 )
-def league(league_id: int = Path(description="The League ID")):
-    return get_request(get_settings().routes.league, params={"league_id": league_id})
+async def league(league_id: int = Path(description="The League ID")):
+    return await get_request(get_settings().routes.league, params={"league_id": league_id})
 
 
 @router.get(
@@ -167,19 +188,19 @@ def league(league_id: int = Path(description="The League ID")):
     responses={status.HTTP_200_OK: {"description": "A League's data"}},
     summary="Get an event (aka: a series of matches) in a League",
 )
-def series_in_league(
+async def series_in_league(
     league_id: int = Path(description="The League ID"), event_id: int = Path(description="The Event ID")
 ):
-    return get_request(get_settings().routes.league_event, params={"league_id": league_id, "event_id": event_id})
+    return await get_request(get_settings().routes.league_event, params={"league_id": league_id, "event_id": event_id})
 
 
 @router.get(
     "/team/{team_id}", responses={status.HTTP_200_OK: {"description": "The Team data"}}, summary="Get Team data"
 )
-def team(team_id: int = Path(description="The Team ID")):
-    return get_request(get_settings().routes.team, params={"team_id": team_id})
+async def team(team_id: int = Path(description="The Team ID")):
+    return await get_request(get_settings().routes.team, params={"team_id": team_id})
 
 
 @router.get("/player/{player_id}", responses={status.HTTP_200_OK: {"description": "The Player"}}, summary="Get Player")
-def player(player_id: int = Path(description="The Player ID")):
-    return get_request(get_settings().routes.player, params={"player_id": player_id})
+async def player(player_id: int = Path(description="The Player ID")):
+    return await get_request(get_settings().routes.player, params={"player_id": player_id})

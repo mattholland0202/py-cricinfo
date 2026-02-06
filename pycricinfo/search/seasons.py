@@ -11,7 +11,7 @@ from pycricinfo.models.source.pages.series import MatchSeries, MatchTypeWithSeri
 from pycricinfo.types.match_types import MatchTypeNames
 
 
-def get_match_types_in_season(
+async def get_match_types_in_season(
     season_name: str | int, type_filter: Optional[MatchTypeNames] = None
 ) -> list[MatchTypeWithSeries]:
     """
@@ -27,7 +27,7 @@ def get_match_types_in_season(
     list[MatchTypeWithSeries]
         A list of match types, each containing a list of series in that match type for this season.
     """
-    content = get_request(
+    content = await get_request(
         route=get_settings().page_routes.series_in_season,
         params={"season_name": quote(str(season_name))},
         base_route=BaseRoute.page,

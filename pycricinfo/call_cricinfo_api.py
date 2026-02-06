@@ -4,7 +4,7 @@ from pycricinfo.models.output.scorecard import CricinfoScorecard
 from pycricinfo.models.source import APIResponseCommentary, Commentary, Match, MatchBasic, Player, TeamFull
 
 
-def get_player(player_id: int) -> Player:
+async def get_player(player_id: int) -> Player:
     """
     Get a player by their ID.
 
@@ -18,10 +18,10 @@ def get_player(player_id: int) -> Player:
     Player
         A parsed Pydantic model representing the player.
     """
-    return get_and_parse(get_settings().routes.player, Player, params={"player_id": player_id})
+    return await get_and_parse(get_settings().routes.player, Player, params={"player_id": player_id})
 
 
-def get_team(team_id: int) -> TeamFull:
+async def get_team(team_id: int) -> TeamFull:
     """
     Get a team by its ID.
 
@@ -36,10 +36,10 @@ def get_team(team_id: int) -> TeamFull:
         A parsed Pydantic model representing the team.
     """
     # TODO: Format "classes" field onto what match type they represent
-    return get_and_parse(get_settings().routes.team, TeamFull, params={"team_id": team_id})
+    return await get_and_parse(get_settings().routes.team, TeamFull, params={"team_id": team_id})
 
 
-def get_match_basic(match_id: int) -> MatchBasic:
+async def get_match_basic(match_id: int) -> MatchBasic:
     """
     Get basic match information by match ID.
 
@@ -53,10 +53,10 @@ def get_match_basic(match_id: int) -> MatchBasic:
     MatchBasic
         A parsed Pydantic model representing the basic match information.
     """
-    return get_and_parse(get_settings().routes.match_basic, MatchBasic, params={"match_id": match_id})
+    return await get_and_parse(get_settings().routes.match_basic, MatchBasic, params={"match_id": match_id})
 
 
-def get_match(series_id: int, match_id: int) -> Match:
+async def get_match(series_id: int, match_id: int) -> Match:
     """
     Get detailed match information by match ID.
 
@@ -73,7 +73,7 @@ def get_match(series_id: int, match_id: int) -> Match:
     Match
         A parsed Pydantic model representing the match details.
     """
-    return get_and_parse(
+    return await get_and_parse(
         get_settings().routes.match_summary,
         Match,
         params={"series_id": series_id, "match_id": match_id},
@@ -81,7 +81,7 @@ def get_match(series_id: int, match_id: int) -> Match:
     )
 
 
-def get_match_raw(series_id: int, match_id: int) -> dict:
+async def get_match_raw(series_id: int, match_id: int) -> dict:
     """
     Get raw match data by match ID.
 
@@ -98,7 +98,7 @@ def get_match_raw(series_id: int, match_id: int) -> dict:
     dict
         The raw match data as a dictionary.
     """
-    return get_request(
+    return await get_request(
         get_settings().routes.match_summary,
         params={"series_id": series_id, "match_id": match_id},
         base_route=BaseRoute.site,
@@ -106,7 +106,7 @@ def get_match_raw(series_id: int, match_id: int) -> dict:
     )
 
 
-def get_scorecard(series_id: int, match_id: int) -> CricinfoScorecard:
+async def get_scorecard(series_id: int, match_id: int) -> CricinfoScorecard:
     """
     Get a match and generate and return a scorecard for it.
 
@@ -120,11 +120,11 @@ def get_scorecard(series_id: int, match_id: int) -> CricinfoScorecard:
     Scorecard
         A scorecard object containing match details and scores.
     """
-    match = get_match(series_id, match_id)
+    match = await get_match(series_id, match_id)
     return CricinfoScorecard(match=match)
 
 
-def get_play_by_play(match_id: int, innings: int = 1, page: int = 1) -> Commentary:
+async def get_play_by_play(match_id: int, innings: int = 1, page: int = 1) -> Commentary:
     """
     Get a page of ball-by-ball data for a match, processed into a list of CommentaryItems.
 
@@ -142,7 +142,7 @@ def get_play_by_play(match_id: int, innings: int = 1, page: int = 1) -> Commenta
     list[CommentaryItem]
         A list of parsed Pydantic models representing the ball-by-ball commentary.
     """
-    response = get_and_parse(
+    response = await get_and_parse(
         get_settings().routes.play_by_play_page,
         APIResponseCommentary,
         {"match_id": match_id, "page": page, "innings": innings},
@@ -152,7 +152,7 @@ def get_play_by_play(match_id: int, innings: int = 1, page: int = 1) -> Commenta
     return response.commentary if response and response.commentary else []
 
 
-def get_play_by_play_raw(match_id: int, page: int = 1, innings: int = 1) -> dict:
+async def get_play_by_play_raw(match_id: int, page: int = 1, innings: int = 1) -> dict:
     """
     Get a page of ball-by-ball data for a match.
 
@@ -170,7 +170,7 @@ def get_play_by_play_raw(match_id: int, page: int = 1, innings: int = 1) -> dict
     dict
         The raw play-by-play data as a dictionary.
     """
-    return get_request(
+    return await get_request(
         get_settings().routes.play_by_play_page,
         {"match_id": match_id, "page": page, "innings": innings},
         base_route=BaseRoute.site,

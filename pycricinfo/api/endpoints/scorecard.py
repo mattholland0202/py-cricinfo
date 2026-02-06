@@ -13,7 +13,7 @@ router = APIRouter(prefix="/scorecard", tags=["scorecard"])
     responses={status.HTTP_200_OK: {"description": "The match scorecard"}},
     summary="Get a match scorecard",
 )
-def scorecard(
+async def scorecard(
     series_id: int = Path(description="The Series ID"), match_id: int = Path(description="The Match ID")
 ) -> CricinfoScorecard:
-    return get_scorecard(series_id, match_id)
+    return await get_scorecard(series_id, match_id)

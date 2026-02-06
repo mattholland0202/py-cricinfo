@@ -10,8 +10,9 @@ dependencies = [
   "prettytable>=3.16.0",
   "pydantic>=2.11.5",
   "pydantic-settings>=2.9.1",
-  "requests>=2.32.3",
+  "aiohttp>=3.9.5",
   "rich>=14.2.0",
+  "uvicorn>=0.34.2",
 ]
 authors = [{ name = "Matt Holland" }]
 license = { text = "MIT" }
@@ -34,15 +35,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project.optional-dependencies]
-api = [
-  "fastapi>=0.115.12",
-  "fastapi-pagination>=0.15.0",
-  "uvicorn>=0.34.2",
-]
-dev = [
-    "pytest>=8.4.1",
-    "ruff>=0.11.0",
-]
+api = ["fastapi>=0.115.12", "fastapi-pagination>=0.15.0", "uvicorn>=0.34.2"]
+dev = ["pytest>=8.4.1", "ruff>=0.11.0"]
 
 [project.scripts]
 print_scorecard = 'pycricinfo.output:print_scorecard'
@@ -74,4 +68,5 @@ packages = ["pycricinfo"]
 [dependency-groups]
 dev = [
     "pytest>=8.4.1",
+    "ruff>=0.11.11",
 ]
