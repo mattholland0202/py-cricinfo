@@ -76,8 +76,8 @@ For scorecards as above, use:
 from pycricinfo.search import get_scorecard
 
 
-def show_scorecard(series_id: int, match_id: int):
-    scorecard = get_scorecard(series_id, match_id)
+async def show_scorecard(series_id: int, match_id: int):
+    scorecard = await get_scorecard(series_id, match_id)
     scorecard.show()
 ```
 
@@ -87,8 +87,8 @@ Other data is available, always returning strongly typed and documented Pydantic
 from pycricinfo.search import get_player
 
 
-def fetch_player_from_cricinfo(player_id: int):
-    cricinfo_player = get_player(player_id)
+async def fetch_player_from_cricinfo(player_id: int):
+    cricinfo_player = await get_player(player_id)
     print(cricinfo_player.display_name)
 ```
 

@@ -26,6 +26,9 @@ jobs:
       - name: Install the project
         run: uv sync --locked --all-extras --dev
 
+      - name: Lint
+        run: uv ruff check .
+
       - name: Run tests
         run: uv run pytest tests/ -v
 

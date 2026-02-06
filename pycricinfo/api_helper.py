@@ -95,10 +95,15 @@ async def get_request(
         base = get_settings().pages_base_route
     full_route = f"{base}{route}"
 
+    referer = full_route if base_route == BaseRoute.page else urljoin(full_route, urlparse(full_route).path)
+
     headers = {
         "User-Agent": get_settings().page_headers.user_agent,
-        "Referer": urljoin(route, urlparse(route).path),
+        "Referer": referer,
         "Accept": get_settings().page_headers.accept,
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
     }
 
     logger.debug(f"Querying: {full_route}", extra={"cricket_stats.request_id": request_id})
