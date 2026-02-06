@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.23]
 ### Changed
 - Move `MatchTypeNames` to a better location
+- Swap to `aiohttp` for requests, and make library async throughout
 
 ## [0.0.22]
 ### Added
