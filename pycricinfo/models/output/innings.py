@@ -6,7 +6,7 @@ from pydantic import AliasChoices, BaseModel, Field, computed_field, model_valid
 
 from pycricinfo.models.output.common import SNAKE_CASE_REGEX, HeaderlessTableMixin
 from pycricinfo.models.source.api.athelete import AthleteWithFirstAndLastName
-from pycricinfo.models.source.api.linescores import BaseInningsDetails
+from pycricinfo.models.source.api.innings import BaseInningsDetails
 from pycricinfo.models.source.api.team import TeamWithColorAndLogos
 
 # ANSI escape codes for colors
@@ -14,8 +14,8 @@ RED = "\033[31m"
 RESET = "\033[0m"
 
 
-class LinescoreStatsLookupMixin(BaseModel, ABC):
-    def add_linescore_stats_as_properties(data: dict, *args) -> dict:
+class InningsStatsLookupMixin(BaseModel, ABC):
+    def add_innings_stats_as_properties(data: dict, *args) -> dict:
         """
         Add items to the data dictionary so that extra keys can be deserialized into the Pydantic model.
 
@@ -32,8 +32,8 @@ class LinescoreStatsLookupMixin(BaseModel, ABC):
         dict
             The input data dictionary, with new keys added
         """
-        linescore: BaseInningsDetails = data.get("linescore")
-        if not linescore:
+        innings: BaseInningsDetails = data.get("player_innings")
+        if not innings:
             return data
 
         for name in args:
@@ -42,7 +42,7 @@ class LinescoreStatsLookupMixin(BaseModel, ABC):
             name_split = str(name).split(".")
             stat_name = name_split[1] if len(name_split) > 1 else name_split[0]
 
-            value = linescore.find(name)
+            value = innings.find(name)
             if value is not None:
                 data[SNAKE_CASE_REGEX.sub("_", stat_name).lower()] = value
         return data
@@ -312,7 +312,7 @@ class Innings(BaseModel, HeaderlessTableMixin):
         print(table)
 
 
-class CricinfoBattingInnings(BattingInnings, LinescoreStatsLookupMixin):
+class CricinfoBattingInnings(BattingInnings, InningsStatsLookupMixin):
     player: AthleteWithFirstAndLastName  # Could be full Athlete
 
     @model_validator(mode="before")
@@ -321,12 +321,12 @@ class CricinfoBattingInnings(BattingInnings, LinescoreStatsLookupMixin):
         """
         Run before Pydantic validation to create the required fields in the data dictionary.
 
-        Find the batting statistics in the linescore and add them as properties to the data dictionary.
+        Find the batting statistics in the innings and add them as properties to the data dictionary.
 
         Parameters
         ----------
         data : dict
-            The input data being validated into this model. It should contain a "linescore" key with a
+            The input data being validated into this model. It should contain a "innings" key with a
             BaseInningsDetails object.
 
         Returns
@@ -335,7 +335,7 @@ class CricinfoBattingInnings(BattingInnings, LinescoreStatsLookupMixin):
             The transformed data dictionary with the required fields for a CricinfoBattingInnings, which Pydantic can
             now validate.
         """
-        data = cls.add_linescore_stats_as_properties(
+        data = cls.add_innings_stats_as_properties(
             data,
             "batting.dismissal_text",
             "runs",
@@ -350,7 +350,7 @@ class CricinfoBattingInnings(BattingInnings, LinescoreStatsLookupMixin):
         return data
 
 
-class CricinfoBowlingInnings(BowlingInnings, LinescoreStatsLookupMixin):
+class CricinfoBowlingInnings(BowlingInnings, InningsStatsLookupMixin):
     player: AthleteWithFirstAndLastName  # Could be full Athlete
 
     @model_validator(mode="before")
@@ -359,12 +359,12 @@ class CricinfoBowlingInnings(BowlingInnings, LinescoreStatsLookupMixin):
         """
         Run before Pydantic validation to create the required fields in the data dictionary.
 
-        Find the bowling statistics in the linescore and add them as properties to the data dictionary.
+        Find the bowling statistics in the innings and add them as properties to the data dictionary.
 
         Parameters
         ----------
         data : dict
-            The input data being validated into this model. It should contain a "linescore" key with a
+            The input data being validated into this model. It should contain a "innings" key with a
             BaseInningsDetails object.
 
         Returns
@@ -373,7 +373,7 @@ class CricinfoBowlingInnings(BowlingInnings, LinescoreStatsLookupMixin):
             The transformed data dictionary with the required fields for a CricinfoBowlingInnings, which Pydantic can
             now validate.
         """
-        return cls.add_linescore_stats_as_properties(
+        return cls.add_innings_stats_as_properties(
             data,
             "overs",
             "maidens",
@@ -389,7 +389,7 @@ class CricinfoBowlingInnings(BowlingInnings, LinescoreStatsLookupMixin):
         )
 
 
-class CricinfoInnings(Innings, LinescoreStatsLookupMixin):
+class CricinfoInnings(Innings, InningsStatsLookupMixin):
     team: TeamWithColorAndLogos
 
     @model_validator(mode="before")
@@ -398,12 +398,12 @@ class CricinfoInnings(Innings, LinescoreStatsLookupMixin):
         """
         Run before Pydantic validation to create the required fields in the data dictionary.
 
-        Find the innings statistics in the linescore and add them as properties to the data dictionary.
+        Find the statistics in the innings and add them as properties to the data dictionary.
 
         Parameters
         ----------
         data : dict
-            The input data being validated into this model. It should contain a "linescore" key with a
+            The input data being validated into this model. It should contain a "player_innings" key with a
             BaseInningsDetails object.
 
         Returns
@@ -412,7 +412,7 @@ class CricinfoInnings(Innings, LinescoreStatsLookupMixin):
             The transformed data dictionary with the required fields for a CricinfoInnings, which Pydantic can
             now validate.
         """
-        return cls.add_linescore_stats_as_properties(
+        return cls.add_innings_stats_as_properties(
             data,
             "bpo",
             "byes",

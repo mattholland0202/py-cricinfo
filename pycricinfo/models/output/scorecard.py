@@ -72,18 +72,18 @@ class CricinfoScorecard(Scorecard):
             if not response:
                 continue
 
-            team, linescore = response
+            team, team_innings = response
             innings.append(
                 CricinfoInnings(
                     number=i,
                     team=team,
                     batting_team_name=team.display_name,
-                    batting_score=linescore.runs,
-                    wickets=linescore.wickets,
-                    overs=linescore.overs,
-                    linescore=linescore,
-                    declared=linescore.declared,
-                    follow_on=linescore.follow_on,
+                    batting_score=team_innings.runs,
+                    wickets=team_innings.wickets,
+                    overs=team_innings.overs,
+                    linescore=team_innings,
+                    declared=team_innings.declared,
+                    follow_on=team_innings.follow_on,
                 )
             )
         for roster in match.rosters:
@@ -121,18 +121,18 @@ class CricinfoScorecard(Scorecard):
         player : MatchPlayer
             The player whose data will be used to enrich the innings.
         """
-        for linescore in player.linescores:
-            if bool(linescore.batted) and bool(int(linescore.batted)):
+        for player_innings in player.innings:
+            if bool(player_innings.batted) and bool(int(player_innings.batted)):
                 bat = CricinfoBattingInnings(
                     player=player.athlete,
                     display_name=player.athlete.display_name,
                     captain=player.captain,
                     keeper=player.keeper,
-                    linescore=linescore,
+                    player_innings=player_innings,
                 )
-                innings[linescore.period - 1].batters.append(bat)
-            elif bool(linescore.bowled) and bool(int(linescore.bowled)):
+                innings[player_innings.period - 1].batters.append(bat)
+            elif bool(player_innings.bowled) and bool(int(player_innings.bowled)):
                 bowl = CricinfoBowlingInnings(
-                    player=player.athlete, display_name=player.athlete.display_name, linescore=linescore
+                    player=player.athlete, display_name=player.athlete.display_name, player_innings=player_innings
                 )
-                innings[linescore.period - 1].bowlers.append(bowl)
+                innings[player_innings.period - 1].bowlers.append(bowl)

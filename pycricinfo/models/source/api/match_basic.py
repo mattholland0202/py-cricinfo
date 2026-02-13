@@ -10,7 +10,7 @@ class MatchCompetitorBasic(CCBaseModel):
     home_or_away: str = Field(validation_alias=AliasChoices("home_or_away", "homeAway"))
     team: RefMixin
     score: RefMixin
-    linescores: RefMixin
+    innings: RefMixin = Field(validation_alias=AliasChoices("innings", "linescores"))
     roster: RefMixin
     leaders: RefMixin
     statistics: RefMixin

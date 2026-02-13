@@ -4,7 +4,7 @@ from pydantic import AliasChoices, BaseModel, Field, computed_field
 
 from pycricinfo.models.source.api.athelete import Athlete
 from pycricinfo.models.source.api.common import CCBaseModel, Position
-from pycricinfo.models.source.api.linescores import PlayerInningsDetails
+from pycricinfo.models.source.api.innings import PlayerInningsDetails
 from pycricinfo.models.source.api.team import TeamWithColorAndLogos
 
 
@@ -15,7 +15,7 @@ class MatchPlayer(CCBaseModel):
     starter: bool
     athlete: Athlete
     position: Position
-    linescores: list[PlayerInningsDetails]
+    innings: list[PlayerInningsDetails] = Field(validation_alias=AliasChoices("innings", "linescores"))
     subbedIn: bool
     subbedOut: bool
 

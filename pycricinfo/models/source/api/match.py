@@ -4,8 +4,8 @@ from typing import Literal, Optional
 from pydantic import AliasChoices, BaseModel, Field, computed_field
 
 from pycricinfo.models.source.api.common import CCBaseModel, Link, MatchClass
+from pycricinfo.models.source.api.innings import TeamInningsDetails
 from pycricinfo.models.source.api.league import League
-from pycricinfo.models.source.api.linescores import TeamInningsDetails
 from pycricinfo.models.source.api.match_note import MatchNote
 from pycricinfo.models.source.api.official import Official
 from pycricinfo.models.source.api.roster import TeamLineup
@@ -81,9 +81,9 @@ class MatchHeader(CCBaseModel):
             The team and innings details for the specified innings number, or None if not found.
         """
         for competitor in self.competition.competitors:
-            for linescore in competitor.innings:
-                if linescore.period == innings_number and linescore.is_batting:
-                    return competitor.team, linescore
+            for team_innings in competitor.innings:
+                if team_innings.period == innings_number and team_innings.is_batting:
+                    return competitor.team, team_innings
 
 
 class MatchInfo(BaseModel):

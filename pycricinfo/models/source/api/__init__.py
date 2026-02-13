@@ -6,8 +6,8 @@ from .bowling import *
 from .commentary import *
 from .common import *
 from .dismissal import *
+from .innings import *
 from .league import *
-from .linescores import *
 from .match_basic import *
 from .match_note import *
 from .match import *
