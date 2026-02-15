@@ -1,24 +1,9 @@
-from enum import Enum
 from typing import Optional
 
 from pydantic import Field, HttpUrl
 
 from pycricinfo.models.source.api.common import CCBaseModel
-
-
-class MatchNoteType(Enum):
-    SERIES_NOTE = "seriesnote"
-    POINTS = "points"
-    MATCH_NUMBER = "matchnumber"
-    SEASON = "season"
-    MATCH_DAYS = "matchdays"
-    TOSS = "toss"
-    LIVE_COMMENTATOR = "livecommentator"
-    LIVE_SCORER = "livescorer"
-    MATCH_NOTE = "matchnote"
-    CLOSE_OF_PLAY = "closeofplay"
-    HOURS_OF_PLAY = "hoursofplay"
-    PLAYER_REPLACEMENT = "playerreplacement"
+from pycricinfo.types.match_types import MatchNoteType
 
 
 class MatchNote(CCBaseModel):

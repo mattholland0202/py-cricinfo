@@ -18,3 +18,29 @@ class MatchTypeNames(str, Enum):
     OTHER_MATCHES = "Other matches"
     OTHER_ODI_MATCHES = "Other one-day/limited-overs matches"
     OTHER_T20_MATCHES = "Other Twenty20 matches"
+
+
+class MatchNoteType(Enum):
+    SERIES_NOTE = "seriesnote"
+    POINTS = "points"
+    MATCH_NUMBER = "matchnumber"
+    SEASON = "season"
+    MATCH_DAYS = "matchdays"
+    TOSS = "toss"
+    LIVE_COMMENTATOR = "livecommentator"
+    LIVE_SCORER = "livescorer"
+    MATCH_NOTE = "matchnote"
+    CLOSE_OF_PLAY = "closeofplay"
+    HOURS_OF_PLAY = "hoursofplay"
+    PLAYER_REPLACEMENT = "playerreplacement"
+    HAWKEYE = "hawkeye"
+
+
+class DeliveryPlayTypes(int, Enum):
+    RUN = 1
+    NO_RUN = 2
+    FOUR = 3
+    SIX = 4
+    BYE = 7
+    LEG_BYE = 8
+    OUT = 9

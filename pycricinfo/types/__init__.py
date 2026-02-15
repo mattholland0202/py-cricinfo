@@ -1,3 +1,3 @@
-from .match_types import MatchTypeNames
+from .match_types import DeliveryPlayTypes, MatchNoteType, MatchTypeNames
 
-__all__ = ["MatchTypeNames"]
+__all__ = ["MatchTypeNames", "DeliveryPlayTypes", "MatchNoteType"]
