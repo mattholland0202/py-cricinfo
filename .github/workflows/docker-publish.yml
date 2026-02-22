@@ -4,7 +4,6 @@ on:
   workflow_run:
     workflows: ["Upload to PyPi"]
     types: [completed]
-    branches: [main]
 
 env:
   REGISTRY: ghcr.io
