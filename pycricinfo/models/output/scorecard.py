@@ -81,7 +81,7 @@ class CricinfoScorecard(Scorecard):
                     batting_score=team_innings.runs,
                     wickets=team_innings.wickets,
                     overs=team_innings.overs,
-                    linescore=team_innings,
+                    innings=team_innings,
                     declared=team_innings.declared,
                     follow_on=team_innings.follow_on,
                 )
@@ -126,6 +126,7 @@ class CricinfoScorecard(Scorecard):
                 bat = CricinfoBattingInnings(
                     player=player.athlete,
                     display_name=player.athlete.display_name,
+                    player_id=player.athlete.id,
                     captain=player.captain,
                     keeper=player.keeper,
                     player_innings=player_innings,
@@ -133,6 +134,9 @@ class CricinfoScorecard(Scorecard):
                 innings[player_innings.period - 1].batters.append(bat)
             elif bool(player_innings.bowled) and bool(int(player_innings.bowled)):
                 bowl = CricinfoBowlingInnings(
-                    player=player.athlete, display_name=player.athlete.display_name, player_innings=player_innings
+                    player=player.athlete,
+                    display_name=player.athlete.display_name,
+                    player_id=player.athlete.id,
+                    player_innings=player_innings,
                 )
                 innings[player_innings.period - 1].bowlers.append(bowl)

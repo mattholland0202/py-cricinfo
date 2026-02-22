@@ -5,7 +5,7 @@ from prettytable import PrettyTable
 from pydantic import AliasChoices, BaseModel, Field, computed_field, model_validator
 
 from pycricinfo.models.output.common import SNAKE_CASE_REGEX, HeaderlessTableMixin
-from pycricinfo.models.source.api.athelete import AthleteWithFirstAndLastName
+from pycricinfo.models.source.api.athelete import Athlete
 from pycricinfo.models.source.api.innings import BaseInningsDetails
 from pycricinfo.models.source.api.team import TeamWithColorAndLogos
 
@@ -32,7 +32,7 @@ class InningsStatsLookupMixin(BaseModel, ABC):
         dict
             The input data dictionary, with new keys added
         """
-        innings: BaseInningsDetails = data.get("player_innings")
+        innings: BaseInningsDetails = data.get("innings") or data.get("player_innings")
         if not innings:
             return data
 
@@ -54,6 +54,7 @@ class PlayerInningsCommon(BaseModel, ABC):
     """
 
     order: int = Field(description="The order within the innings that this player batted or bowled")
+    player_id: str | int = Field(description="The unique identifier for the player in this innings")
 
     def colour_row(self, row_items: list[str], colour: str) -> list[str]:
         """
@@ -80,6 +81,11 @@ class PlayerInningsCommon(BaseModel, ABC):
 
 
 class BattingInnings(PlayerInningsCommon):
+    innings_id: Optional[int] = Field(
+        default=None,
+        description="The unique identifier for the innings that this batting performance belongs to",
+        validation_alias=AliasChoices("innings_id", "battingId", "batting_id"),
+    )
     display_name: str
     dismissal_text: str
     captain: Optional[bool] = None
@@ -137,6 +143,11 @@ class BattingInnings(PlayerInningsCommon):
 
 
 class BowlingInnings(PlayerInningsCommon):
+    innings_id: Optional[int] = Field(
+        default=None,
+        description="The unique identifier for the innings that this batting performance belongs to",
+        validation_alias=AliasChoices("innings_id", "bowlingId", "bowling_id"),
+    )
     display_name: str
     overs: float | int
     maidens: int
@@ -313,7 +324,7 @@ class Innings(BaseModel, HeaderlessTableMixin):
 
 
 class CricinfoBattingInnings(BattingInnings, InningsStatsLookupMixin):
-    player: AthleteWithFirstAndLastName  # Could be full Athlete
+    player: Athlete
 
     @model_validator(mode="before")
     @classmethod
@@ -346,12 +357,13 @@ class CricinfoBattingInnings(BattingInnings, InningsStatsLookupMixin):
             "sixes",
             "minutes",
             "strikeRate",
+            "battingId",
         )
         return data
 
 
 class CricinfoBowlingInnings(BowlingInnings, InningsStatsLookupMixin):
-    player: AthleteWithFirstAndLastName  # Could be full Athlete
+    player: Athlete
 
     @model_validator(mode="before")
     @classmethod
@@ -386,6 +398,7 @@ class CricinfoBowlingInnings(BowlingInnings, InningsStatsLookupMixin):
             "foursConceded",
             "sixesConceded",
             "economyRate",
+            "bowlingId",
         )
 
 
