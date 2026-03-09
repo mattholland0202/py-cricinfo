@@ -27,6 +27,22 @@ class PlayerInningsDetails(BaseInningsDetails):
 
     @computed_field
     @property
+    def absent(self) -> bool:
+        return self.find("absentDescription") == "absent"
+
+    @computed_field
+    @property
+    def retired_hurt(self) -> bool:
+        return (not self.absent) and self.find("retiredDescription") == "hurt"
+
+    @computed_field
+    @property
+    def is_batting_innings(self) -> bool:
+        did_bat = bool(self.batted) and bool(int(self.batted))
+        return did_bat or self.absent
+
+    @computed_field
+    @property
     def bowled(self) -> bool:
         return self.find("bowled")
 

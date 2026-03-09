@@ -53,7 +53,10 @@ class PlayerInningsCommon(BaseModel, ABC):
     Common base class shared between batting and bowling innings
     """
 
-    order: int = Field(description="The order within the innings that this player batted or bowled")
+    order: int = Field(
+        description="The order within the innings that this player batted or bowled",
+        validation_alias=AliasChoices("order", "batting_position", "bowling_position"),
+    )
     player_id: str | int = Field(description="The unique identifier for the player in this innings")
 
     def colour_row(self, row_items: list[str], colour: str) -> list[str]:
@@ -97,6 +100,8 @@ class BattingInnings(PlayerInningsCommon):
     minutes: Optional[int] = None
     not_out: bool = Field(validation_alias=AliasChoices("not_out", "notouts"))
     strike_rate: Optional[float | str] = Field(default=None, validation_alias=AliasChoices("strike_rate", "strikeRate"))
+    absent: Optional[bool] = None
+    retired_hurt: Optional[bool] = None
 
     @computed_field
     @property
@@ -123,21 +128,29 @@ class BattingInnings(PlayerInningsCommon):
         row_data = [
             self.player_display,
             self.dismissal_text,
-            f"{self.runs}{'*' if self.not_out else ''}",
-            self.balls_faced,
-            self.fours,
-            self.sixes,
         ]
 
-        if kwargs.get("include_batting_minutes"):
-            row_data.append(self.minutes)
+        if self.absent:
+            row_data.extend(["-", "-", "-", "-"])
+        else:
+            row_data.extend(
+                [
+                    f"{self.runs}{'*' if self.not_out else ''}",
+                    self.balls_faced,
+                    self.fours,
+                    self.sixes,
+                ]
+            )
 
-        row_data.append(self.strike_rate)
+        if kwargs.get("include_batting_minutes"):
+            row_data.append("-") if self.absent else row_data.append(self.minutes)
+
+        row_data.append("-") if self.absent else row_data.append(self.strike_rate)
 
         table.add_row(
             self.colour_row(
                 row_data,
-                RED if self.not_out else RESET,
+                RED if (self.not_out and not self.retired_hurt) else RESET,
             )
         )
 
@@ -352,13 +365,18 @@ class CricinfoBattingInnings(BattingInnings, InningsStatsLookupMixin):
             "runs",
             "ballsFaced",
             "notouts",
-            "batting.order",
+            "battingPosition",
             "fours",
             "sixes",
             "minutes",
             "strikeRate",
             "battingId",
+            "absentDescription",
+            "retiredDescription",
         )
+
+        if data.get("absent_description") == "absent":
+            data["dismissal_text"] = "absent hurt"
         return data
 
 

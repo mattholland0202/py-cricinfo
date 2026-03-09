@@ -42,7 +42,7 @@ def _print_scorecard_from_match_id(series_id: int, match_id: int):
 def _print_scorecard_from_match(match: Match):
     try:
         sc = CricinfoScorecard(match=match)
-        sc.show(include_batting_minutes=False, include_bowling_dots=False)
+        sc.show(include_batting_minutes=True, include_bowling_dots=False)   # TODO: make these parameterised
     except ValidationError as validation_error:
         print(validation_error.errors())
         raise

@@ -122,7 +122,7 @@ class CricinfoScorecard(Scorecard):
             The player whose data will be used to enrich the innings.
         """
         for player_innings in player.innings:
-            if bool(player_innings.batted) and bool(int(player_innings.batted)):
+            if player_innings.is_batting_innings:
                 bat = CricinfoBattingInnings(
                     player=player.athlete,
                     display_name=player.athlete.display_name,
@@ -130,6 +130,8 @@ class CricinfoScorecard(Scorecard):
                     captain=player.captain,
                     keeper=player.keeper,
                     player_innings=player_innings,
+                    absent=player_innings.absent,
+                    retired_hurt=player_innings.retired_hurt
                 )
                 innings[player_innings.period - 1].batters.append(bat)
             elif bool(player_innings.bowled) and bool(int(player_innings.bowled)):
