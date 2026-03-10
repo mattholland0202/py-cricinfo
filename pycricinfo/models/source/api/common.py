@@ -54,7 +54,7 @@ class Link(CCBaseModel):
 class Position(RefMixin):
     displayName: Optional[str] = None
     id: Optional[str] = None
-    name: str
+    name: Optional[str] = None
     abbreviation: Optional[str] = None
 
 
