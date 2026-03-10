@@ -16,8 +16,8 @@ class MatchPlayer(CCBaseModel):
     athlete: Athlete
     position: Position
     innings: list[PlayerInningsDetails] = Field(validation_alias=AliasChoices("innings", "linescores"))
-    subbedIn: bool
-    subbedOut: bool
+    subbed_in: bool
+    subbed_out: bool
 
     @computed_field
     @property

@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, HttpUrl
 
-from pycricinfo.models.source.api.common import CCBaseModel, DisplayNameMixin, Link, RefMixin
+from pycricinfo.models.source.api.common import CCBaseModel, DisplayNameMixin, Link, Position, RefMixin
 
 
 class Style(CCBaseModel):
@@ -49,6 +49,7 @@ class Athlete(AthleteWithFirstAndLastName):
     uid: str
     name: str
     style: Optional[list[Style]] = None
+    position: Optional[Position] = None
     batting_name: str
     fielding_name: str
     headshot: Optional[Headshot] = None
