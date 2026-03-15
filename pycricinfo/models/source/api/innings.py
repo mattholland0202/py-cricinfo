@@ -5,20 +5,44 @@ from pydantic import AliasChoices, BaseModel, Field, computed_field, field_valid
 
 from pycricinfo.models.source.api.athelete import Athlete
 from pycricinfo.models.source.api.common import CCBaseModel, RefMixin
-from pycricinfo.models.source.api.statistics import PlayerStatisticsCategory, StatisticsCategory, TeamStatisticsCategory
+from pycricinfo.models.source.api.statistics import (
+    PlayerStatisticsCategoryContainer,
+    StatsCategoryContainer,
+    TeamStatisticsCategory,
+)
 
 
 class BaseInningsDetails(CCBaseModel, ABC):
-    period: int
-    statistics: StatisticsCategory
+    """
+    Abstract base class for commong fields between a Team's Innings and individual Player innings
+    """
 
-    def find(self, name: str) -> int | str | float:
+    period: int = Field(description="Which period of the match this Innings is")
+    statistics: StatsCategoryContainer = Field(
+        description="The stats category container for this innings. Expected to be overridden by Player or Team stats"
+    )
+
+    def find(self, name: str) -> Optional[int | str | float]:
+        """
+        Find a matching stat within the attached category
+
+        Parameters
+        ----------
+        name : str
+            The name of the stat to find. Just a name if searching within the primary base container, otherwise (if in
+            a Player innings) starting with "batting." or "bowling." to search in those extensions
+
+        Returns
+        -------
+        Optional[int | str | float]
+            The value of the matching stat, if found, otherwise None
+        """
         return self.statistics.find(name)
 
 
 class PlayerInningsDetails(BaseInningsDetails):
-    media_id: int = Field(validation_alias=AliasChoices("media_id", "mediaId"))
-    statistics: PlayerStatisticsCategory
+    media_id: int = Field(description="A media ID for this innings")
+    statistics: PlayerStatisticsCategoryContainer
 
     @computed_field
     @property
@@ -60,9 +84,15 @@ class InningsState(BaseModel):
 
 
 class PartnershipFallOfWicketCommon(RefMixin, CCBaseModel, ABC):
-    wicket_number: int
-    fow_type: Literal["out", "end of innings", "not out", "retired not out"]
-    runs: int
+    """
+    Abstract base class for commong fields between a Partnership and a Fall of Wicket
+    """
+
+    wicket_number: int = Field(description="Which number wicket in the innings this was")
+    fow_type: Literal["out", "end of innings", "not out", "retired not out"] = Field(
+        description="Which of the fixed values for a wicket falling this represents"
+    )
+    runs: int = Field(description="The number of runs scored at this current point")
 
     @field_validator("fow_type", mode="before")
     @classmethod

@@ -6,6 +6,12 @@ from pydantic.alias_generators import to_camel
 
 
 class CCBaseModel(ABC, BaseModel):
+    """
+    Abstract base class for Common Cricinfo (CC) models, which adds a validator so that the source data which
+    contains camelCased fields can be deserialised into models with snake_case fields, and which sets any fields
+    whose values are empty dictionaries to have a value of None
+    """
+
     model_config = ConfigDict(
         alias_generator=AliasGenerator(validation_alias=to_camel), validate_by_name=True, validate_by_alias=True
     )
@@ -23,6 +29,10 @@ class CCBaseModel(ABC, BaseModel):
 
 
 class PagingModel(CCBaseModel):
+    """
+    Details of paging information, included in any APIs which page their responses
+    """
+
     count: int
     page_index: int
     page_size: int
@@ -30,18 +40,34 @@ class PagingModel(CCBaseModel):
 
 
 class RefMixin(CCBaseModel):
+    """
+    Mixin property of a URL included within models as a direct link to that entity
+    """
+
     ref: Optional[HttpUrl] = Field(default=None, validation_alias=AliasChoices("ref", "$ref", "href"))
 
 
 class DateMixin(CCBaseModel):
+    """
+    Mixin property for a date
+    """
+
     date: Optional[str] = None
 
 
 class DisplayNameMixin(BaseModel):
+    """
+    Mixin property for a display name
+    """
+
     display_name: str
 
 
 class Link(CCBaseModel):
+    """
+    All details of a link to an entity
+    """
+
     language: Optional[str] = None
     rel: Optional[list[str] | str] = None
     href: HttpUrl
@@ -52,16 +78,29 @@ class Link(CCBaseModel):
 
 
 class Position(RefMixin):
+    """
+    A Player's position, which can represent both their overall role and their position within a match
+    """
+
     displayName: Optional[str] = None
     id: Optional[str] = None
     name: Optional[str] = None
     abbreviation: Optional[str] = None
 
 
-class Event(RefMixin, DateMixin): ...
+class Event(RefMixin, DateMixin):
+    """
+    An event, containing a link and a date
+    """
+
+    pass
 
 
 class MatchClass(CCBaseModel):
+    """
+    The class (i.e. level and type) of a match
+    """
+
     name: str
     event_type: str
     general_class_id: int
