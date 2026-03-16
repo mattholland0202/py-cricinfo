@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.28]
+### Added
+- Improved comments
+- Git hook to run tests
+
+### Fixed
+- URL encoding slash in page request
+
+### Changed
+- Browser version in UA
+
 ## [0.0.27]
 ### Changed
 - Missing and renamed field in Match Player

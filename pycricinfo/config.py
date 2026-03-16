@@ -30,7 +30,7 @@ class PageRoutes(BaseModel):
 
 
 class PageHeaders(BaseModel):
-    user_agent: str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:147.0) Gecko/20100101 Firefox/147.0"
+    user_agent: str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:148.0) Gecko/20100101 Firefox/148.0"
     accept: str = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
 
 

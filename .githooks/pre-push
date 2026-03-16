@@ -1,0 +1,11 @@
+#!/bin/sh
+
+echo "Running tests before push..."
+uv run pytest .
+
+if [ $? -ne 0 ]; then
+    echo "Tests failed. Push blocked."
+    exit 1
+fi
+
+exit 0

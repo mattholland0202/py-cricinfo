@@ -29,7 +29,7 @@ async def get_match_types_in_season(
     """
     content = await get_request(
         route=get_settings().page_routes.series_in_season,
-        params={"season_name": quote(str(season_name))},
+        params={"season_name": quote(str(season_name), safe="")},
         base_route=BaseRoute.page,
         response_output_sub_folder="seasons",
     )
