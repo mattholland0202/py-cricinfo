@@ -7,6 +7,7 @@ from typing import Optional, Type, TypeVar
 from urllib.parse import urljoin, urlparse
 
 import aiohttp
+import yarl
 from pydantic import BaseModel, ValidationError
 
 from pycricinfo.config import BaseRoute, get_settings
@@ -97,6 +98,21 @@ async def get_request(
 
     referer = full_route if base_route == BaseRoute.page else urljoin(full_route, urlparse(full_route).path)
 
+    if base_route == BaseRoute.page:
+        sec_fetch_headers = {
+            "Upgrade-Insecure-Requests": "1",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "same-origin",
+            "Sec-Fetch-User": "?1",
+        }
+    else:
+        sec_fetch_headers = {
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+        }
+
     headers = {
         "User-Agent": get_settings().page_headers.user_agent,
         "Referer": referer,
@@ -104,12 +120,13 @@ async def get_request(
         "Accept-Language": "en-US,en;q=0.9",
         "Accept-Encoding": "gzip, deflate, br",
         "Connection": "keep-alive",
+        **sec_fetch_headers,
     }
 
     logger.debug(f"Querying: {full_route}", extra={"cricket_stats.request_id": request_id})
 
     async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.get(full_route) as response:
+        async with session.get(yarl.URL(full_route, encoded=True)) as response:
             response_logging_extras["cricket_stats.response_code"] = response.status
 
             if base_route == BaseRoute.page:
