@@ -27,14 +27,14 @@ def _clean_text(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-async def extract_match_ids_from_series(series_id: int | str) -> list[MatchResult]:
+async def get_match_results_in_series(series_id: int | str) -> list[MatchResult]:
     """
-    Extract match IDs from a series by fetching the series page and parsing the matches.
+    Extract match results from a series by fetching the series page and parsing the matches.
 
     Parameters
     ----------
     series_id : int | str
-        The ID of the series to extract match IDs from.
+        The ID of the series to extract match results from.
 
     Returns
     -------

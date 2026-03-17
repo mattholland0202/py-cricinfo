@@ -2,7 +2,7 @@ from fastapi import APIRouter, Path, Query, status
 
 from pycricinfo.models.source.pages.series import MatchResult, MatchTypeWithSeries
 from pycricinfo.search.seasons import get_match_types_in_season
-from pycricinfo.search.series import extract_match_ids_from_series
+from pycricinfo.search.series import get_match_results_in_series
 from pycricinfo.types.match_types import MatchTypeNames
 
 router = APIRouter(prefix="", tags=["seasons"])
@@ -35,4 +35,4 @@ async def match_types_in_season(
     summary="Get a list of IDs of the matches in the supplied series",
 )
 async def match_ids_in_series(data_series_id: int = Path(description="The ID of a series")) -> list[MatchResult]:
-    return await extract_match_ids_from_series(data_series_id)
+    return await get_match_results_in_series(data_series_id)

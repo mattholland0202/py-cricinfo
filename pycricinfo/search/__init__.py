@@ -1,17 +1,7 @@
-from pycricinfo.call_cricinfo_api import (
-    get_match,
-    get_match_basic,
-    get_play_by_play,
-    get_player,
-    get_scorecard,
-    get_team,
-)
+from pycricinfo.search.seasons import get_match_types_in_season
+from pycricinfo.search.series import get_match_results_in_series
 
 __all__ = [
-    "get_match",
-    "get_match_basic",
-    "get_play_by_play",
-    "get_player",
-    "get_scorecard",
-    "get_team",
+    "get_match_types_in_season",
+    "get_match_results_in_series",
 ]

@@ -22,6 +22,7 @@ class TeamWithColorAndLogos(TeamCommon):
 
 
 class TeamFull(TeamWithName):
+    # TODO: Format "classes" field onto what match type they represent
     color: str
     nickname: str
     short_display_name: str

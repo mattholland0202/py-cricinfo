@@ -68,12 +68,12 @@ Installing the optional API dependency adds a further script:
 Runs `uvicorn` to launch a `FastAPI` wrapper around the Cricinfo API, which will launch on port 8000, with the Swagger documentation available at `http://localhost:8000/docs`
 
 ## Sample usage: In code
-Import one of the `get_` function from `pycricinfo.search`.
+Import one of the `get_` function from the root of the library.
 
 For scorecards as above, use:
 
 ```python
-from pycricinfo.search import get_scorecard
+from pycricinfo import get_scorecard
 
 
 async def show_scorecard(series_id: int, match_id: int):
@@ -84,13 +84,32 @@ async def show_scorecard(series_id: int, match_id: int):
 Other data is available, always returning strongly typed and documented Pydantic models, such as:
 
 ```python
-from pycricinfo.search import get_player
+from pycricinfo import get_player
 
 
 async def fetch_player_from_cricinfo(player_id: int):
     cricinfo_player = await get_player(player_id)
     print(cricinfo_player.display_name)
 ```
+
+### Reusing a session
+
+By default, each call creates and closes its own HTTP session. For better reliability when making multiple requests — particularly when fetching data across several seasons or matches — you can create a shared session using `create_session()` and pass it to each call.
+
+A persistent session retains cookies set by the server across requests, which makes subsequent calls appear more like a real browser session and reduces the likelihood of being rejected with transient 5xx errors.
+
+```python
+from pycricinfo import create_session, get_match_types_in_season
+
+
+async def fetch_multiple_seasons():
+    async with create_session() as session:
+        season_2023 = await get_match_types_in_season("2023", session=session)
+        season_2024 = await get_match_types_in_season("2024", session=session)
+        season_2024_25 = await get_match_types_in_season("2024/25", session=session)
+```
+
+The session is used as an async context manager, which ensures it is properly closed when done.
 
 ## Docker
 

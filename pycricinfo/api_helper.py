@@ -18,12 +18,36 @@ logger = logging.getLogger("cricinfo")
 T = TypeVar("T", bound=BaseModel)
 
 
+def create_session() -> aiohttp.ClientSession:
+    """
+    Create a configured aiohttp ClientSession with base headers set.
+
+    Reusing a session across multiple requests persists cookies returned by the
+    server, making subsequent requests appear more like a real browser session.
+    The caller is responsible for closing the session when finished.
+
+    Returns
+    -------
+    aiohttp.ClientSession
+        A session configured with appropriate browser-like default headers.
+    """
+    headers = {
+        "User-Agent": get_settings().page_headers.user_agent,
+        "Accept": get_settings().page_headers.accept,
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
+    }
+    return aiohttp.ClientSession(headers=headers)
+
+
 async def get_and_parse(
     route: str,
     type_to_parse: Type[T],
     params: dict = None,
     null_out_empty_dicts: bool = False,
     base_route: BaseRoute = BaseRoute.core,
+    session: Optional[aiohttp.ClientSession] = None,
 ) -> T:
     """
     Make a GET request to the API and parse the response to the supplied type
@@ -40,12 +64,16 @@ async def get_and_parse(
         Whether to replace any dictionaries that contain only None values with None, by default False
     base_route: BaseRoute, optional
         The base route to use for the API call, by default BaseRoute.core
+    session : aiohttp.ClientSession, optional
+        An existing session to use for the request. If None, a new session is created and
+        closed after the request. Pass a session created by ``create_session()`` to persist
+        cookies across multiple requests, by default None
     Returns
     -------
     T
         The response data parsed into the supplied model
     """
-    api_response = await get_request(route, params, base_route)
+    api_response = await get_request(route, params, base_route, session=session)
 
     if null_out_empty_dicts:
         api_response = replace_empty_objects_with_null(api_response)
@@ -62,9 +90,10 @@ async def get_request(
     params: Optional[dict[str, str]] = None,
     base_route: BaseRoute = BaseRoute.core,
     response_output_sub_folder: str = None,
+    session: Optional[aiohttp.ClientSession] = None,
 ) -> dict | str:
     """
-    Make a GET request to the Football Stats API
+    Make a GET request to the Cricinfo API or page routes.
 
     Parameters
     ----------
@@ -74,10 +103,16 @@ async def get_request(
         Any parameters to fill in into the route, in a dictionary of key-value pairs, by default None
     base_route: BaseRoute, optional
         The base route to use for the API call, by default BaseRoute.core
+    response_output_sub_folder : str, optional
+        Sub-folder within the response output folder to write the response file, by default None
+    session : aiohttp.ClientSession, optional
+        An existing session to use for the request. If None, a new session is created and
+        closed after the request. Pass a session created by ``create_session()`` to persist
+        cookies across multiple requests, by default None
     Returns
     -------
-    dict
-        The JSON content of the API response
+    dict | str
+        The JSON content or HTML text of the response
     """
     request_id = str(uuid.uuid4())
     response_logging_extras = {
@@ -114,19 +149,17 @@ async def get_request(
         }
 
     headers = {
-        "User-Agent": get_settings().page_headers.user_agent,
         "Referer": referer,
-        "Accept": get_settings().page_headers.accept,
-        "Accept-Language": "en-US,en;q=0.9",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Connection": "keep-alive",
         **sec_fetch_headers,
     }
 
     logger.debug(f"Querying: {full_route}", extra={"cricket_stats.request_id": request_id})
 
-    async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.get(yarl.URL(full_route, encoded=True)) as response:
+    owned_session = session is None
+    if owned_session:
+        session = create_session()
+    try:
+        async with session.get(yarl.URL(full_route, encoded=True), headers=headers) as response:
             response_logging_extras["cricket_stats.response_code"] = response.status
 
             if base_route == BaseRoute.page:
@@ -150,6 +183,9 @@ async def get_request(
                 raise CricinfoAPIException(status_code=response.status, route=full_route, content=output)
 
             return output
+    finally:
+        if owned_session:
+            await session.close()
 
 
 def _format_route(route: str, params: dict[str, str] = {}) -> str:

@@ -20,7 +20,7 @@ async def get_match_types_in_season(
     Parameters
     ----------
     season_name : str | int
-        The name of the season to get matches for, e.g. "2024" or "2020-21"
+        The name of the season to get matches for, e.g. "2024" or "2020/21"
 
     Returns
     -------
