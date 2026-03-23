@@ -1,14 +1,13 @@
 from typing import Optional
 
-from pydantic import Field, HttpUrl
+from pydantic import Field
 
-from pycricinfo.models.source.api.common import DateMixin
+from pycricinfo.models.source.api.common import DateMixin, RefMixin
 from pycricinfo.types.match_types import MatchNoteType
 
 
-class MatchNote(DateMixin):
+class MatchNote(DateMixin, RefMixin):
     id: Optional[str | int] = Field(default=None)
     day_number: Optional[str | int] = Field(default=None)
     text: Optional[str] = Field(default=None)
     type: MatchNoteType
-    href: Optional[HttpUrl] = Field(default=None)

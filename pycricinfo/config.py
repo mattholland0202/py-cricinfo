@@ -17,6 +17,21 @@ class CoreAPIRoutes(BaseModel):
     player: str = "teams/0/athletes/{player_id}"
     match_basic: str = "events/{match_id}"
     match_team: str = "leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}"
+    match_team_roster: str = "leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}/roster"
+    match_team_all_innings: str = "leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}/linescores"
+    match_team_innings: str = (
+        "leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}/linescores/0/{innings}"
+    )
+    match_team_statistics: str = (
+        "leagues/{series_id}/events/{match_id}/competitions/{match_id}/competitors/{team_id}/statistics"
+    )
+    match_player_all_innings: str = (
+        "leagues/0/events/{match_id}/competitions/{match_id}/competitors/{team_id}/roster/{player_id}/linescores"
+    )
+    match_player_innings_statistics: str = (
+        "leagues/{series_id}/events/{match_id}/competitions/{match_id}/competitors/{team_id}/"
+        "roster/{player_id}/linescores/0/{innings}/statistics/0"
+    )
     match_summary: str = "{series_id}/summary?event={match_id}"
     league: str = "leagues/{league_id}"
     league_event: str = "leagues/{league_id}/events/{event_id}"

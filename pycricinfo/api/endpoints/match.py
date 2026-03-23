@@ -16,17 +16,18 @@ router = APIRouter(prefix="/match", tags=["match"])
     responses={status.HTTP_200_OK: {"description": "The basic match data"}},
     summary="Get basic match data from the '/events' API",
 )
-async def match_basic(match_id: int = Path(description="The Match ID")) -> MatchBasic:
+async def match_basic(match_id: Annotated[int, Path(description="The ID of the Match")]) -> MatchBasic:
     return await get_match_basic(match_id)
 
 
 @router.get(
     "/{match_id}/team/{team_id}",
-    responses={status.HTTP_200_OK: {"description": "The basic match data"}},
+    responses={status.HTTP_200_OK: {"description": "A team from a Match"}},
     summary="Get a match's Team",
 )
 async def get_match_team(
-    match_id: int = Path(description="The Match ID"), team_id: int = Path(description="The Team ID")
+    match_id: Annotated[int, Path(description="The ID of the Match")],
+    team_id: Annotated[int, Path(description="The ID of the Team")],
 ):
     return await get_request(
         get_settings().routes.match_team,

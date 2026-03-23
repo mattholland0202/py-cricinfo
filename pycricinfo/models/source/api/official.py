@@ -1,12 +1,9 @@
-from pydantic import BaseModel, HttpUrl
-
-from pycricinfo.models.source.api.common import CCBaseModel, Link, Position
+from pycricinfo.models.source.api.common import CCBaseModel, Link, Position, RefMixin
 
 
-class Flag(BaseModel):
+class Flag(RefMixin):
     alt: str
     height: int
-    href: HttpUrl
     rel: list[str]
     width: int
 

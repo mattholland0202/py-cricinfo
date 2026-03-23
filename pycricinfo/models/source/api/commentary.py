@@ -22,7 +22,7 @@ class Bowler(BaseModel):
     conceded: int
 
 
-class Batsman(CCBaseModel):
+class Batter(CCBaseModel):
     athlete: Athlete
     team: Team
     total_runs: int
@@ -117,8 +117,8 @@ class CommentaryItem(CCBaseModel):
     athletes_involved: list[Athlete]
     bowler: Bowler
     other_bowler: Optional[Bowler] = None
-    batsman: Batsman
-    other_batsman: Batsman
+    batter: Batter = Field(validation_alias=AliasChoices("batter", "batsman"))
+    other_batter: Batter = Field(validation_alias=AliasChoices("other_batter", "other_batsman"))
     current_innings_score: Innings = Field(validation_alias=AliasChoices("current_innings_score", "innings"))
     over: Over
     dismissal: Dismissal

@@ -44,7 +44,11 @@ class RefMixin(CCBaseModel):
     Mixin property of a URL included within models as a direct link to that entity
     """
 
-    ref: Optional[HttpUrl] = Field(default=None, validation_alias=AliasChoices("ref", "$ref", "href"))
+    ref: Optional[HttpUrl] = Field(
+        default=None,
+        validation_alias=AliasChoices("ref", "$ref", "href"),
+        description="The url to the entity, which is usually a link to ESPN's CDN",
+    )
 
 
 class DateMixin(CCBaseModel):

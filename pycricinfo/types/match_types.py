@@ -20,7 +20,7 @@ class MatchTypeNames(str, Enum):
     OTHER_T20_MATCHES = "Other Twenty20 matches"
 
 
-class MatchNoteType(Enum):
+class MatchNoteType(str, Enum):
     SERIES_NOTE = "seriesnote"
     POINTS = "points"
     MATCH_NUMBER = "matchnumber"

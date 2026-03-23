@@ -3,6 +3,7 @@ import re
 from prettytable import PrettyTable
 
 SNAKE_CASE_REGEX = re.compile(r"(?<!^)(?=[A-Z])")
+""" Regex to identify positions between lower and uppercase letters, for camel to snake case conversion """
 
 
 class HeaderlessTableMixin:
