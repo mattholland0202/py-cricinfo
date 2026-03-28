@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, computed_field, model_validator
+from pydantic import BaseModel, Field, computed_field, model_validator
 
 from pycricinfo.models.source.api.common import CCBaseModel
 from pycricinfo.models.source.api.dismissal import Dismissal
@@ -47,14 +47,19 @@ class BattingDetails(CCBaseModel):
     order: int
     out_details: Dismissal
     pvp: BattingPvp
-    runs_summary: list[int | str]  # 8 values: dots, singles, twos, threes, fours, X, sixes, X
+    runs_summary: list[int | str] = Field(
+        description="Count of number of deliveries for each possible run count. Will be 8 elements: 0,1,2,3,4,5,6,7",
+        max_length=8,
+    )
     dot_ball_percentage: int
     batting_recent: BattingRecent
     preferred_shot: Optional[PreferredShot] = None
-    scoring_shots: int
-    control_percentage: int
-    wagonZone: list[WagonZone]  # 8 zones: clockwise from long leg
-    wagon: Wagon
+    scoring_shots: Optional[int]
+    control_percentage: Optional[int]
+    wagon_zone: Optional[list[WagonZone]] = Field(
+        description="List of wagon areas, clockwise from long leg", max_length=8
+    )
+    wagon: Optional[Wagon]
 
     @computed_field
     @property

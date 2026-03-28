@@ -3,6 +3,8 @@ from pydantic import AliasChoices, Field
 from pycricinfo.models.source.api.common import CCBaseModel, DateMixin, MatchClass, RefMixin
 from pycricinfo.models.source.api.venue import Venue
 
+# TODO: Extract common base classes with full Match versions
+
 
 class MatchCompetitorBasic(CCBaseModel):
     id: int

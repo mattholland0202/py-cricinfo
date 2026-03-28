@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Lots more missing comments
 
+### Changed
+- Made more fields optional
+- Refactored some common models
+
 ## [0.0.29]
 ### Added
 - More headers to aim to stop 5xx errors
