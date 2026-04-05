@@ -14,7 +14,7 @@ from pycricinfo.models.source.api.team import TeamWithColorAndLogos
 from pycricinfo.models.source.api.venue import Venue
 
 
-class MatchCompetitorCommon(ABC, CCBaseModel):
+class MatchCompetitorCommon(CCBaseModel, ABC):
     """Common fields for a competitor in a match, used in both the basic and full match data models"""
 
     id: int
@@ -46,7 +46,7 @@ class MatchCompetitorBasic(MatchCompetitorCommon):
     record: RefMixin
 
 
-class MatchCompetitonCommon(ABC, CCBaseModel):
+class MatchCompetitonCommon(CCBaseModel, ABC):
     """Common fields for a match competition, used in both the basic and full match data models"""
 
     id: int = Field(description="The Cricinfo ID for the match", examples=["1225249"])
@@ -86,7 +86,7 @@ class MatchCompetitionBasic(MatchCompetitonCommon):
     status: RefMixin
 
 
-class MatchHeaderAndBasicCommon(ABC, CCBaseModel):
+class MatchHeaderAndBasicCommon(CCBaseModel, ABC):
     """Common fields for match data, used in both the basic model and the header section of the full model"""
 
     id: int = Field(description="The Cricinfo ID for the match", examples=["1381212"])
