@@ -1,6 +1,6 @@
 [project]
 name = "pycricinfo"
-version = "0.0.30"
+version = "0.0.31"
 description = "A package to collect data from ESPN Cricinfo"
 readme = "readme.md"
 requires-python = ">=3.13"
@@ -66,7 +66,4 @@ known-first-party = ["pycricinfo"]
 packages = ["pycricinfo"]
 
 [dependency-groups]
-dev = [
-    "pytest>=8.4.1",
-    "ruff>=0.11.11",
-]
+dev = ["pytest>=8.4.1", "ruff>=0.11.11"]

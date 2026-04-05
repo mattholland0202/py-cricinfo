@@ -29,6 +29,7 @@
     "editor.formatOnSave": true,
     "ruff.lineLength": 120,
     "ruff.nativeServer": "on",
+    "ruff.format.preview": true,
     "[python]": {
       "editor.defaultFormatter": "charliermarsh.ruff",
       "editor.formatOnSave": true,

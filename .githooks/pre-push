@@ -1,5 +1,13 @@
 #!/bin/sh
 
+echo "Running ruff check..."
+uv run ruff check .
+
+if [ $? -ne 0 ]; then
+    echo "Ruff check failed. Push blocked."
+    exit 1
+fi
+
 echo "Running tests before push..."
 uv run pytest .
 

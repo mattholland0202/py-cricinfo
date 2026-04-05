@@ -5,8 +5,7 @@ from fastapi import APIRouter, Path, status
 from pycricinfo.api_helper import get_request
 from pycricinfo.call_cricinfo_api import get_match, get_match_basic
 from pycricinfo.config import BaseRoute, get_settings
-from pycricinfo.models.source.api.match import Match
-from pycricinfo.models.source.api.match_basic import MatchBasic
+from pycricinfo.models.source.api.match import Match, MatchBasic
 
 router = APIRouter(prefix="/match", tags=["match"])
 

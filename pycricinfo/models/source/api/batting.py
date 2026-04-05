@@ -54,12 +54,21 @@ class BattingDetails(CCBaseModel):
     dot_ball_percentage: int
     batting_recent: BattingRecent
     preferred_shot: Optional[PreferredShot] = None
-    scoring_shots: Optional[int]
-    control_percentage: Optional[int]
-    wagon_zone: Optional[list[WagonZone]] = Field(
-        description="List of wagon areas, clockwise from long leg", max_length=8
+    scoring_shots: Optional[int] = Field(default=None, description="Number of scoring shots in the innings")
+    control_percentage: Optional[int] = Field(
+        default=None,
+        description="Percentage of deliveries where the batter played a controlled shot",
     )
-    wagon: Optional[Wagon]
+    wagon_zone: Optional[list[WagonZone]] = Field(
+        default=None, description="Raw data of list of wagon areas, clockwise from long leg", max_length=8
+    )
+    wagon: Optional[Wagon] = Field(
+        default=None,
+        description=(
+            "Processed Wagon object containing details of named wagon zones, only present if wagonZone field "
+            "is present in the API response"
+        ),
+    )
 
     @computed_field
     @property

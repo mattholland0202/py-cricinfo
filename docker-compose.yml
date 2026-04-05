@@ -1,7 +1,6 @@
 services:
   pycricinfo-api:
-    build:
-      context: .
+    image: ghcr.io/mattholland0202/py-cricinfo:latest
     container_name: pycricinfo-api
     ports:
       - "8000:8000"

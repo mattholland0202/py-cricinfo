@@ -63,7 +63,7 @@ class CricinfoScorecard(Scorecard):
         if not match:
             raise ValueError("Match data is required to create a CricinfoScorecard.")
 
-        data["title"] = html.unescape(match.header.title)
+        data["title"] = html.unescape(match.header.description)
         data["summary"] = html.unescape(match.summary)
 
         innings = []

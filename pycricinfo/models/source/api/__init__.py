@@ -8,7 +8,6 @@ from .common import *
 from .dismissal import *
 from .innings import *
 from .league import *
-from .match_basic import *
 from .match_note import *
 from .match import *
 from .official import *
