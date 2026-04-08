@@ -10,7 +10,13 @@ from pycricinfo.models.source.api.match import Match
 from pycricinfo.utils import load_file_and_validate_to_model
 
 
-def print_scorecard(file_path: str = None, match_id: int = None, series_id: int = None):
+def print_scorecard(
+    file_path: str = None,
+    match_id: int = None,
+    series_id: int = None,
+    include_batting_minutes: bool = True,
+    include_bowling_dots: bool = False,
+):
     """
     Prints the scorecard of a match, either by passing a file path or loading from command line arguments
 
@@ -22,27 +28,40 @@ def print_scorecard(file_path: str = None, match_id: int = None, series_id: int 
     args = parse_scorecard_args()
 
     if file_path or args.file:
-        _print_scorecard_from_file(file_path or args.file)
+        _print_scorecard_from_file(
+            file_path or args.file,
+            include_batting_minutes or args.include_batting_minutes,
+            include_bowling_dots or args.include_bowling_dots,
+        )
     elif match_id or args.match_id:
-        _print_scorecard_from_match_id(series_id or args.series_id, match_id or args.match_id)
+        _print_scorecard_from_match_id(
+            series_id or args.series_id,
+            match_id or args.match_id,
+            include_batting_minutes or args.include_batting_minutes,
+            include_bowling_dots or args.include_bowling_dots,
+        )
     else:
         print("Please provide either a file path or match & series IDs")
 
 
-def _print_scorecard_from_file(file_path: str):
+def _print_scorecard_from_file(
+    file_path: str, include_batting_minutes: bool = True, include_bowling_dots: bool = False
+):
     model = load_file_and_validate_to_model(file_path, Match)
-    _print_scorecard_from_match(model)
+    _print_scorecard_from_match(model, include_batting_minutes, include_bowling_dots)
 
 
-def _print_scorecard_from_match_id(series_id: int, match_id: int):
+def _print_scorecard_from_match_id(
+    series_id: int, match_id: int, include_batting_minutes: bool = True, include_bowling_dots: bool = False
+):
     model = asyncio.run(get_match(series_id, match_id))
-    _print_scorecard_from_match(model)
+    _print_scorecard_from_match(model, include_batting_minutes, include_bowling_dots)
 
 
-def _print_scorecard_from_match(match: Match):
+def _print_scorecard_from_match(match: Match, include_batting_minutes: bool = True, include_bowling_dots: bool = False):
     try:
         sc = CricinfoScorecard(match=match)
-        sc.show(include_batting_minutes=True, include_bowling_dots=False)   # TODO: make these parameterised
+        sc.show(include_batting_minutes=include_batting_minutes, include_bowling_dots=include_bowling_dots)
     except ValidationError as validation_error:
         print(validation_error.errors())
         raise
@@ -61,6 +80,10 @@ def parse_scorecard_args() -> Namespace:
     parser.add_argument("--file", help="Path to a JSON file to parse and print from")
     parser.add_argument("--series_id", help="ID of the series of the match to fetch from the API")
     parser.add_argument("--match_id", help="ID of the match to fetch from the API")
+    parser.add_argument(
+        "--include_batting_minutes", help="Include batting minutes in the scorecard", action="store_true"
+    )
+    parser.add_argument("--include_bowling_dots", help="Include bowling dots in the scorecard", action="store_true")
     args = parser.parse_args()
     return args
 

@@ -48,7 +48,7 @@ class BattingDetails(CCBaseModel):
     out_details: Dismissal
     pvp: BattingPvp
     runs_summary: list[int | str] = Field(
-        description="Count of number of deliveries for each possible run count. Will be 8 elements: 0,1,2,3,4,5,6,7",
+        description="Count of number of deliveries of each possible run count. Will be 8 elements: 0,1,2,3,4,5,6,7",
         max_length=8,
     )
     dot_ball_percentage: int
@@ -78,6 +78,10 @@ class BattingDetails(CCBaseModel):
     @model_validator(mode="before")
     @classmethod
     def generate_wagon(cls, data: dict):
+        """
+        Generate a Wagon object from the raw wagonZone data in the API response, if present. The wagonZone data is a
+        list of 8 elements, corresponding to the 8 wagon zones in clockwise order from long leg.
+        """
         wagon_fields = Wagon.model_fields.keys()
 
         wagon_zone = data.get("wagonZone", None)
