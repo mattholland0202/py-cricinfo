@@ -7,12 +7,12 @@ from pycricinfo.models.source.api.common import CCBaseModel, PagingModel
 from pycricinfo.models.source.api.team import TeamWithName as Team
 
 
-class PlayType(BaseModel):
+class CommentaryPlayType(BaseModel):
     id: str
     description: str
 
 
-class Bowler(BaseModel):
+class CommentaryBowler(BaseModel):
     athlete: Optional[Athlete] = Field(default=None)
     team: Team
     maidens: int
@@ -22,7 +22,7 @@ class Bowler(BaseModel):
     conceded: int
 
 
-class Batter(CCBaseModel):
+class CommentaryBatter(CCBaseModel):
     athlete: Athlete
     team: Team
     total_runs: int
@@ -32,7 +32,7 @@ class Batter(CCBaseModel):
     sixes: int
 
 
-class Innings(CCBaseModel):
+class CommentaryInnings(CCBaseModel):
     id: str
     run_rate: float
     remaining_balls: int
@@ -47,8 +47,8 @@ class Innings(CCBaseModel):
     session: int
     day: int
     fall_of_wickets: int
-    trailBy: int
-    leadBy: int
+    trail_by: int
+    lead_by: int
     remaining_overs: float
     total_runs: int
     wides: int
@@ -56,11 +56,11 @@ class Innings(CCBaseModel):
 
     @computed_field
     @property
-    def score(self) -> str:
+    def current_score(self) -> str:
         return f"{self.runs}/{self.wickets}"
 
 
-class Over(CCBaseModel):
+class CommentaryOver(CCBaseModel):
     ball: int
     balls: int
     complete: bool
@@ -78,35 +78,36 @@ class Over(CCBaseModel):
     unique: float
 
 
-class BowlerAthlete(BaseModel):
+class CommentaryDismissalAthlete(CCBaseModel):
     athlete: Athlete
 
 
-class BatsmanAthlete(BaseModel):
-    athlete: Athlete
+class CommentaryFielderAthlete(CommentaryDismissalAthlete):
+    is_keeper: bool
 
 
-class Dismissal(CCBaseModel):
+class CommentaryDismissal(CCBaseModel):
     dismissal: bool
     bowled: bool
     type: str
-    bowler: BowlerAthlete
-    batsman: BatsmanAthlete
+    bowler: CommentaryDismissalAthlete
+    batter: CommentaryDismissalAthlete = Field(validation_alias=AliasChoices("batter", "batsman"))
+    fielder: Optional[CommentaryFielderAthlete] = None
     text: str
-    minutes: Optional[int | str] = None  # TODO: Can be empty string - parse to null in that case
+    minutes: Optional[int | str] = None
     retired_text: str
 
 
-class CommentaryItem(CCBaseModel):
+class CommentaryDelivery(CCBaseModel):
     id: str
     clock: str
     date: str
-    play_type: PlayType
+    play_type: CommentaryPlayType
     team: Team
     media_id: int
     period: int
-    periodText: str
-    preText: str
+    period_text: str
+    pre_text: str
     text: str
     post_text: str
     short_text: str
@@ -115,24 +116,32 @@ class CommentaryItem(CCBaseModel):
     score_value: int
     sequence: int
     athletes_involved: list[Athlete]
-    bowler: Bowler
-    other_bowler: Optional[Bowler] = None
-    batter: Batter = Field(validation_alias=AliasChoices("batter", "batsman"))
-    other_batter: Batter = Field(validation_alias=AliasChoices("other_batter", "other_batsman"))
-    current_innings_score: Innings = Field(validation_alias=AliasChoices("current_innings_score", "innings"))
-    over: Over
-    dismissal: Dismissal
+    speed_kph: Optional[float] = None
+    speed_mph: Optional[float] = None
+    bowler: CommentaryBowler
+    other_bowler: Optional[CommentaryBowler] = None
+    batter: CommentaryBatter = Field(validation_alias=AliasChoices("batter", "batsman"))
+    other_batter: CommentaryBatter = Field(
+        validation_alias=AliasChoices("other_batter", "other_batsman", "otherBatsman")
+    )
+    current_innings_score: CommentaryInnings = Field(validation_alias=AliasChoices("current_innings_score", "innings"))
+    over: CommentaryOver
+    dismissal: CommentaryDismissal
     bbb_timestamp: int
 
     @computed_field
     @property
-    def summary(self) -> str:
-        return f"{self.over.overs}: {self.short_text} - {self.current_innings_score.score}"
+    def short_summary(self) -> str:
+        return f"{self.over.overs}: {self.short_text} - {self.current_innings_score.current_score}"
 
 
 class Commentary(PagingModel):
-    deliveries: list[CommentaryItem] = Field(validation_alias=AliasChoices("items", "deliveries"))
+    """The data about the current page, and the list of deliveries"""
+
+    deliveries: list[CommentaryDelivery] = Field(validation_alias=AliasChoices("items", "deliveries"))
 
 
 class APIResponseCommentary(BaseModel):
+    """The API response contains a root field called 'commentary' which contains the actual commentary data."""
+
     commentary: Commentary

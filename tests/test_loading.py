@@ -3,6 +3,7 @@ import os
 import pytest
 
 from pycricinfo.models.source import Match, MatchBasic
+from pycricinfo.models.source.api.commentary import APIResponseCommentary
 from pycricinfo.utils import load_file_and_validate_to_model
 
 
@@ -30,3 +31,14 @@ def test_load_match_basic():
 
     assert result is not None
     assert isinstance(result, MatchBasic)
+
+
+@pytest.mark.parametrize("file_name", ["ball_by_ball/1031439_1_1.json", "ball_by_ball/1031439_1_3.json"])
+def test_load_ball_by_ball_page(file_name):
+    """Test loading JSON files into APIResponseCommentary model without exceptions."""
+    test_file_path = get_test_file_path(file_name)
+
+    result = load_file_and_validate_to_model(test_file_path, APIResponseCommentary)
+
+    assert result is not None
+    assert isinstance(result, APIResponseCommentary)

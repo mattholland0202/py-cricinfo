@@ -1,6 +1,6 @@
 [project]
 name = "pycricinfo"
-version = "0.0.32"
+version = "0.0.33"
 description = "A package to collect data from ESPN Cricinfo"
 readme = "readme.md"
 requires-python = ">=3.13"
@@ -11,6 +11,7 @@ dependencies = [
   "pydantic-settings>=2.9.1",
   "aiohttp>=3.9.5",
   "rich>=14.2.0",
+  "aenum>=3.1.17",
 ]
 authors = [{ name = "Matt Holland" }]
 license = { text = "MIT" }

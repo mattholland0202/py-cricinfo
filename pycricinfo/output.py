@@ -129,7 +129,7 @@ def _print_ball_by_ball_from_match_id(match_id: int, innings: int, page: int):
 
 def _print_ball_by_ball_from_commentary_model(model: Commentary):
     for item in model.deliveries:
-        print(f"{item.over.overs}: {item.short_text} - {item.current_innings_score.score}")
+        print(f"{item.over.overs}: {item.short_text} - {item.current_innings_score.current_score}")
 
 
 def parse_ball_by_ball_args() -> Namespace:

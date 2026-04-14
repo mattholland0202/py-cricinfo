@@ -1,5 +1,7 @@
 from enum import Enum
 
+from aenum import MultiValueEnum
+
 
 class MatchTypeNames(str, Enum):
     TESTS = "Tests"
@@ -20,20 +22,20 @@ class MatchTypeNames(str, Enum):
     OTHER_T20_MATCHES = "Other Twenty20 matches"
 
 
-class MatchNoteType(str, Enum):
-    SERIES_NOTE = "seriesnote"
-    POINTS = "points"
-    MATCH_NUMBER = "matchnumber"
-    SEASON = "season"
-    MATCH_DAYS = "matchdays"
-    TOSS = "toss"
-    LIVE_COMMENTATOR = "livecommentator"
-    LIVE_SCORER = "livescorer"
-    MATCH_NOTE = "matchnote"
-    CLOSE_OF_PLAY = "closeofplay"
-    HOURS_OF_PLAY = "hoursofplay"
-    PLAYER_REPLACEMENT = "playerreplacement"
-    HAWKEYE = "hawkeye"
+class MatchNoteType(MultiValueEnum):
+    SERIES_NOTE = "seriesnote", "Series note"
+    POINTS = "points", "Points"
+    MATCH_NUMBER = "matchnumber", "Match number"
+    SEASON = "season", "Season"
+    MATCH_DAYS = "matchdays", "Match days"
+    TOSS = "toss", "Toss"
+    LIVE_COMMENTATOR = "livecommentator", "Live commentator"
+    LIVE_SCORER = "livescorer", "Live scorer"
+    MATCH_NOTE = "matchnote", "Match note"
+    CLOSE_OF_PLAY = "closeofplay", "Close of play"
+    HOURS_OF_PLAY = "hoursofplay", "Hours of play"
+    PLAYER_REPLACEMENT = "playerreplacement", "Player replacement"
+    HAWKEYE = "hawkeye", "Hawkeye"
 
 
 class DeliveryPlayTypes(int, Enum):
