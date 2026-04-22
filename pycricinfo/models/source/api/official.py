@@ -1,16 +1,9 @@
-from pycricinfo.models.source.api.common import CCBaseModel, Link, Position, RefMixin
-
-
-class Flag(RefMixin):
-    alt: str
-    height: int
-    rel: list[str]
-    width: int
+from pycricinfo.models.source.api.common import CCBaseModel, FlagMixin, Link, Position
 
 
 class Official(CCBaseModel):
     display_name: str
-    flag: Flag
+    flag: FlagMixin
     links: Link
     order: int
     position: Position

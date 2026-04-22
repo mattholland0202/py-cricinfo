@@ -111,3 +111,14 @@ class MatchClass(CCBaseModel):
     general_class_card: Optional[str] = None
     international_class_id: Optional[int] = None
     international_class_card: Optional[str] = None
+
+
+class FlagMixin(RefMixin):
+    """
+    Mixin property for a flag, for a person's nationality
+    """
+
+    alt: str
+    rel: list[str]
+    height: int
+    width: int

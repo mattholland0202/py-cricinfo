@@ -12,7 +12,7 @@ class BaseRoute(Enum):
 
 
 class CoreAPIRoutes(BaseModel):
-    team: str = "events/0/teams/{team_id}"
+    team: str = "teams/{team_id}"
     team_players: str = "cricket/teams/{team_id}/athletes"
     player: str = "teams/0/athletes/{player_id}"
     match_basic: str = "events/{match_id}"
@@ -60,6 +60,8 @@ class Settings(BaseSettings):
     api_response_output_folder: str = "responses"
     port: int = 8004
 
+    # TODO: Combine with MatchTypeNames enum
+    # 11, 12 and 13 have different meanings in API "match_class" and the records/StatsGuru section
     match_classes: dict[int, str] = {
         1: "Test",
         2: "ODI",
@@ -70,9 +72,12 @@ class Settings(BaseSettings):
         8: "Women's Test",
         9: "Women's ODI",
         10: "Women's T20I",
-        11: "Combined Test, ODI and T20I",
-        12: "Combined First Class, List A and T20",
-        13: "All cricket, including minor cricket",
+        11: "Combined Test, ODI and T20I",  # aka: Other Matches (multi-day)
+        12: "Combined First Class, List A and T20",  # aka: Other one-day/limited-overs matches
+        13: "All cricket, including minor cricket",  # aka: Other Twenty20 matches
+        14: "Youth Test",  # matches will have generalId: 11
+        15: "Youth ODI",  # matches will have generalId: 12
+        17: "Women's T20",
         20: "Under 19s Youth Test",
         21: "Under 19s Youth ODI",
         23: "Women's T20",

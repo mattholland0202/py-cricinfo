@@ -3,7 +3,7 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
-from pycricinfo.models.source.api.common import CCBaseModel, DisplayNameMixin, Link, Position, RefMixin
+from pycricinfo.models.source.api.common import CCBaseModel, DisplayNameMixin, FlagMixin, Link, Position, RefMixin
 
 
 class Style(CCBaseModel):
@@ -65,6 +65,9 @@ class Athlete(AthleteWithFirstAndLastName, ShortNameMixin):
     fielding_name: str
     headshot: Optional[Headshot] = None
     links: list[Link]
+    debuts: Optional[list[RefMixin]] = None
+    major_teams: Optional[list[RefMixin]] = None
+    flag: FlagMixin
 
     def __str__(self) -> str:
         return f"{self.name} ({self.uid})"
