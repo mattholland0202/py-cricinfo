@@ -4,6 +4,7 @@ import pytest
 
 from pycricinfo.models.source import Match, MatchBasic
 from pycricinfo.models.source.api.commentary import APIResponseCommentary
+from pycricinfo.models.source.api.player import Player
 from pycricinfo.utils import load_file_and_validate_to_model
 
 
@@ -42,3 +43,13 @@ def test_load_ball_by_ball_page(file_name):
 
     assert result is not None
     assert isinstance(result, APIResponseCommentary)
+
+
+def test_load_plater():
+    """Test loading JSON files into Player model without exceptions."""
+    test_file_path = get_test_file_path("player/303669.json")
+
+    result = load_file_and_validate_to_model(test_file_path, Player)
+
+    assert result is not None
+    assert isinstance(result, Player)
