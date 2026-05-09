@@ -22,3 +22,6 @@ class CricinfoAPIException(Exception):
             "route": self.route,
             "content": self.content,
         }
+
+    def __str__(self) -> str:
+        return f"CricinfoAPIException: status_code={self.status_code}, route={self.route}, content={self.content}"

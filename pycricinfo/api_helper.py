@@ -41,6 +41,60 @@ def create_session() -> aiohttp.ClientSession:
     return aiohttp.ClientSession(headers=headers)
 
 
+async def warm_page_session(session: aiohttp.ClientSession) -> None:
+    """
+    Prime a session with a homepage navigation request to establish cookies.
+
+    Parameters
+    ----------
+    session : aiohttp.ClientSession
+        The session to warm before making page requests.
+    """
+    warmup_url = "https://www.espncricinfo.com/"
+    warmup_headers = {
+        "Referer": warmup_url,
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+    }
+
+    async with session.get(yarl.URL(warmup_url, encoded=True), headers=warmup_headers):
+        return
+
+
+async def fetch_page_content(session: aiohttp.ClientSession, url: str) -> tuple[str, int]:
+    """
+    Fetch a page URL using browser-like navigation headers.
+
+    Parameters
+    ----------
+    session : aiohttp.ClientSession
+        The session to use for the request.
+    url : str
+        The absolute page URL to fetch.
+
+    Returns
+    -------
+    tuple[str, int]
+        The response content and HTTP status code.
+    """
+    request_headers = {
+        "Referer": "https://www.espncricinfo.com/",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "same-origin",
+        "Sec-Fetch-User": "?1",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+    }
+
+    async with session.get(yarl.URL(url, encoded=True), headers=request_headers) as response:
+        return await response.text(), response.status
+
+
 async def get_and_parse(
     route: str,
     type_to_parse: Type[T],
