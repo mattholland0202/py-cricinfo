@@ -182,7 +182,7 @@ async def get_request(
     elif base_route == BaseRoute.site:
         base = get_settings().site_base_route_v2
     else:
-        base = get_settings().pages_base_route
+        base = get_settings().cricinfo_base_route
     full_route = f"{base}{route}"
 
     referer = full_route if base_route == BaseRoute.page else urljoin(full_route, urlparse(full_route).path)

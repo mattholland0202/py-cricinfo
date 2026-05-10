@@ -40,8 +40,9 @@ class CoreAPIRoutes(BaseModel):
 
 
 class PageRoutes(BaseModel):
-    series_in_season: str = "series/index.html?season={season_name};view=season"
-    matches_in_series: str = "match/index/series.html?series={series_id}"
+    player_profile: str = "cricketers/{player_slug}-{player_id}"
+    series_in_season: str = "ci/engine/series/index.html?season={season_name};view=season"
+    matches_in_series: str = "ci/engine/match/index/series.html?series={series_id}"
 
 
 class PageHeaders(BaseModel):
@@ -52,7 +53,7 @@ class PageHeaders(BaseModel):
 class Settings(BaseSettings):
     core_base_route_v2: str = "http://core.espnuk.org/v2/sports/cricket/"
     site_base_route_v2: str = "http://site.api.espn.com/apis/site/v2/sports/cricket/"
-    pages_base_route: str = "https://www.espncricinfo.com/ci/engine/"
+    cricinfo_base_route: str = "https://www.espncricinfo.com/"
 
     routes: CoreAPIRoutes = CoreAPIRoutes()
     page_routes: PageRoutes = PageRoutes()

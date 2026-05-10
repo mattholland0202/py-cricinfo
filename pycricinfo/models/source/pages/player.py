@@ -1,6 +1,8 @@
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field
+
+from pycricinfo.types import MatchTypeNames
 
 
 class CareerStatsBaseModel(BaseModel):
@@ -8,25 +10,25 @@ class CareerStatsBaseModel(BaseModel):
 
 
 class CareerBattingFieldingRow(CareerStatsBaseModel):
-    format: str
+    format: MatchTypeNames
     matches: Optional[str] = Field(default=None, validation_alias="mat")
     innings: Optional[str] = Field(default=None, validation_alias="inns")
     not_outs: Optional[str] = Field(default=None, validation_alias="no")
-    runs: Optional[str] = None
+    runs: Optional[str] = Field(default=None)
     highest_score: Optional[str] = Field(default=None, validation_alias="hs")
     average: Optional[str] = Field(default=None, validation_alias="ave")
     balls_faced: Optional[str] = Field(default=None, validation_alias="bf")
     strike_rate: Optional[str] = Field(default=None, validation_alias="sr")
-    centuries: Optional[str] = Field(default=None, validation_alias="hundreds")
-    half_centuries: Optional[str] = Field(default=None, validation_alias="fifties")
-    fours: Optional[str] = None
-    sixes: Optional[str] = None
+    centuries: Optional[str] = Field(default=None, validation_alias=AliasChoices("100s", "hundreds"))
+    half_centuries: Optional[str] = Field(default=None, validation_alias=AliasChoices("50s", "fifties"))
+    fours: Optional[str] = Field(default=None, validation_alias="4s")
+    sixes: Optional[str] = Field(default=None, validation_alias="6s")
     catches: Optional[str] = Field(default=None, validation_alias="ct")
     stumpings: Optional[str] = Field(default=None, validation_alias="st")
 
 
 class CareerBowlingRow(CareerStatsBaseModel):
-    format: str
+    format: MatchTypeNames
     matches: Optional[str] = Field(default=None, validation_alias="mat")
     innings: Optional[str] = Field(default=None, validation_alias="inns")
     balls_bowled: Optional[str] = Field(default=None, validation_alias="balls")
@@ -37,9 +39,9 @@ class CareerBowlingRow(CareerStatsBaseModel):
     average: Optional[str] = Field(default=None, validation_alias="ave")
     economy_rate: Optional[str] = Field(default=None, validation_alias="econ")
     strike_rate: Optional[str] = Field(default=None, validation_alias="sr")
-    four_wicket_hauls: Optional[str] = Field(default=None, validation_alias="four_w")
-    five_wicket_hauls: Optional[str] = Field(default=None, validation_alias="five_w")
-    ten_wicket_hauls: Optional[str] = Field(default=None, validation_alias="ten_w")
+    four_wicket_hauls: Optional[str] = Field(default=None, validation_alias=AliasChoices("4w", "four_w"))
+    five_wicket_hauls: Optional[str] = Field(default=None, validation_alias=AliasChoices("5w", "five_w"))
+    ten_wicket_hauls: Optional[str] = Field(default=None, validation_alias=AliasChoices("10w", "ten_w"))
 
 
 class Career(BaseModel):

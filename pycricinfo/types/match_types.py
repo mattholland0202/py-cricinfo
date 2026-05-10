@@ -3,15 +3,16 @@ from enum import Enum
 from aenum import MultiValueEnum
 
 
-class MatchTypeNames(str, Enum):
+class MatchTypeNames(str, MultiValueEnum):
     TESTS = "Tests"
-    ODIs = "One-Day Internationals"
-    T20Is = "Twenty20 Internationals"
-    FIRST_CLASS = "First-class"
+    ODIs = "One-Day Internationals", "ODIs"
+    T20Is = "Twenty20 Internationals", "T20Is"
+    FIRST_CLASS = "First-class", "FC"
     LIST_A = "List A"
-    T20 = "Twenty20"
-    WOMENS_ODIs = "Women's One-Day Internationals"
-    WOMENS_T20Is = "Women's Twenty20 Internationals"
+    T20 = "Twenty20", "T20s"
+    WOMENS_TESTS = "Women's Tests", "WTests"
+    WOMENS_ODIs = "Women's One-Day Internationals", "WODIs"
+    WOMENS_T20Is = "Women's Twenty20 Internationals", "WT20Is"
     YOUTH_TESTS = "Youth Tests"
     YOUTH_ODIs = "Youth One-Day Internationals"
     WOMENS_T20 = "Women's Twenty20"
@@ -22,7 +23,7 @@ class MatchTypeNames(str, Enum):
     OTHER_T20_MATCHES = "Other Twenty20 matches"
 
 
-class MatchNoteType(MultiValueEnum):
+class MatchNoteType(str, MultiValueEnum):
     SERIES_NOTE = "seriesnote", "Series note"
     POINTS = "points", "Points"
     MATCH_NUMBER = "matchnumber", "Match number"
