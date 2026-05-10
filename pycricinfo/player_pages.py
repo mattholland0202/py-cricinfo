@@ -1,13 +1,12 @@
 import re
 from typing import Optional, TypeVar
-from urllib.parse import quote, urljoin
+from urllib.parse import quote
 
 import aiohttp
 from bs4 import BeautifulSoup, Tag
 
-from pycricinfo.api_helper import create_session, fetch_page_content, warm_page_session
-from pycricinfo.config import get_settings
-from pycricinfo.exceptions import CricinfoAPIException
+from pycricinfo.api_helper import get_request
+from pycricinfo.config import BaseRoute, get_settings
 from pycricinfo.models.source.pages.player import (
     Career,
     CareerBattingFieldingRow,
@@ -40,53 +39,15 @@ async def get_player_career_stats(
     Career
         Structured career batting/fielding and bowling rows.
     """
-    content = await _get_player_page_content(player_name=player_name, player_id=player_id, session=session)
-    return _parse_player_career_stats_page(content)
-
-
-async def _get_player_page_content(
-    player_name: str,
-    player_id: int,
-    session: Optional[aiohttp.ClientSession] = None,
-) -> str:
-    """
-    Fetch the HTML for an ESPN Cricinfo player profile page.
-
-    Parameters
-    ----------
-    player_name : str
-        Player name for the URL, for example "Ben Stokes".
-    player_id : int
-        Cricinfo player ID in the URL.
-    session : aiohttp.ClientSession, optional
-        An existing session to use for the request, by default None.
-
-    Returns
-    -------
-    str
-        HTML content of the player profile page.
-    """
     player_slug = _slugify_player_name(player_name)
-    profile_route = get_settings().page_routes.player_profile.format(player_slug=player_slug, player_id=player_id)
-    profile_url = urljoin(get_settings().cricinfo_base_route, profile_route)
-
-    owned_session = session is None
-    if owned_session:
-        session = create_session()
-
-    try:
-        # Warm cookies/session first; this can reduce bot/WAF challenges on direct profile-page hits.
-        await warm_page_session(session)
-
-        content, status = await fetch_page_content(session, profile_url)
-
-        if status == 200:
-            return content
-
-        raise CricinfoAPIException(status_code=status, route=profile_url, content=content)
-    finally:
-        if owned_session:
-            await session.close()
+    content = await get_request(
+        route=get_settings().page_routes.player_profile,
+        params={"player_slug": player_slug, "player_id": str(player_id)},
+        base_route=BaseRoute.page,
+        warm_session=True,
+        session=session,
+    )
+    return _parse_player_career_stats_page(str(content))
 
 
 def _slugify_player_name(player_name: str) -> str:

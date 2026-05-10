@@ -16,22 +16,22 @@ Use your package manager of choice to install `pycricinfo`. For example:
 
 #### Pip
 ```
-pip install pycricinfo
+uv add pycricinfo
 ```
 
 #### UV
 ```
-uv add pycricinfo
+pip install pycricinfo
 ```
 
 ### Optional installation: API
 This project also comes with an optional dependency to run an API wrapper around Cricinfo, providing an OpenAPI specification through `FastAPI`. Install this optional dependency with:
 ```
-pip install 'pycricinfo[api]'
+uv add pycricinfo --optional api
 ```
 or
 ```
-uv add pycricinfo --optional api
+pip install 'pycricinfo[api]'
 ```
 
 ## Sample usage: CLI

@@ -18,83 +18,6 @@ logger = logging.getLogger("cricinfo")
 T = TypeVar("T", bound=BaseModel)
 
 
-def create_session() -> aiohttp.ClientSession:
-    """
-    Create a configured aiohttp ClientSession with base headers set.
-
-    Reusing a session across multiple requests persists cookies returned by the
-    server, making subsequent requests appear more like a real browser session.
-    The caller is responsible for closing the session when finished.
-
-    Returns
-    -------
-    aiohttp.ClientSession
-        A session configured with appropriate browser-like default headers.
-    """
-    headers = {
-        "User-Agent": get_settings().page_headers.user_agent,
-        "Accept": get_settings().page_headers.accept,
-        "Accept-Language": "en-US,en;q=0.9",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Connection": "keep-alive",
-    }
-    return aiohttp.ClientSession(headers=headers)
-
-
-async def warm_page_session(session: aiohttp.ClientSession) -> None:
-    """
-    Prime a session with a homepage navigation request to establish cookies.
-
-    Parameters
-    ----------
-    session : aiohttp.ClientSession
-        The session to warm before making page requests.
-    """
-    warmup_url = "https://www.espncricinfo.com/"
-    warmup_headers = {
-        "Referer": warmup_url,
-        "Upgrade-Insecure-Requests": "1",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
-    }
-
-    async with session.get(yarl.URL(warmup_url, encoded=True), headers=warmup_headers):
-        return
-
-
-async def fetch_page_content(session: aiohttp.ClientSession, url: str) -> tuple[str, int]:
-    """
-    Fetch a page URL using browser-like navigation headers.
-
-    Parameters
-    ----------
-    session : aiohttp.ClientSession
-        The session to use for the request.
-    url : str
-        The absolute page URL to fetch.
-
-    Returns
-    -------
-    tuple[str, int]
-        The response content and HTTP status code.
-    """
-    request_headers = {
-        "Referer": "https://www.espncricinfo.com/",
-        "Upgrade-Insecure-Requests": "1",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "same-origin",
-        "Sec-Fetch-User": "?1",
-        "Cache-Control": "no-cache",
-        "Pragma": "no-cache",
-    }
-
-    async with session.get(yarl.URL(url, encoded=True), headers=request_headers) as response:
-        return await response.text(), response.status
-
-
 async def get_and_parse(
     route: str,
     type_to_parse: Type[T],
@@ -144,6 +67,7 @@ async def get_request(
     params: Optional[dict[str, str]] = None,
     base_route: BaseRoute = BaseRoute.core,
     response_output_sub_folder: str = None,
+    warm_session: bool = False,
     session: Optional[aiohttp.ClientSession] = None,
 ) -> dict | str:
     """
@@ -159,6 +83,9 @@ async def get_request(
         The base route to use for the API call, by default BaseRoute.core
     response_output_sub_folder : str, optional
         Sub-folder within the response output folder to write the response file, by default None
+    warm_session : bool, optional
+        Whether to warm the session with a homepage navigation request before issuing the main request.
+        Most useful for page routes that may require initial cookie setup, by default False
     session : aiohttp.ClientSession, optional
         An existing session to use for the request. If None, a new session is created and
         closed after the request. Pass a session created by ``create_session()`` to persist
@@ -213,6 +140,9 @@ async def get_request(
     if owned_session:
         session = create_session()
     try:
+        if warm_session and base_route == BaseRoute.page:
+            await _warm_page_session(session)
+
         async with session.get(yarl.URL(full_route, encoded=True), headers=headers) as response:
             response_logging_extras["cricket_stats.response_code"] = response.status
 
@@ -265,6 +195,52 @@ def _format_route(route: str, params: dict[str, str] = {}) -> str:
             key = key + "}"
         route = route.replace(key, str(value))
     return route
+
+
+def create_session() -> aiohttp.ClientSession:
+    """
+    Create a configured aiohttp ClientSession with base headers set.
+
+    Reusing a session across multiple requests persists cookies returned by the
+    server, making subsequent requests appear more like a real browser session.
+    The caller is responsible for closing the session when finished.
+
+    Returns
+    -------
+    aiohttp.ClientSession
+        A session configured with appropriate browser-like default headers.
+    """
+    headers = {
+        "User-Agent": get_settings().page_headers.user_agent,
+        "Accept": get_settings().page_headers.accept,
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
+    }
+    return aiohttp.ClientSession(headers=headers)
+
+
+async def _warm_page_session(session: aiohttp.ClientSession) -> None:
+    """
+    Prime a session with a homepage navigation request to establish cookies.
+
+    Parameters
+    ----------
+    session : aiohttp.ClientSession
+        The session to warm before making page requests.
+    """
+    warmup_url = "https://www.espncricinfo.com/"
+    warmup_headers = {
+        "Referer": warmup_url,
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+    }
+
+    async with session.get(yarl.URL(warmup_url, encoded=True), headers=warmup_headers):
+        return
 
 
 def _output_response_to_file(response: str, route: str, sub_folder: str, file_extension: str) -> None:
