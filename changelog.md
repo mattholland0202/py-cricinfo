@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.36]
+### Fixed
+- Use correct types in Career model
+- Missing `.gitattributes` file so GitHub ignores test files in language checking
+
 ## [0.0.35]
 ### Added
 - Parsing of a Player page to get Career stats
