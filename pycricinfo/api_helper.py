@@ -146,13 +146,18 @@ async def get_request(
             if base_route == BaseRoute.page:
                 output = await response.text()
 
-                if response_status == 403 and _is_access_denied_page(output):
+                if response_status == 403 or _is_bot_protection_page(output):
                     fallback_output = await _retry_with_browser_tls(full_route=full_route, referer=referer)
                     if fallback_output is not None:
                         output = fallback_output
                         response_status = 200
                         response_logging_extras["cricket_stats.response_code"] = response_status
                         response_logging_extras["cricket_stats.transport_fallback"] = "curl_cffi"
+
+                if _is_bot_protection_page(output):
+                    response_status = 403
+                    response_logging_extras["cricket_stats.response_code"] = response_status
+                    response_logging_extras["cricket_stats.block_reason"] = "bot_protection_page"
 
                 logger.debug(json.dumps(f"Page fetched from: {full_route}"), extra=response_logging_extras)
                 output_for_file = output
@@ -239,10 +244,19 @@ def _get_request_headers(base_route: BaseRoute, referer: str) -> dict[str, str]:
     }
 
 
-def _is_access_denied_page(content: str) -> bool:
-    """Detect Akamai-style Access Denied HTML pages."""
+def _is_bot_protection_page(content: str) -> bool:
+    """Detect Akamai bot protection responses, including challenge and deny pages."""
     lowered = content.lower()
-    return "<title>access denied</title>" in lowered or "errors.edgesuite.net" in lowered
+    return any(
+        marker in lowered
+        for marker in (
+            "<title>access denied</title>",
+            "errors.edgesuite.net",
+            'id="sec-if-cpt-container"',
+            "powered and protected by",
+            "scf-akamai-logo",
+        )
+    )
 
 
 async def _retry_with_browser_tls(full_route: str, referer: str) -> str | None:
@@ -275,7 +289,12 @@ async def _retry_with_browser_tls(full_route: str, referer: str) -> str | None:
             )
             if response.status_code != 200:
                 return None
-            return response.text
+
+            response_text = response.text
+            if _is_bot_protection_page(response_text):
+                return None
+
+            return response_text
         except Exception as ex:
             logger.warning("Fallback page request failed: %s", ex)
             return None
