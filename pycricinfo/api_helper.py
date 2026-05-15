@@ -18,6 +18,14 @@ logger = logging.getLogger("cricinfo")
 T = TypeVar("T", bound=BaseModel)
 
 
+_COMMON_BROWSER_HEADERS = {
+    "DNT": "1",
+    "Sec-GPC": "1",
+    "Cache-Control": "max-age=0",
+    "Pragma": "no-cache",
+}
+
+
 async def get_and_parse(
     route: str,
     type_to_parse: Type[T],
@@ -114,25 +122,7 @@ async def get_request(
 
     referer = full_route if base_route == BaseRoute.page else urljoin(full_route, urlparse(full_route).path)
 
-    if base_route == BaseRoute.page:
-        sec_fetch_headers = {
-            "Upgrade-Insecure-Requests": "1",
-            "Sec-Fetch-Dest": "document",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-Site": "same-origin",
-            "Sec-Fetch-User": "?1",
-        }
-    else:
-        sec_fetch_headers = {
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-origin",
-        }
-
-    headers = {
-        "Referer": referer,
-        **sec_fetch_headers,
-    }
+    headers = _get_request_headers(base_route=base_route, referer=referer)
 
     logger.debug(f"Querying: {full_route}", extra={"cricket_stats.request_id": request_id})
 
@@ -197,6 +187,42 @@ def _format_route(route: str, params: dict[str, str] = {}) -> str:
     return route
 
 
+def _get_request_headers(base_route: BaseRoute, referer: str) -> dict[str, str]:
+    """
+    Build request-specific headers for page and API routes.
+
+    Parameters
+    ----------
+    base_route : BaseRoute
+        Which base route type is being requested.
+    referer : str
+        The referer value to attach to the request.
+
+    Returns
+    -------
+    dict[str, str]
+        Headers to send for the outgoing request.
+    """
+    if base_route == BaseRoute.page:
+        return {
+            "Referer": referer,
+            "Origin": get_settings().cricinfo_base_route.rstrip("/"),
+            "Upgrade-Insecure-Requests": "1",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "same-origin",
+            "Sec-Fetch-User": "?1",
+            **_COMMON_BROWSER_HEADERS,
+        }
+
+    return {
+        "Referer": referer,
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+    }
+
+
 def create_session() -> aiohttp.ClientSession:
     """
     Create a configured aiohttp ClientSession with base headers set.
@@ -215,6 +241,7 @@ def create_session() -> aiohttp.ClientSession:
         "Accept": get_settings().page_headers.accept,
         "Accept-Language": "en-US,en;q=0.9",
         "Accept-Encoding": "gzip, deflate, br",
+        **_COMMON_BROWSER_HEADERS,
         "Connection": "keep-alive",
     }
     return aiohttp.ClientSession(headers=headers)
