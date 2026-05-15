@@ -44,7 +44,7 @@ async def get_player_career_stats(
         route=get_settings().page_routes.player_profile,
         params={"player_slug": player_slug, "player_id": str(player_id)},
         base_route=BaseRoute.page,
-        warm_session=True,
+        warm_session=False,
         session=session,
     )
     return _parse_player_career_stats_page(str(content))
