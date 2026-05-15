@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import uuid
@@ -9,6 +10,11 @@ from urllib.parse import urljoin, urlparse
 import aiohttp
 import yarl
 from pydantic import BaseModel, ValidationError
+
+try:
+    from curl_cffi import requests as curl_requests
+except ImportError:  # pragma: no cover - optional at runtime in some environments
+    curl_requests = None
 
 from pycricinfo.config import BaseRoute, get_settings
 from pycricinfo.exceptions import CricinfoAPIException
@@ -134,10 +140,20 @@ async def get_request(
             await _warm_page_session(session)
 
         async with session.get(yarl.URL(full_route, encoded=True), headers=headers) as response:
-            response_logging_extras["cricket_stats.response_code"] = response.status
+            response_status = response.status
+            response_logging_extras["cricket_stats.response_code"] = response_status
 
             if base_route == BaseRoute.page:
                 output = await response.text()
+
+                if response_status == 403 and _is_access_denied_page(output):
+                    fallback_output = await _retry_with_browser_tls(full_route=full_route, referer=referer)
+                    if fallback_output is not None:
+                        output = fallback_output
+                        response_status = 200
+                        response_logging_extras["cricket_stats.response_code"] = response_status
+                        response_logging_extras["cricket_stats.transport_fallback"] = "curl_cffi"
+
                 logger.debug(json.dumps(f"Page fetched from: {full_route}"), extra=response_logging_extras)
                 output_for_file = output
                 response_output_file_extension = "html"
@@ -149,12 +165,12 @@ async def get_request(
 
             _output_response_to_file(output_for_file, route, response_output_sub_folder, response_output_file_extension)
 
-            if response.status != 200:
+            if response_status != 200:
                 logger.error(
-                    f"Status Code '{response.status}' returned for '{full_route}'",
+                    f"Status Code '{response_status}' returned for '{full_route}'",
                     extra=response_logging_extras,
                 )
-                raise CricinfoAPIException(status_code=response.status, route=full_route, content=output)
+                raise CricinfoAPIException(status_code=response_status, route=full_route, content=output)
 
             return output
     finally:
@@ -221,6 +237,50 @@ def _get_request_headers(base_route: BaseRoute, referer: str) -> dict[str, str]:
         "Sec-Fetch-Mode": "cors",
         "Sec-Fetch-Site": "same-origin",
     }
+
+
+def _is_access_denied_page(content: str) -> bool:
+    """Detect Akamai-style Access Denied HTML pages."""
+    lowered = content.lower()
+    return "<title>access denied</title>" in lowered or "errors.edgesuite.net" in lowered
+
+
+async def _retry_with_browser_tls(full_route: str, referer: str) -> str | None:
+    """
+    Retry blocked page requests with browser TLS fingerprint impersonation.
+
+    This addresses environments where server egress IP/TLS fingerprints are
+    blocked by WAF rules for some endpoints.
+    """
+    if curl_requests is None:
+        return None
+
+    fallback_headers = {
+        "Referer": referer,
+        "Origin": get_settings().cricinfo_base_route.rstrip("/"),
+        "User-Agent": get_settings().page_headers.user_agent,
+        "Accept": get_settings().page_headers.accept,
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        **_COMMON_BROWSER_HEADERS,
+    }
+
+    def _do_request() -> str | None:
+        try:
+            response = curl_requests.get(
+                full_route,
+                headers=fallback_headers,
+                impersonate="chrome124",
+                timeout=20,
+            )
+            if response.status_code != 200:
+                return None
+            return response.text
+        except Exception as ex:
+            logger.warning("Fallback page request failed: %s", ex)
+            return None
+
+    return await asyncio.to_thread(_do_request)
 
 
 def create_session() -> aiohttp.ClientSession:
