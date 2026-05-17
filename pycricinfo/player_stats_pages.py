@@ -15,49 +15,6 @@ from pycricinfo.models.source.pages.player import (
 
 _INTERNATIONAL_FORMATS = frozenset({"Test matches", "One-Day Internationals", "Twenty20 Internationals"})
 
-# Maps page column header text → model field key (matches a field name or validation_alias)
-_BATTING_COLUMN_MAP: dict[str, str] = {
-    "Mat": "mat",
-    "Inns": "inns",
-    "NO": "no",
-    "Runs": "runs",
-    "HS": "hs",
-    "Ave": "ave",
-    "BF": "bf",
-    "SR": "sr",
-    "100": "100s",
-    "50": "50s",
-    "0": "0",
-    "4s": "4s",
-    "6s": "6s",
-}
-
-_BOWLING_COLUMN_MAP: dict[str, str] = {
-    "Mat": "mat",
-    "Inns": "inns",
-    "Overs": "overs",
-    "Mdns": "mdns",
-    "Runs": "runs",
-    "Wkts": "wkts",
-    "BBI": "bbi",
-    "BBM": "bbm",
-    "Ave": "ave",
-    "Econ": "econ",
-    "SR": "sr",
-    "5": "five_w",
-    "10": "ten_w",
-}
-
-_FIELDING_COLUMN_MAP: dict[str, str] = {
-    "Mat": "mat",
-    "Inns": "inns",
-    "Dis": "dismissals",
-    "Ct": "ct",
-    "St": "st",
-    "Ct Wk": "ct_wk",
-    "Ct Fi": "ct_fi",
-}
-
 
 async def get_player_career_stats_from_stats_pages(
     player_id: int,
@@ -119,7 +76,7 @@ def _parse_batting_career_summary(html: str) -> list[CareerBattingFieldingRow]:
     rows = _extract_career_summary_rows(html)
     result = []
     for format_name, cells, headers in rows:
-        mapped = _map_cells(headers, cells, _BATTING_COLUMN_MAP)
+        mapped = _map_cells(headers, cells)
         mapped["format"] = format_name
         result.append(CareerBattingFieldingRow(**mapped))
     return result
@@ -130,7 +87,7 @@ def _parse_bowling_career_summary(html: str) -> list[CareerBowlingRow]:
     rows = _extract_career_summary_rows(html)
     result = []
     for format_name, cells, headers in rows:
-        mapped = _map_cells(headers, cells, _BOWLING_COLUMN_MAP)
+        mapped = _map_cells(headers, cells)
         mapped["format"] = format_name
         result.append(CareerBowlingRow(**mapped))
     return result
@@ -141,7 +98,7 @@ def _parse_fielding_career_summary(html: str) -> list[CareerBattingFieldingRow]:
     rows = _extract_career_summary_rows(html)
     result = []
     for format_name, cells, headers in rows:
-        mapped = _map_cells(headers, cells, _FIELDING_COLUMN_MAP)
+        mapped = _map_cells(headers, cells)
         mapped["format"] = format_name
         result.append(CareerBattingFieldingRow(**mapped))
     return result
@@ -225,18 +182,9 @@ def _extract_th_text(th: Tag) -> str:
     return th.get_text(strip=True)
 
 
-def _map_cells(
-    headers: list[str],
-    cells: list[str],
-    column_map: dict[str, str],
-) -> dict:
+def _map_cells(headers: list[str], cells: list[str]) -> dict:
     """
     Zip headers with cell values and produce a dict whose keys match model
-    field names or validation aliases, skipping unmapped columns.
+    validation aliases (which must match the table headers exactly).
     """
-    mapped: dict = {}
-    for header, value in zip(headers, cells):
-        key = column_map.get(header)
-        if key and value:
-            mapped[key] = value
-    return mapped
+    return {header: value for header, value in zip(headers, cells) if value}

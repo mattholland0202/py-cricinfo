@@ -9,7 +9,6 @@ from pycricinfo.models.output.scorecard import CricinfoScorecard
 from pycricinfo.models.source.api.commentary import APIResponseCommentary, Commentary
 from pycricinfo.models.source.api.match import Match
 from pycricinfo.models.source.pages.player import Career
-from pycricinfo.player_pages import get_player_career_stats
 from pycricinfo.utils import load_file_and_validate_to_model
 
 
