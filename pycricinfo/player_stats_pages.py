@@ -12,11 +12,12 @@ from pycricinfo.models.source.pages.player import (
     CareerBattingFieldingRow,
     CareerBowlingRow,
 )
+from pycricinfo.types.match_types import MatchTypeNames
 
 _INTERNATIONAL_FORMATS = frozenset({"Test matches", "One-Day Internationals", "Twenty20 Internationals"})
 
 
-async def get_player_career_stats_from_stats_pages(
+async def get_player_career(
     player_id: int,
     session: Optional[aiohttp.ClientSession] = None,
 ) -> Career:
@@ -52,9 +53,9 @@ async def get_player_career_stats_from_stats_pages(
         if owned_session:
             await session.close()
 
-    batting_rows = _parse_batting_career_summary(str(batting_html))
-    bowling_rows = _parse_bowling_career_summary(str(bowling_html))
-    fielding_rows = _parse_fielding_career_summary(str(fielding_html))
+    batting_rows = _parse_career_summary_rows(str(batting_html), CareerBattingFieldingRow)
+    bowling_rows = _parse_career_summary_rows(str(bowling_html), CareerBowlingRow)
+    fielding_rows = _parse_career_summary_rows(str(fielding_html), CareerBattingFieldingRow)
 
     merged = _merge_batting_and_fielding(batting_rows, fielding_rows)
 
@@ -71,36 +72,29 @@ async def _fetch_stats_page(player_id: int, stat_type: str, session: aiohttp.Cli
     )
 
 
-def _parse_batting_career_summary(html: str) -> list[CareerBattingFieldingRow]:
-    """Parse Test/ODI/T20I batting rows from a Statsguru batting stats page."""
-    rows = _extract_career_summary_rows(html)
+# Generic parser for career summary rows
+def _parse_career_summary_rows(html: str, row_model):
+    """
+    Generic parser for Test/ODI/T20I career summary rows from a Statsguru stats page.
+    row_model: The model class to instantiate for each row (e.g., CareerBattingFieldingRow, CareerBowlingRow)
+    """
+    try:
+        rows = _extract_career_summary_rows(html)
+    except Exception:
+        rows = []
     result = []
+
+    fmt_map = {
+        "Test matches": MatchTypeNames.TESTS,
+        "One-Day Internationals": MatchTypeNames.ODIs,
+        "Twenty20 Internationals": MatchTypeNames.T20Is,
+    }
     for format_name, cells, headers in rows:
+        if all((c.strip() == "-" or c.strip() == "") for c in cells):
+            continue
         mapped = _map_cells(headers, cells)
-        mapped["format"] = format_name
-        result.append(CareerBattingFieldingRow(**mapped))
-    return result
-
-
-def _parse_bowling_career_summary(html: str) -> list[CareerBowlingRow]:
-    """Parse Test/ODI/T20I bowling rows from a Statsguru bowling stats page."""
-    rows = _extract_career_summary_rows(html)
-    result = []
-    for format_name, cells, headers in rows:
-        mapped = _map_cells(headers, cells)
-        mapped["format"] = format_name
-        result.append(CareerBowlingRow(**mapped))
-    return result
-
-
-def _parse_fielding_career_summary(html: str) -> list[CareerBattingFieldingRow]:
-    """Parse Test/ODI/T20I fielding rows from a Statsguru fielding stats page."""
-    rows = _extract_career_summary_rows(html)
-    result = []
-    for format_name, cells, headers in rows:
-        mapped = _map_cells(headers, cells)
-        mapped["format"] = format_name
-        result.append(CareerBattingFieldingRow(**mapped))
+        mapped["format"] = fmt_map.get(format_name, format_name)
+        result.append(row_model(**mapped))
     return result
 
 
@@ -141,15 +135,24 @@ def _extract_career_summary_rows(html: str) -> list[tuple[str, list[str], list[s
 
     caption = soup.find("caption", string=re.compile(r"^Career summary$", re.IGNORECASE))
     if not caption:
-        raise ValueError("Could not find 'Career summary' table in stats page")
+        return []
 
     table = caption.find_parent("table")
+    if table is None:
+        return []
 
-    thead_row = table.find("thead").find("tr")
+    thead = table.find("thead")
+    if thead is None:
+        return []
+    thead_row = thead.find("tr")
+    if thead_row is None:
+        return []
     headers = [_extract_th_text(th) for th in thead_row.find_all("th")]
 
     # Only the first <tbody> holds the format-level grouping rows
     first_tbody = table.find("tbody")
+    if first_tbody is None:
+        return []
     result = []
     for tr in first_tbody.find_all("tr"):
         cells = tr.find_all("td")

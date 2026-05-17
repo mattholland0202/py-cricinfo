@@ -9,6 +9,7 @@ from pycricinfo.models.output.scorecard import CricinfoScorecard
 from pycricinfo.models.source.api.commentary import APIResponseCommentary, Commentary
 from pycricinfo.models.source.api.match import Match
 from pycricinfo.models.source.pages.player import Career
+from pycricinfo.player_stats_pages import get_player_career
 from pycricinfo.utils import load_file_and_validate_to_model
 
 
@@ -171,7 +172,7 @@ def print_player_career(player_name: str = None, player_id: int = None):
         print("Please provide both --player_name and --player_id")
         return
 
-    career = asyncio.run(get_player_career_stats(player_name=selected_player_name, player_id=selected_player_id))
+    career = asyncio.run(get_player_career(player_name=selected_player_name, player_id=selected_player_id))
     _print_player_career_stats(career, selected_player_name)
 
 
