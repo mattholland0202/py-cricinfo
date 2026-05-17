@@ -1,6 +1,6 @@
 import pytest
 
-from pycricinfo.models.source.pages.player import CareerBattingFieldingRow
+from pycricinfo.models.source.pages.player import CareerBattingRow, CareerBowlingRow, CareerFieldingRow
 from pycricinfo.player_stats_pages import _parse_career_summary_rows
 from pycricinfo.types.match_types import MatchTypeNames
 
@@ -51,17 +51,35 @@ def _read(path: str) -> str:
         return f.read()
 
 
+# Batting tests
 @pytest.mark.parametrize("case", PLAYER_CASES, ids=[c["name"] for c in PLAYER_CASES])
 def test_parse_stats_batting_career_summary(case):
-    rows = _parse_career_summary_rows(_read(case["batting"]), CareerBattingFieldingRow)
+    rows = _parse_career_summary_rows(_read(case["batting"]), CareerBattingRow)
     present_formats = {fmt for fmt, expected in case["expected"].items() if expected is not None}
     row_formats = {r.format for r in rows}
     assert row_formats == present_formats
     for fmt, expected in case["expected"].items():
         if expected is None:
-            # Should not be present in the output
             assert fmt not in row_formats
         else:
             row = next(r for r in rows if r.format == fmt)
             for k, v in expected.items():
                 assert getattr(row, k) == v
+
+
+# Bowling tests (structure only, as expected values are not provided)
+@pytest.mark.parametrize("case", PLAYER_CASES, ids=[c["name"] for c in PLAYER_CASES])
+def test_parse_stats_bowling_career_summary(case):
+    if not case["bowling"]:
+        return
+    rows = _parse_career_summary_rows(_read(case["bowling"]), CareerBowlingRow)
+    assert all(isinstance(r, CareerBowlingRow) for r in rows)
+
+
+# Fielding tests (structure only, as expected values are not provided)
+@pytest.mark.parametrize("case", PLAYER_CASES, ids=[c["name"] for c in PLAYER_CASES])
+def test_parse_stats_fielding_career_summary(case):
+    if not case["fielding"]:
+        return
+    rows = _parse_career_summary_rows(_read(case["fielding"]), CareerFieldingRow)
+    assert all(isinstance(r, CareerFieldingRow) for r in rows)

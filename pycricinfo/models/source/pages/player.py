@@ -1,3 +1,4 @@
+from abc import ABC
 from typing import Optional
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
@@ -5,7 +6,8 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
 from pycricinfo.types import MatchTypeNames
 
 
-class CareerStatsBaseModel(BaseModel):
+class CareerStatsBaseModel(BaseModel, ABC):
+    format: MatchTypeNames
     model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
     @model_validator(mode="before")
@@ -21,8 +23,7 @@ class CareerStatsBaseModel(BaseModel):
         return data
 
 
-class CareerBattingFieldingRow(CareerStatsBaseModel):
-    format: MatchTypeNames
+class CareerBattingRow(CareerStatsBaseModel):
     matches: Optional[int] = Field(default=None, validation_alias=AliasChoices("Mat", "mat"))
     innings: Optional[int] = Field(default=None, validation_alias=AliasChoices("Inns", "inns"))
     not_outs: Optional[int] = Field(default=None, validation_alias=AliasChoices("NO", "no"))
@@ -39,9 +40,12 @@ class CareerBattingFieldingRow(CareerStatsBaseModel):
     half_centuries: Optional[int] = Field(default=None, validation_alias=AliasChoices("50", "50s", "fifties"))
     fours: Optional[int] = Field(default=None, validation_alias=AliasChoices("4s"))
     sixes: Optional[int] = Field(default=None, validation_alias=AliasChoices("6s"))
+    ducks: Optional[int] = Field(default=None, validation_alias=AliasChoices("0", "ducks"))
+
+
+class CareerFieldingRow(CareerStatsBaseModel):
     catches: Optional[int] = Field(default=None, validation_alias=AliasChoices("Ct", "ct"))
     stumpings: Optional[int] = Field(default=None, validation_alias=AliasChoices("St", "st"))
-    ducks: Optional[int] = Field(default=None, validation_alias=AliasChoices("0", "ducks"))
     dismissals: Optional[int] = Field(default=None, validation_alias=AliasChoices("Dis"))
     catches_as_keeper: Optional[int] = Field(
         default=None, validation_alias=AliasChoices("Ct Wk", "ct_wk", "catches_as_keeper")
@@ -71,5 +75,6 @@ class CareerBowlingRow(CareerStatsBaseModel):
 
 
 class Career(BaseModel):
-    batting_and_fielding: list[CareerBattingFieldingRow]
+    batting: list[CareerBattingRow]
     bowling: list[CareerBowlingRow]
+    fielding: list[CareerFieldingRow]

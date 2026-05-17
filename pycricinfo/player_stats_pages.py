@@ -9,8 +9,9 @@ from pycricinfo.api_helper import create_session, get_request
 from pycricinfo.config import BaseRoute, get_settings
 from pycricinfo.models.source.pages.player import (
     Career,
-    CareerBattingFieldingRow,
+    CareerBattingRow,
     CareerBowlingRow,
+    CareerFieldingRow,
 )
 from pycricinfo.types.match_types import MatchTypeNames
 
@@ -53,13 +54,11 @@ async def get_player_career(
         if owned_session:
             await session.close()
 
-    batting_rows = _parse_career_summary_rows(str(batting_html), CareerBattingFieldingRow)
+    batting_rows = _parse_career_summary_rows(str(batting_html), CareerBattingRow)
     bowling_rows = _parse_career_summary_rows(str(bowling_html), CareerBowlingRow)
-    fielding_rows = _parse_career_summary_rows(str(fielding_html), CareerBattingFieldingRow)
+    fielding_rows = _parse_career_summary_rows(str(fielding_html), CareerFieldingRow)
 
-    merged = _merge_batting_and_fielding(batting_rows, fielding_rows)
-
-    return Career(batting_and_fielding=merged, bowling=bowling_rows)
+    return Career(batting=batting_rows, bowling=bowling_rows, fielding=fielding_rows)
 
 
 async def _fetch_stats_page(player_id: int, stat_type: str, session: aiohttp.ClientSession) -> str:
@@ -97,30 +96,7 @@ def _parse_career_summary_rows(html: str, row_model):
         result.append(row_model(**mapped))
     return result
 
-
-def _merge_batting_and_fielding(
-    batting: list[CareerBattingFieldingRow],
-    fielding: list[CareerBattingFieldingRow],
-) -> list[CareerBattingFieldingRow]:
-    """Merge fielding stats into batting rows, matching by format."""
-    fielding_by_format = {row.format: row for row in fielding}
-    merged = []
-    for bat_row in batting:
-        fld_row = fielding_by_format.get(bat_row.format)
-        if fld_row is None:
-            merged.append(bat_row)
-            continue
-
-        row_data = bat_row.model_dump()
-        row_data.update({
-            "catches": fld_row.catches,
-            "stumpings": fld_row.stumpings,
-            "dismissals": fld_row.dismissals,
-            "catches_as_keeper": fld_row.catches_as_keeper,
-            "catches_as_fielder": fld_row.catches_as_fielder,
-        })
-        merged.append(CareerBattingFieldingRow(**row_data))
-    return merged
+    # No longer needed: merging logic removed. Batting and fielding are now separate.
 
 
 def _extract_career_summary_rows(html: str) -> list[tuple[str, list[str], list[str]]]:

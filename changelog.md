@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.37]
 ### Changed
 - Move to collecting Player career data from Statsguru instead of page scraping, due to bot detection
+- Separate Career into 3 sections for Batting, Bowling and Fielding
 
 ### Removed
 - The method of fetching Player career data added in `[0.0.35]`
