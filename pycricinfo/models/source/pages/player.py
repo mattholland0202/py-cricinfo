@@ -41,6 +41,12 @@ class CareerBattingFieldingRow(CareerStatsBaseModel):
     sixes: Optional[int] = Field(default=None, validation_alias="6s")
     catches: Optional[int] = Field(default=None, validation_alias="ct")
     stumpings: Optional[int] = Field(default=None, validation_alias="st")
+    ducks: Optional[int] = Field(default=None, validation_alias=AliasChoices("0", "ducks"))
+    dismissals: Optional[int] = Field(default=None)
+    catches_as_keeper: Optional[int] = Field(default=None, validation_alias=AliasChoices("ct_wk", "catches_as_keeper"))
+    catches_as_fielder: Optional[int] = Field(
+        default=None, validation_alias=AliasChoices("ct_fi", "catches_as_fielder")
+    )
 
 
 class CareerBowlingRow(CareerStatsBaseModel):
@@ -58,6 +64,8 @@ class CareerBowlingRow(CareerStatsBaseModel):
     four_wicket_hauls: Optional[int] = Field(default=None, validation_alias=AliasChoices("4w", "four_w"))
     five_wicket_hauls: Optional[int] = Field(default=None, validation_alias=AliasChoices("5w", "five_w"))
     ten_wicket_hauls: Optional[int] = Field(default=None, validation_alias=AliasChoices("10w", "ten_w"))
+    overs: Optional[str] = Field(default=None)
+    maidens: Optional[int] = Field(default=None, validation_alias=AliasChoices("mdns", "maidens"))
 
 
 class Career(BaseModel):

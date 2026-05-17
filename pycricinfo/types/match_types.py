@@ -4,7 +4,7 @@ from aenum import MultiValueEnum
 
 
 class MatchTypeNames(str, MultiValueEnum):
-    TESTS = "Tests"
+    TESTS = "Tests", "Test matches"
     ODIs = "One-Day Internationals", "ODIs"
     T20Is = "Twenty20 Internationals", "T20Is"
     FIRST_CLASS = "First-class", "FC"

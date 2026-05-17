@@ -122,6 +122,8 @@ async def get_request(
         base = get_settings().core_base_route_v2
     elif base_route == BaseRoute.site:
         base = get_settings().site_base_route_v2
+    elif base_route == BaseRoute.stats:
+        base = get_settings().stats_base_route
     else:
         base = get_settings().cricinfo_base_route
     full_route = f"{base}{route}"
@@ -143,7 +145,7 @@ async def get_request(
             response_status = response.status
             response_logging_extras["cricket_stats.response_code"] = response_status
 
-            if base_route == BaseRoute.page:
+            if base_route in (BaseRoute.page, BaseRoute.stats):
                 output = await response.text()
 
                 if response_status == 403 or _is_bot_protection_page(output):
@@ -224,10 +226,15 @@ def _get_request_headers(base_route: BaseRoute, referer: str) -> dict[str, str]:
     dict[str, str]
         Headers to send for the outgoing request.
     """
-    if base_route == BaseRoute.page:
+    if base_route in (BaseRoute.page, BaseRoute.stats):
+        origin = (
+            get_settings().stats_base_route.rstrip("/")
+            if base_route == BaseRoute.stats
+            else get_settings().cricinfo_base_route.rstrip("/")
+        )
         return {
             "Referer": referer,
-            "Origin": get_settings().cricinfo_base_route.rstrip("/"),
+            "Origin": origin,
             "Upgrade-Insecure-Requests": "1",
             "Sec-Fetch-Dest": "document",
             "Sec-Fetch-Mode": "navigate",
