@@ -1,15 +1,12 @@
 import asyncio
 from argparse import ArgumentParser, Namespace
 
-from prettytable import PrettyTable
 from pydantic import ValidationError
 
 from pycricinfo.call_cricinfo_api import get_match, get_play_by_play
 from pycricinfo.models.output.scorecard import CricinfoScorecard
 from pycricinfo.models.source.api.commentary import APIResponseCommentary, Commentary
 from pycricinfo.models.source.api.match import Match
-from pycricinfo.models.source.pages.player import Career
-from pycricinfo.player_stats_pages import get_player_career
 from pycricinfo.utils import load_file_and_validate_to_model
 
 
@@ -149,126 +146,5 @@ def parse_ball_by_ball_args() -> Namespace:
     parser.add_argument("--match_id", help="ID of the match to fetch from the API")
     parser.add_argument("--innings", help="The innings of the game to get data from", type=int, default=1)
     parser.add_argument("--page", help="The page of commentary to return from that innings", type=int, default=1)
-    args = parser.parse_args()
-    return args
-
-
-def print_player_career(player_name: str = None, player_id: int = None):
-    """
-    Print a player's career batting/fielding and bowling stats in a readable table format.
-
-    Parameters
-    ----------
-    player_name : str, optional
-        Player name from the URL slug, for example "Ben Stokes".
-    player_id : int, optional
-        Cricinfo player ID from the URL.
-    """
-    args = parse_player_career_args()
-    selected_player_name = player_name or args.player_name
-    selected_player_id = player_id or args.player_id
-
-    if not selected_player_name or not selected_player_id:
-        print("Please provide both --player_name and --player_id")
-        return
-
-    career = asyncio.run(get_player_career(player_name=selected_player_name, player_id=selected_player_id))
-    _print_player_career_stats(career, selected_player_name)
-
-
-def _print_player_career_stats(career: Career, player_name: str):
-    print(f"\n{player_name} Career Stats")
-    print("=" * (len(player_name) + 13))
-
-    batting_table = PrettyTable()
-    batting_table.field_names = [
-        "Format",
-        "Mat",
-        "Inns",
-        "NO",
-        "Runs",
-        "HS",
-        "Ave",
-        "BF",
-        "SR",
-        "100s",
-        "50s",
-        "4s",
-        "6s",
-        "Ct",
-        "St",
-    ]
-
-    for row in career.batting_and_fielding:
-        batting_table.add_row([
-            row.format,
-            row.matches,
-            row.innings,
-            row.not_outs,
-            row.runs,
-            row.highest_score,
-            row.average,
-            row.balls_faced,
-            row.strike_rate,
-            row.centuries,
-            row.half_centuries,
-            row.fours,
-            row.sixes,
-            row.catches,
-            row.stumpings,
-        ])
-
-    bowling_table = PrettyTable()
-    bowling_table.field_names = [
-        "Format",
-        "Mat",
-        "Inns",
-        "Overs",
-        "Runs",
-        "Wkts",
-        "BBI",
-        "BBM",
-        "Ave",
-        "Econ",
-        "SR",
-        "5w",
-        "10w",
-    ]
-
-    for row in career.bowling:
-        bowling_table.add_row([
-            row.format,
-            row.matches,
-            row.innings,
-            row.overs,
-            row.runs_conceded,
-            row.wickets,
-            row.best_bowling_innings,
-            row.best_bowling_match,
-            row.average,
-            row.economy_rate,
-            row.strike_rate,
-            row.five_wicket_hauls,
-            row.ten_wicket_hauls,
-        ])
-
-    print("\nBatting & Fielding")
-    print(batting_table)
-    print("\nBowling")
-    print(bowling_table)
-
-
-def parse_player_career_args() -> Namespace:
-    """
-    Parse command line arguments for printing a player's career stats.
-
-    Returns
-    -------
-    argparse.Namespace
-        The parsed arguments.
-    """
-    parser = ArgumentParser()
-    parser.add_argument("--player_name", help="Player name from Cricinfo URL, for example 'Ben Stokes'")
-    parser.add_argument("--player_id", help="Player ID from Cricinfo URL", type=int)
     args = parser.parse_args()
     return args

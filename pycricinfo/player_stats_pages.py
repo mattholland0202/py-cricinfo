@@ -16,15 +16,7 @@ from pycricinfo.models.source.pages.player import (
 )
 from pycricinfo.types.match_types import MatchTypeNames
 
-_INTERNATIONAL_FORMATS = frozenset({"Test matches", "One-Day Internationals", "Twenty20 Internationals"})
-_FORMAT_NAME_MAP = {
-    "Test matches": MatchTypeNames.TESTS,
-    "Tests": MatchTypeNames.TESTS,
-    "One-Day Internationals": MatchTypeNames.ODIs,
-    "ODIs": MatchTypeNames.ODIs,
-    "Twenty20 Internationals": MatchTypeNames.T20Is,
-    "T20Is": MatchTypeNames.T20Is,
-}
+_INTERNATIONAL_MATCH_TYPES = frozenset({MatchTypeNames.TESTS, MatchTypeNames.ODIs, MatchTypeNames.T20Is})
 
 
 async def get_player_career(
@@ -96,10 +88,11 @@ def _parse_career_summary_rows(html: str, row_model: Type[CareerStatsBaseModel])
     for format_name, cells, headers in rows:
         if all((c.strip() == "-" or c.strip() == "") for c in cells):
             continue
-        mapped = _map_cells(headers, cells)
-        mapped["format"] = _FORMAT_NAME_MAP.get(format_name)
-        if mapped["format"] is None:
+        format_value = _to_international_match_type(format_name)
+        if format_value is None:
             continue
+        mapped = _map_cells(headers, cells)
+        mapped["format"] = format_value
         result.append(row_model(**mapped))
 
     # Fallback for single-format pages where career summary rows are not grouped by format.
@@ -173,13 +166,26 @@ def _extract_single_format_from_stats_tab(html: str) -> Optional[MatchTypeNames]
         if not text:
             continue
         label = re.sub(r"\s*\([^)]*\)\s*$", "", text).strip()
-        if label in ("Tests", "ODIs", "T20Is"):
-            labels.append(label)
+        format_value = _to_international_match_type(label)
+        if format_value is not None:
+            labels.append(format_value)
 
     if len(labels) != 1:
         return None
 
-    return _FORMAT_NAME_MAP.get(labels[0])
+    return labels[0]
+
+
+def _to_international_match_type(format_name: str) -> Optional[MatchTypeNames]:
+    try:
+        parsed = MatchTypeNames(format_name)
+    except ValueError:
+        return None
+
+    if parsed not in _INTERNATIONAL_MATCH_TYPES:
+        return None
+
+    return parsed
 
 
 def _extract_career_summary_rows(html: str) -> list[tuple[str, list[str], list[str]]]:
@@ -223,7 +229,7 @@ def _extract_career_summary_rows(html: str) -> list[tuple[str, list[str], list[s
             continue
 
         format_name = b_tag.get_text(strip=True)
-        if format_name not in _INTERNATIONAL_FORMATS:
+        if _to_international_match_type(format_name) is None:
             continue
 
         cell_texts = [td.get_text(strip=True) for td in cells]
