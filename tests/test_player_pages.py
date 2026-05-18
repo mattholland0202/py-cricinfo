@@ -43,6 +43,17 @@ PLAYER_CASES = [
             MatchTypeNames.T20Is: None,
         },
     },
+    {
+        "name": "single_format_fallback",
+        "batting": "tests/test_files/player/887207_stats_page_batting_all.html",
+        "bowling": None,
+        "fielding": None,
+        "expected": {
+            MatchTypeNames.TESTS: {"matches": 64, "runs": 3732},
+            MatchTypeNames.ODIs: None,
+            MatchTypeNames.T20Is: None,
+        },
+    },
 ]
 
 

@@ -1,6 +1,6 @@
 import asyncio
 import re
-from typing import Optional
+from typing import Optional, Type
 
 import aiohttp
 from bs4 import BeautifulSoup, Tag
@@ -12,10 +12,19 @@ from pycricinfo.models.source.pages.player import (
     CareerBattingRow,
     CareerBowlingRow,
     CareerFieldingRow,
+    CareerStatsBaseModel,
 )
 from pycricinfo.types.match_types import MatchTypeNames
 
 _INTERNATIONAL_FORMATS = frozenset({"Test matches", "One-Day Internationals", "Twenty20 Internationals"})
+_FORMAT_NAME_MAP = {
+    "Test matches": MatchTypeNames.TESTS,
+    "Tests": MatchTypeNames.TESTS,
+    "One-Day Internationals": MatchTypeNames.ODIs,
+    "ODIs": MatchTypeNames.ODIs,
+    "Twenty20 Internationals": MatchTypeNames.T20Is,
+    "T20Is": MatchTypeNames.T20Is,
+}
 
 
 async def get_player_career(
@@ -73,31 +82,104 @@ async def _fetch_stats_page(player_id: int, stat_type: str, session: aiohttp.Cli
 
 
 # Generic parser for career summary rows
-def _parse_career_summary_rows(html: str, row_model):
+def _parse_career_summary_rows(html: str, row_model: Type[CareerStatsBaseModel]) -> list[CareerStatsBaseModel]:
     """
     Generic parser for Test/ODI/T20I career summary rows from a Statsguru stats page.
-    row_model: The model class to instantiate for each row (e.g., CareerBattingFieldingRow, CareerBowlingRow)
+    row_model: The model class to instantiate for each row (e.g., CareerBattingRow, CareerBowlingRow)
     """
     try:
         rows = _extract_career_summary_rows(html)
     except Exception:
         rows = []
-    result = []
+    result: list[CareerStatsBaseModel] = []
 
-    fmt_map = {
-        "Test matches": MatchTypeNames.TESTS,
-        "One-Day Internationals": MatchTypeNames.ODIs,
-        "Twenty20 Internationals": MatchTypeNames.T20Is,
-    }
     for format_name, cells, headers in rows:
         if all((c.strip() == "-" or c.strip() == "") for c in cells):
             continue
         mapped = _map_cells(headers, cells)
-        mapped["format"] = fmt_map.get(format_name, format_name)
+        mapped["format"] = _FORMAT_NAME_MAP.get(format_name)
+        if mapped["format"] is None:
+            continue
         result.append(row_model(**mapped))
+
+    # Fallback for single-format pages where career summary rows are not grouped by format.
+    if result:
+        return result
+
+    fallback_row = _extract_overall_career_averages_row(html)
+    fallback_format = _extract_single_format_from_stats_tab(html)
+    if not fallback_row or fallback_format is None:
+        return result
+
+    cells, headers = fallback_row
+    if all((c.strip() == "-" or c.strip() == "") for c in cells):
+        return result
+
+    mapped = _map_cells(headers, cells)
+    mapped["format"] = fallback_format
+    result.append(row_model(**mapped))
     return result
 
-    # No longer needed: merging logic removed. Batting and fielding are now separate.
+
+def _extract_overall_career_averages_row(html: str) -> Optional[tuple[list[str], list[str]]]:
+    soup = BeautifulSoup(html, "html.parser")
+
+    caption = soup.find("caption", string=re.compile(r"^Career averages$", re.IGNORECASE))
+    if not caption:
+        return None
+
+    table = caption.find_parent("table")
+    if table is None:
+        return None
+
+    thead = table.find("thead")
+    if thead is None:
+        return None
+
+    thead_row = thead.find("tr")
+    if thead_row is None:
+        return None
+
+    headers = [_extract_th_text(th) for th in thead_row.find_all("th")]
+
+    tbody = table.find("tbody")
+    if tbody is None:
+        return None
+
+    for tr in tbody.find_all("tr"):
+        cells = tr.find_all("td")
+        if not cells:
+            continue
+        label = cells[0].get_text(strip=True).lower()
+        if label != "overall":
+            continue
+
+        cell_texts = [td.get_text(strip=True) for td in cells]
+        return cell_texts, headers
+
+    return None
+
+
+def _extract_single_format_from_stats_tab(html: str) -> Optional[MatchTypeNames]:
+    soup = BeautifulSoup(html, "html.parser")
+
+    stats_tab = soup.find("ul", id="statsTab")
+    if stats_tab is None:
+        return None
+
+    labels = []
+    for anchor in stats_tab.find_all("a"):
+        text = anchor.get_text(" ", strip=True)
+        if not text:
+            continue
+        label = re.sub(r"\s*\([^)]*\)\s*$", "", text).strip()
+        if label in ("Tests", "ODIs", "T20Is"):
+            labels.append(label)
+
+    if len(labels) != 1:
+        return None
+
+    return _FORMAT_NAME_MAP.get(labels[0])
 
 
 def _extract_career_summary_rows(html: str) -> list[tuple[str, list[str], list[str]]]:
