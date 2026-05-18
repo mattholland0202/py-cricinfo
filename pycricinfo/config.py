@@ -81,9 +81,9 @@ class Settings(BaseSettings):
         13: "All cricket, including minor cricket",  # aka: Other Twenty20 matches
         14: "Youth Test",  # matches will have generalId: 11
         15: "Youth ODI",  # matches will have generalId: 12
-        17: "Women's T20",
         20: "Under 19s Youth Test",
         21: "Under 19s Youth ODI",
+        22: "Youth T20",
         23: "Women's T20",
     }
 

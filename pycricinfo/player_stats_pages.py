@@ -45,6 +45,7 @@ async def get_player_career(
         session = create_session()
 
     try:
+        # TODO: This only works for male players, there's no collective "all international formats" page for women
         batting_html, bowling_html, fielding_html = await asyncio.gather(
             _fetch_stats_page(player_id, "batting", session),
             _fetch_stats_page(player_id, "bowling", session),

@@ -223,7 +223,7 @@ def _print_player_career_stats(career: Career, player_name: str):
         "Format",
         "Mat",
         "Inns",
-        "Balls",
+        "Overs",
         "Runs",
         "Wkts",
         "BBI",
@@ -231,7 +231,6 @@ def _print_player_career_stats(career: Career, player_name: str):
         "Ave",
         "Econ",
         "SR",
-        "4w",
         "5w",
         "10w",
     ]
@@ -241,7 +240,7 @@ def _print_player_career_stats(career: Career, player_name: str):
             row.format,
             row.matches,
             row.innings,
-            row.balls_bowled,
+            row.overs,
             row.runs_conceded,
             row.wickets,
             row.best_bowling_innings,
@@ -249,7 +248,6 @@ def _print_player_career_stats(career: Career, player_name: str):
             row.average,
             row.economy_rate,
             row.strike_rate,
-            row.four_wicket_hauls,
             row.five_wicket_hauls,
             row.ten_wicket_hauls,
         ])

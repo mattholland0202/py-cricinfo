@@ -59,7 +59,6 @@ class CareerBowlingRow(CareerStatsBaseModel):
     format: MatchTypeNames
     matches: Optional[int] = Field(default=None, validation_alias=AliasChoices("Mat", "mat"))
     innings: Optional[int] = Field(default=None, validation_alias=AliasChoices("Inns", "inns"))
-    balls_bowled: Optional[int] = Field(default=None, validation_alias=AliasChoices("Balls", "balls"))
     runs_conceded: Optional[int] = Field(default=None, validation_alias=AliasChoices("Runs", "runs"))
     wickets: Optional[int] = Field(default=None, validation_alias=AliasChoices("Wkts", "wkts"))
     best_bowling_innings: Optional[str] = Field(default=None, validation_alias=AliasChoices("BBI", "bbi"))
@@ -67,7 +66,6 @@ class CareerBowlingRow(CareerStatsBaseModel):
     average: Optional[float] = Field(default=None, validation_alias=AliasChoices("Ave", "ave"))
     economy_rate: Optional[float] = Field(default=None, validation_alias=AliasChoices("Econ", "econ"))
     strike_rate: Optional[float] = Field(default=None, validation_alias=AliasChoices("SR", "sr"))
-    four_wicket_hauls: Optional[int] = Field(default=None, validation_alias=AliasChoices("4w", "Four", "four_w"))
     five_wicket_hauls: Optional[int] = Field(default=None, validation_alias=AliasChoices("5", "5w", "five_w"))
     ten_wicket_hauls: Optional[int] = Field(default=None, validation_alias=AliasChoices("10", "10w", "ten_w"))
     overs: Optional[str] = Field(default=None, validation_alias=AliasChoices("Overs", "overs"))
