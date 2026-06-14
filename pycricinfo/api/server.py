@@ -1,7 +1,6 @@
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from fastapi_pagination import add_pagination
 
 from pycricinfo.api.endpoints.match import router as match_router
 from pycricinfo.api.endpoints.play_by_play import router as play_by_play_router
@@ -26,11 +25,10 @@ app = FastAPI(
     openapi_tags=[
         {
             "name": "Cricinfo: API",
-            "description": "Endpoints direct from the Cricinfo API, without any additional processing",
+            "description": "Endpoints direct from the Cricinfo API, without any additional processing or parsing.",
         },
     ],
 )
-add_pagination(app)
 
 app.include_router(raw_router)
 app.include_router(match_router)
@@ -42,7 +40,7 @@ app.include_router(team_router)
 
 
 @app.exception_handler(CricinfoAPIException)
-def my_custom_exception_handler(request: Request, exc: CricinfoAPIException):
+def overall_exception_handler(_: Request, exc: CricinfoAPIException):
     return JSONResponse(
         status_code=exc.status_code,
         content=exc.output(),

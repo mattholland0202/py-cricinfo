@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import AliasChoices, BaseModel, Field, computed_field
 
 from pycricinfo.models.source.api.athelete import AthleteWithNameAndShortName as Athlete
-from pycricinfo.models.source.api.common import CCBaseModel, PagingModel
+from pycricinfo.models.source.api.common import CCBaseModel, LeniantOptional, PagingModel
 from pycricinfo.models.source.api.team import TeamWithName as Team
 
 
@@ -13,7 +13,7 @@ class CommentaryPlayType(BaseModel):
 
 
 class CommentaryBowler(BaseModel):
-    athlete: Optional[Athlete] = Field(default=None)
+    athlete: LeniantOptional[Athlete] = Field(default=None)
     team: Team
     maidens: int
     balls: int

@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.39]
+### Fixed
+- Improve comments on player stats code
+- Add lenient optional type to handle cases where API responses return empty dicts rather than null, specifically in Commentary response
+
 ## [0.0.38]
 ### Fixed
 - Handle Career stats for Players who have only played one format

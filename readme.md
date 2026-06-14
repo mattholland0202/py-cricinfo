@@ -34,39 +34,6 @@ or
 pip install 'pycricinfo[api]'
 ```
 
-## Sample usage: CLI
-Installing the project adds 2 scripts:
-
-### `print_scorecard`
-Produces a match scorecard in the CLI, output using [PrettyTable](https://pypi.org/project/prettytable/).  
-Can either be from an already downloaded JSON file on disk, or fetched on demand from the API, by changing parameter options:
-
-* `--file`: A path to a JSON file from the Cricinfo match summary API
-
-or
-
-* `--match_id`: The Cricinfo ID of a match while will be fetched from the summary API
-* `--series_id`: The Cricinfo ID of the series this match was in
-
-### `print_ballbyball` 
-Produces a summary of each ball in a page of data in the CLI.  
-Can either be output from an already fetched JSON file on disk, or fetched on demand from the API, by changing parameter options:
-
-* `--file`: A path to a JSON file from the Cricinfo 'play-by-play' API to the
-
-or
-
-* `--match_id`: The Cricinfo ID of a match while will be fetched from the summary API
-* `--innings`: The innings of the game to get data from
-* `--page`: The page of commentary to return from that innings
-
-----
-
-Installing the optional API dependency adds a further script:
-
-### `run_api`
-Runs `uvicorn` to launch a `FastAPI` wrapper around the Cricinfo API, which will launch on port 8000, with the Swagger documentation available at `http://localhost:8000/docs`
-
 ## Sample usage: In code
 Import one of the `get_` function from the root of the library.
 
@@ -110,6 +77,39 @@ async def fetch_multiple_seasons():
 ```
 
 The session is used as an async context manager, which ensures it is properly closed when done.
+
+## Sample usage: CLI
+Installing the project adds 2 scripts:
+
+### `print_scorecard`
+Produces a match scorecard in the CLI, output using [PrettyTable](https://pypi.org/project/prettytable/).  
+Can either be from an already downloaded JSON file on disk, or fetched on demand from the API, by changing parameter options:
+
+* `--file`: A path to a JSON file from the Cricinfo match summary API
+
+or
+
+* `--match_id`: The Cricinfo ID of a match while will be fetched from the summary API
+* `--series_id`: The Cricinfo ID of the series this match was in
+
+### `print_ballbyball` 
+Produces a summary of each ball in a page of data in the CLI.  
+Can either be output from an already fetched JSON file on disk, or fetched on demand from the API, by changing parameter options:
+
+* `--file`: A path to a JSON file from the Cricinfo 'play-by-play' API to the
+
+or
+
+* `--match_id`: The Cricinfo ID of a match while will be fetched from the summary API
+* `--innings`: The innings of the game to get data from
+* `--page`: The page of commentary to return from that innings
+
+----
+
+Installing the optional API dependency adds a further script:
+
+### `run_api`
+Runs `uvicorn` to launch a `FastAPI` wrapper around the Cricinfo API, which will launch on port 8000, with the Swagger documentation available at `http://localhost:8000/docs`
 
 ## Docker
 

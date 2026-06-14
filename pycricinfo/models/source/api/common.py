@@ -1,7 +1,16 @@
 from abc import ABC
-from typing import Optional
+from typing import Annotated, Any, Optional, TypeVar
 
-from pydantic import AliasChoices, AliasGenerator, BaseModel, ConfigDict, Field, HttpUrl, model_validator
+from pydantic import (
+    AliasChoices,
+    AliasGenerator,
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    model_validator,
+)
 from pydantic.alias_generators import to_camel
 
 
@@ -26,6 +35,16 @@ class CCBaseModel(ABC, BaseModel):
             if isinstance(v, dict) and len(v) == 0:
                 data[k] = None
         return data
+
+
+T = TypeVar("T")
+
+
+def falsy_to_none(x: Any) -> Any:
+    return x or None
+
+
+LeniantOptional = Annotated[Optional[T], BeforeValidator(falsy_to_none)]
 
 
 class PagingModel(CCBaseModel):
