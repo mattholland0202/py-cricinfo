@@ -79,7 +79,7 @@ class CommentaryOver(CCBaseModel):
 
 
 class CommentaryDismissalAthlete(CCBaseModel):
-    athlete: Athlete
+    athlete: LeniantOptional[Athlete] = Field(default=None)
 
 
 class CommentaryFielderAthlete(CommentaryDismissalAthlete):
