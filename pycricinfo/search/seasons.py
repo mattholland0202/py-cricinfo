@@ -137,6 +137,8 @@ def _process_series_blocks(series_blocks: list[_QueryResults]) -> list[MatchSeri
             link = series_link.get("href", "")
 
             series_id_regex_match = re.search(r"/series/[^/]+-(\d+)/", link)
+            if not series_id_regex_match:
+                continue
             series_id = int(series_id_regex_match.group(1))
 
             s = MatchSeries(

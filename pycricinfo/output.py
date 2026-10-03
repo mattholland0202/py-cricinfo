@@ -1,5 +1,6 @@
 import asyncio
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser, BooleanOptionalAction, Namespace
+from typing import Optional
 
 from pydantic import ValidationError
 
@@ -14,8 +15,8 @@ def print_scorecard(
     file_path: str = None,
     match_id: int = None,
     series_id: int = None,
-    include_batting_minutes: bool = True,
-    include_bowling_dots: bool = False,
+    include_batting_minutes: Optional[bool] = None,
+    include_bowling_dots: Optional[bool] = None,
 ):
     """
     Prints the scorecard of a match, either by passing a file path or loading from command line arguments
@@ -27,19 +28,18 @@ def print_scorecard(
     """
     args = parse_scorecard_args()
 
+    if include_batting_minutes is None:
+        include_batting_minutes = args.include_batting_minutes
+    if include_bowling_dots is None:
+        include_bowling_dots = args.include_bowling_dots
+
+    match_id = match_id or args.match_id
+    series_id = series_id or args.series_id
+
     if file_path or args.file:
-        _print_scorecard_from_file(
-            file_path or args.file,
-            include_batting_minutes or args.include_batting_minutes,
-            include_bowling_dots or args.include_bowling_dots,
-        )
-    elif match_id or args.match_id:
-        _print_scorecard_from_match_id(
-            series_id or args.series_id,
-            match_id or args.match_id,
-            include_batting_minutes or args.include_batting_minutes,
-            include_bowling_dots or args.include_bowling_dots,
-        )
+        _print_scorecard_from_file(file_path or args.file, include_batting_minutes, include_bowling_dots)
+    elif match_id and series_id:
+        _print_scorecard_from_match_id(series_id, match_id, include_batting_minutes, include_bowling_dots)
     else:
         print("Please provide either a file path or match & series IDs")
 
@@ -81,14 +81,19 @@ def parse_scorecard_args() -> Namespace:
     parser.add_argument("--series_id", help="ID of the series of the match to fetch from the API")
     parser.add_argument("--match_id", help="ID of the match to fetch from the API")
     parser.add_argument(
-        "--include_batting_minutes", help="Include batting minutes in the scorecard", action="store_true"
+        "--include_batting_minutes",
+        help="Include batting minutes in the scorecard",
+        action=BooleanOptionalAction,
+        default=True,
     )
     parser.add_argument("--include_bowling_dots", help="Include bowling dots in the scorecard", action="store_true")
     args = parser.parse_args()
     return args
 
 
-def print_ball_by_ball(file_path: str = None, match_id: int = None, innings: int = 1, page: int = 1):
+def print_ball_by_ball(
+    file_path: str = None, match_id: int = None, innings: Optional[int] = None, page: Optional[int] = None
+):
     """
     Prints a page of ball by ball commentary of a match, either by passing a file path or loading from command line
     arguments
@@ -100,9 +105,11 @@ def print_ball_by_ball(file_path: str = None, match_id: int = None, innings: int
     match_id : int, optional
         The ID of the match to fetch from the API. If not provided, it will be taken from command line arguments.
     innings : int, optional
-        The innings of the match to fetch commentary for. Defaults to 1.
+        The innings of the match to fetch commentary for. If not provided, it will be taken from command line
+        arguments, which default to 1.
     page : int, optional
-        The page of commentary to fetch. Defaults to 1.
+        The page of commentary to fetch. If not provided, it will be taken from command line arguments, which
+        default to 1.
     """
     args = parse_ball_by_ball_args()
 

@@ -191,6 +191,6 @@ class Match(CCBaseModel):
 
     @computed_field
     @property
-    def summary(self) -> bool:
+    def summary(self) -> str:
         """A summary of the result of the match, e.g.) 'England won by 5 wickets'"""
         return self.header.competitions[0].status.summary

@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0]
+### Fixed
+- Bug fixes from a Claude review
+    - `--innings` and `--page` arguments to `print_ballbyball` were ignored
+    - `--include_batting_minutes` for `print_scorecard` could not be turned off; it now defaults on and can be disabled with `--no-include_batting_minutes`
+    - Parameter check on `print_scorecard`
+    - `/raw/match_summary` endpoint never filled in the Series ID; it is now `/raw/match_summary/{series_id}/{match_id}`
+    - Scorecard innings are matched by innings number rather than list position
+    - `batted`, `bowled` and `summary` computed fields returned values not matching their types
+    - Non-JSON error responses from the API now raise a `CricinfoAPIException`
+    - Browser TLS fallback for Statsguru pages now sends the Statsguru `Origin` header
+    - Season page parsing no longer crashes on a Series link without an ID
+
 ## [0.0.40]
 ### Fixed
 - Account for empty fielder in Commentary Dismissal

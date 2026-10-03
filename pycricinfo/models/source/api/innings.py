@@ -47,7 +47,8 @@ class PlayerInningsDetails(BaseInningsDetails):
     @computed_field
     @property
     def batted(self) -> bool:
-        return self.find("batted")
+        batted = self.find("batted")
+        return bool(batted) and bool(int(batted))
 
     @computed_field
     @property
@@ -62,13 +63,13 @@ class PlayerInningsDetails(BaseInningsDetails):
     @computed_field
     @property
     def is_batting_innings(self) -> bool:
-        did_bat = bool(self.batted) and bool(int(self.batted))
-        return did_bat or self.absent
+        return self.batted or self.absent
 
     @computed_field
     @property
     def bowled(self) -> bool:
-        return self.find("bowled")
+        bowled = self.find("bowled")
+        return bool(bowled) and bool(int(bowled))
 
 
 class PartnershipBatter(CCBaseModel):

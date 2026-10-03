@@ -149,7 +149,9 @@ async def get_request(
                 output = await response.text()
 
                 if response_status == 403 or _is_bot_protection_page(output):
-                    fallback_output = await _retry_with_browser_tls(full_route=full_route, referer=referer)
+                    fallback_output = await _retry_with_browser_tls(
+                        full_route=full_route, referer=referer, origin=headers["Origin"]
+                    )
                     if fallback_output is not None:
                         output = fallback_output
                         response_status = 200
@@ -165,7 +167,14 @@ async def get_request(
                 output_for_file = output
                 response_output_file_extension = "html"
             else:
-                output = await response.json()
+                try:
+                    output = await response.json(content_type=None)
+                except ValueError:
+                    # Error responses may not have a JSON body, so fall back to the raw text and let the status
+                    # code check below raise a CricinfoAPIException
+                    if response_status == 200:
+                        raise
+                    output = await response.text()
                 logger.debug(json.dumps(output, indent=4), extra=response_logging_extras)
                 output_for_file = json.dumps(output, indent=4)
                 response_output_file_extension = "json"
@@ -266,7 +275,7 @@ def _is_bot_protection_page(content: str) -> bool:
     )
 
 
-async def _retry_with_browser_tls(full_route: str, referer: str) -> str | None:
+async def _retry_with_browser_tls(full_route: str, referer: str, origin: str) -> str | None:
     """
     Retry blocked page requests with browser TLS fingerprint impersonation.
 
@@ -278,7 +287,7 @@ async def _retry_with_browser_tls(full_route: str, referer: str) -> str | None:
 
     fallback_headers = {
         "Referer": referer,
-        "Origin": get_settings().cricinfo_base_route.rstrip("/"),
+        "Origin": origin,
         "User-Agent": get_settings().page_headers.user_agent,
         "Accept": get_settings().page_headers.accept,
         "Accept-Language": "en-US,en;q=0.9",

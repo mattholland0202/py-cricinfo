@@ -86,22 +86,23 @@ class CricinfoScorecard(Scorecard):
                     follow_on=team_innings.follow_on,
                 )
             )
+        innings_by_number = {i.number: i for i in innings}
         for roster in match.rosters:
-            cls._enrich_innings_with_lineups(innings, roster)
+            cls._enrich_innings_with_lineups(innings_by_number, roster)
 
         data["innings"] = innings
         return data
 
     @classmethod
-    def _enrich_innings_with_lineups(cls, innings: list[CricinfoInnings], lineup: TeamLineup):
+    def _enrich_innings_with_lineups(cls, innings: dict[int, CricinfoInnings], lineup: TeamLineup):
         """
         Enrich the innings with player data from the team lineup. The innings will be updated in
         place, adding batters and bowlers based on the players in the lineup.
 
         Parameters
         ----------
-        innings : list[CricinfoInnings]
-            All innings in the match, which will be enriched with player data.
+        innings : dict[int, CricinfoInnings]
+            All innings in the match, keyed by innings number, which will be enriched with player data.
         lineup : TeamLineup
             The team lineup containing player data to enrich the innings with.
         """
@@ -109,19 +110,24 @@ class CricinfoScorecard(Scorecard):
             cls._enrich_innings_for_player(innings, player)
 
     @classmethod
-    def _enrich_innings_for_player(cls, innings: list[CricinfoInnings], player: MatchPlayer):
+    def _enrich_innings_for_player(cls, innings: dict[int, CricinfoInnings], player: MatchPlayer):
         """
         Enrich the innings with data for a specific player. The innings will be updated in
         place, adding batters or bowlers records based on this player's data.
 
         Parameters
         ----------
-        innings : list[CricinfoInnings]
-            All innings in the match, which will be enriched with player data.
+        innings : dict[int, CricinfoInnings]
+            All innings in the match, keyed by innings number, which will be enriched with player data.
         player : MatchPlayer
             The player whose data will be used to enrich the innings.
         """
         for player_innings in player.innings:
+            # Skip periods that aren't in the scorecard, e.g. super overs in limited overs matches
+            team_innings = innings.get(player_innings.period)
+            if team_innings is None:
+                continue
+
             if player_innings.is_batting_innings:
                 bat = CricinfoBattingInnings(
                     player=player.athlete,
@@ -131,14 +137,14 @@ class CricinfoScorecard(Scorecard):
                     keeper=player.keeper,
                     player_innings=player_innings,
                     absent=player_innings.absent,
-                    retired_hurt=player_innings.retired_hurt
+                    retired_hurt=player_innings.retired_hurt,
                 )
-                innings[player_innings.period - 1].batters.append(bat)
-            elif bool(player_innings.bowled) and bool(int(player_innings.bowled)):
+                team_innings.batters.append(bat)
+            elif player_innings.bowled:
                 bowl = CricinfoBowlingInnings(
                     player=player.athlete,
                     display_name=player.athlete.display_name,
                     player_id=player.athlete.id,
                     player_innings=player_innings,
                 )
-                innings[player_innings.period - 1].bowlers.append(bowl)
+                team_innings.bowlers.append(bowl)

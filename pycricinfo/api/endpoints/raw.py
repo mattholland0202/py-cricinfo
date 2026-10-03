@@ -152,13 +152,17 @@ async def match_play_by_play(
 
 
 @router.get(
-    "/match_summary/{match_id}",
+    "/match_summary/{series_id}/{match_id}",
     responses={status.HTTP_200_OK: {"description": "The match summary"}},
     summary="Get a match summary",
 )
-async def match_summary(match_id: int = Path(description="The Match ID")):
+async def match_summary(
+    series_id: int = Path(description="The Series ID"), match_id: int = Path(description="The Match ID")
+):
     return await get_request(
-        get_settings().routes.match_summary, params={"match_id": match_id}, base_route=BaseRoute.site
+        get_settings().routes.match_summary,
+        params={"series_id": series_id, "match_id": match_id},
+        base_route=BaseRoute.site,
     )
 
 
