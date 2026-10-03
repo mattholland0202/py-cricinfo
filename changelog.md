@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Non-JSON error responses from the API now raise a `CricinfoAPIException`
     - Browser TLS fallback for Statsguru pages now sends the Statsguru `Origin` header
     - Season page parsing no longer crashes on a Series link without an ID
+    - `load_file_and_validate_to_model` and `load_dict_to_model` now raise a `ValidationError` instead of exiting the process
+    - `get_play_by_play` return value always matches its `Commentary` return type
+    - `TeamFull.current_match` and `TeamFull.current_players_link` are typed as `Optional`
+    - Browser TLS fallback now impersonates Firefox rather than Chrome 124, to match the User-Agent
+
+### Changed
+- Update page request User-Agent to Firefox 157
+- Require `curl-cffi>=0.15.0`
 
 ## [0.0.40]
 ### Fixed

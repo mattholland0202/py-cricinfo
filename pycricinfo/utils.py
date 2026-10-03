@@ -3,7 +3,7 @@ import json
 from importlib.metadata import metadata
 from typing import Any, Type, TypeVar
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -69,15 +69,14 @@ def load_dict_to_model(json_data: dict, type_to_parse: Type[T]) -> T:
     -------
     T
         An instance of the Pydantic model with the loaded data
+
+    Raises
+    ------
+    ValidationError
+        If the data does not match the model
     """
     modified_data = replace_empty_objects_with_null(json_data)
-    try:
-        model = type_to_parse.model_validate(modified_data)
-    except ValidationError as ex:
-        print(ex)
-        exit(1)
-
-    return model
+    return type_to_parse.model_validate(modified_data)
 
 
 def get_field_from_pyproject(field_name: str) -> str:

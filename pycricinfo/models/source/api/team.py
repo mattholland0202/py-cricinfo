@@ -29,8 +29,8 @@ class TeamFull(TeamWithName):
     is_national: bool
     is_active: bool
     classes: list[int] = Field(description="The classes of match that this Team plays in")
-    current_match: Event = Field(default=None, validation_alias=AliasChoices("event"))
-    current_players_link: RefMixin = Field(default=None, validation_alias=AliasChoices("athletes"))
+    current_match: Optional[Event] = Field(default=None, validation_alias=AliasChoices("event"))
+    current_players_link: Optional[RefMixin] = Field(default=None, validation_alias=AliasChoices("athletes"))
 
 
 class TeamWicketDetails(CCBaseModel):

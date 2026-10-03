@@ -1,14 +1,17 @@
 import asyncio
+import sys
 from argparse import ArgumentParser, BooleanOptionalAction, Namespace
-from typing import Optional
+from typing import Optional, Type, TypeVar
 
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from pycricinfo.call_cricinfo_api import get_match, get_play_by_play
 from pycricinfo.models.output.scorecard import CricinfoScorecard
 from pycricinfo.models.source.api.commentary import APIResponseCommentary, Commentary
 from pycricinfo.models.source.api.match import Match
 from pycricinfo.utils import load_file_and_validate_to_model
+
+T = TypeVar("T", bound=BaseModel)
 
 
 def print_scorecard(
@@ -44,10 +47,18 @@ def print_scorecard(
         print("Please provide either a file path or match & series IDs")
 
 
+def _load_file_or_exit(file_path: str, type_to_parse: Type[T]) -> T:
+    try:
+        return load_file_and_validate_to_model(file_path, type_to_parse)
+    except ValidationError as ex:
+        print(ex)
+        sys.exit(1)
+
+
 def _print_scorecard_from_file(
     file_path: str, include_batting_minutes: bool = True, include_bowling_dots: bool = False
 ):
-    model = load_file_and_validate_to_model(file_path, Match)
+    model = _load_file_or_exit(file_path, Match)
     _print_scorecard_from_match(model, include_batting_minutes, include_bowling_dots)
 
 
@@ -125,7 +136,7 @@ def print_ball_by_ball(
 
 
 def _print_ball_by_ball_from_file(file_path: str):
-    model = load_file_and_validate_to_model(file_path, APIResponseCommentary)
+    model = _load_file_or_exit(file_path, APIResponseCommentary)
     _print_ball_by_ball_from_commentary_model(model.commentary)
 
 

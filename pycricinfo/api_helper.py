@@ -300,7 +300,7 @@ async def _retry_with_browser_tls(full_route: str, referer: str, origin: str) ->
             response = curl_requests.get(
                 full_route,
                 headers=fallback_headers,
-                impersonate="chrome124",
+                impersonate="firefox",
                 timeout=20,
             )
             if response.status_code != 200:

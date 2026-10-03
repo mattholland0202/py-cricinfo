@@ -164,8 +164,8 @@ async def get_play_by_play(
 
     Returns
     -------
-    list[CommentaryItem]
-        A list of parsed Pydantic models representing the ball-by-ball commentary.
+    Commentary
+        The paging details and the list of parsed deliveries for this page of ball-by-ball commentary.
     """
     response = await get_and_parse(
         get_settings().routes.play_by_play_page,
@@ -175,7 +175,7 @@ async def get_play_by_play(
         BaseRoute.site,
         session=session,
     )
-    return response.commentary if response and response.commentary else []
+    return response.commentary
 
 
 async def get_play_by_play_raw(
