@@ -47,5 +47,17 @@ def overall_exception_handler(_: Request, exc: CricinfoAPIException):
     )
 
 
+def start_api(reload: bool = False):
+    """
+    Run the API with uvicorn, on the port from settings. Entry point for the `run_api` script.
+
+    Parameters
+    ----------
+    reload : bool, optional
+        Whether to restart the server when code changes, for development, by default False
+    """
+    uvicorn.run("pycricinfo.api.server:app", host="0.0.0.0", port=get_settings().port, reload=reload)
+
+
 if __name__ == "__main__":
-    uvicorn.run("pycricinfo.api.server:app", host="0.0.0.0", port=get_settings().port, reload=True)
+    start_api(reload=True)

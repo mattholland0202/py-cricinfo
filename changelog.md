@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `get_play_by_play` return value always matches its `Commentary` return type
     - `TeamFull.current_match` and `TeamFull.current_players_link` are typed as `Optional`
     - Browser TLS fallback now impersonates Firefox rather than Chrome 124, to match the User-Agent
+    - API port setting was 8004, rather than the documented 8000 used by the Docker image
 
 ### Changed
 - Update page request User-Agent to Firefox 157

@@ -8,8 +8,9 @@ A Python package extracting match, player & statistical data from [ESPNCricinfo]
 
 Defines [Pydantic](https://docs.pydantic.dev) models to represent data from the API, allowing easier interaction with the data in your code.
 
-## Project status
-:warning: This project is still in pre-release and, whilst it still has a `0.0.X` version number, is liable to change in a breaking way with any release :warning:
+## AI Declaration
+The project was started before agentic coding, so a lot of it is handwritten. I then used GitHub Copilot for a while, mostly just for auto-complete rather than in full agentic mode, apart from some tasks such as parsing pages and enabling scraping where the agent was used.  
+As of version `1.0.0`, I have moved to Claude instead, with a mix of manual coding and agentic development.
 
 ## Installation
 Use your package manager of choice to install `pycricinfo`. For example:

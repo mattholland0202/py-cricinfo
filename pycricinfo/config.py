@@ -62,7 +62,7 @@ class Settings(BaseSettings):
     page_routes: PageRoutes = PageRoutes()
     page_headers: PageHeaders = PageHeaders()
     api_response_output_folder: str = "responses"
-    port: int = 8004
+    port: int = 8000
 
     # TODO: Combine with MatchTypeNames enum
     # 11, 12 and 13 have different meanings in API "match_class" and the records/StatsGuru section
