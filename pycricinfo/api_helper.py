@@ -2,6 +2,8 @@ import asyncio
 import json
 import logging
 import uuid
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Optional, Type, TypeVar
@@ -23,6 +25,9 @@ from pycricinfo.utils import replace_empty_objects_with_null
 logger = logging.getLogger("cricinfo")
 T = TypeVar("T", bound=BaseModel)
 
+
+_REDIRECT_STATUSES = (301, 302, 303, 307, 308)
+_MAX_REDIRECTS = 10
 
 _COMMON_BROWSER_HEADERS = {
     "DNT": "1",
@@ -118,15 +123,8 @@ async def get_request(
     if params:
         route = _format_route(route, params)
 
-    if base_route == BaseRoute.core:
-        base = get_settings().core_base_route_v2
-    elif base_route == BaseRoute.site:
-        base = get_settings().site_base_route_v2
-    elif base_route == BaseRoute.stats:
-        base = get_settings().stats_base_route
-    else:
-        base = get_settings().cricinfo_base_route
-    full_route = f"{base}{route}"
+    full_route = f"{_get_base_url(base_route)}{route}"
+    is_page = base_route in (BaseRoute.page, BaseRoute.stats)
 
     referer = full_route if base_route == BaseRoute.page else urljoin(full_route, urlparse(full_route).path)
 
@@ -134,64 +132,159 @@ async def get_request(
 
     logger.debug(f"Querying: {full_route}", extra={"cricket_stats.request_id": request_id})
 
-    owned_session = session is None
-    if owned_session:
-        session = create_session()
-    try:
+    async with _session_scope(session) as session:
         if warm_session and base_route == BaseRoute.page:
             await _warm_page_session(session)
 
-        async with session.get(yarl.URL(full_route, encoded=True), headers=headers) as response:
-            response_status = response.status
-            response_logging_extras["cricket_stats.response_code"] = response_status
-
-            if base_route in (BaseRoute.page, BaseRoute.stats):
-                output = await response.text()
-
-                if response_status == 403 or _is_bot_protection_page(output):
-                    fallback_output = await _retry_with_browser_tls(
-                        full_route=full_route, referer=referer, origin=headers["Origin"]
-                    )
-                    if fallback_output is not None:
-                        output = fallback_output
-                        response_status = 200
-                        response_logging_extras["cricket_stats.response_code"] = response_status
-                        response_logging_extras["cricket_stats.transport_fallback"] = "curl_cffi"
-
-                if _is_bot_protection_page(output):
-                    response_status = 403
-                    response_logging_extras["cricket_stats.response_code"] = response_status
-                    response_logging_extras["cricket_stats.block_reason"] = "bot_protection_page"
-
-                logger.debug(json.dumps(f"Page fetched from: {full_route}"), extra=response_logging_extras)
-                output_for_file = output
-                response_output_file_extension = "html"
-            else:
-                try:
-                    output = await response.json(content_type=None)
-                except ValueError:
-                    # Error responses may not have a JSON body, so fall back to the raw text and let the status
-                    # code check below raise a CricinfoAPIException
-                    if response_status == 200:
-                        raise
-                    output = await response.text()
-                logger.debug(json.dumps(output, indent=4), extra=response_logging_extras)
-                output_for_file = json.dumps(output, indent=4)
-                response_output_file_extension = "json"
-
-            _output_response_to_file(output_for_file, route, response_output_sub_folder, response_output_file_extension)
-
-            if response_status != 200:
-                logger.error(
-                    f"Status Code '{response_status}' returned for '{full_route}'",
-                    extra=response_logging_extras,
+        response = await _get_following_redirects(session, yarl.URL(full_route, encoded=True), headers)
+        async with response:
+            if is_page:
+                output, response_status = await _read_page_response(
+                    response, full_route, referer, headers["Origin"], response_logging_extras
                 )
-                raise CricinfoAPIException(status_code=response_status, route=full_route, content=output)
+            else:
+                output, response_status = await _read_api_response(response)
 
-            return output
+    response_logging_extras["cricket_stats.response_code"] = response_status
+
+    if is_page:
+        logger.debug(json.dumps(f"Page fetched from: {full_route}"), extra=response_logging_extras)
+        output_for_file = output
+        response_output_file_extension = "html"
+    else:
+        logger.debug(json.dumps(output, indent=4), extra=response_logging_extras)
+        output_for_file = json.dumps(output, indent=4)
+        response_output_file_extension = "json"
+
+    _output_response_to_file(output_for_file, route, response_output_sub_folder, response_output_file_extension)
+
+    if response_status != 200:
+        logger.error(
+            f"Status Code '{response_status}' returned for '{full_route}'",
+            extra=response_logging_extras,
+        )
+        raise CricinfoAPIException(status_code=response_status, route=full_route, content=output)
+
+    return output
+
+
+def _get_base_url(base_route: BaseRoute) -> str:
+    """
+    Get the base URL for a base route type
+
+    Parameters
+    ----------
+    base_route : BaseRoute
+        The base route type being requested
+
+    Returns
+    -------
+    str
+        The base URL that routes are appended to
+    """
+    if base_route == BaseRoute.core:
+        return get_settings().core_base_route_v2
+    if base_route == BaseRoute.site:
+        return get_settings().site_base_route_v2
+    if base_route == BaseRoute.stats:
+        return get_settings().stats_base_route
+    return get_settings().cricinfo_base_route
+
+
+@asynccontextmanager
+async def _session_scope(session: Optional[aiohttp.ClientSession]) -> AsyncIterator[aiohttp.ClientSession]:
+    """
+    Yield the supplied session, or a new one that is closed on exit if none was supplied
+
+    Parameters
+    ----------
+    session : aiohttp.ClientSession, optional
+        An existing session, which is left open on exit
+
+    Returns
+    -------
+    AsyncIterator[aiohttp.ClientSession]
+        The session to make requests with
+    """
+    if session is not None:
+        yield session
+        return
+
+    owned_session = create_session()
+    try:
+        yield owned_session
     finally:
-        if owned_session:
-            await session.close()
+        await owned_session.close()
+
+
+async def _read_page_response(
+    response: aiohttp.ClientResponse, full_route: str, referer: str, origin: str, logging_extras: dict[str, str]
+) -> tuple[str, int]:
+    """
+    Read an HTML page response, retrying with browser TLS impersonation if blocked by bot protection
+
+    Parameters
+    ----------
+    response : aiohttp.ClientResponse
+        The response to read
+    full_route : str
+        The URL that was requested, used for the retry
+    referer : str
+        The referer header value, used for the retry
+    origin : str
+        The origin header value, used for the retry
+    logging_extras : dict[str, str]
+        Logging extras for the request. The transport fallback and block reason are added to it when they apply
+
+    Returns
+    -------
+    tuple[str, int]
+        The HTML text of the page and the effective status code
+    """
+    response_status = response.status
+    output = await response.text()
+
+    if response_status == 403 or _is_bot_protection_page(output):
+        fallback_output = await _retry_with_browser_tls(full_route=full_route, referer=referer, origin=origin)
+        if fallback_output is not None:
+            output = fallback_output
+            response_status = 200
+            logging_extras["cricket_stats.transport_fallback"] = "curl_cffi"
+
+    if _is_bot_protection_page(output):
+        response_status = 403
+        logging_extras["cricket_stats.block_reason"] = "bot_protection_page"
+
+    return output, response_status
+
+
+async def _read_api_response(response: aiohttp.ClientResponse) -> tuple[dict | str, int]:
+    """
+    Read a JSON API response
+
+    Parameters
+    ----------
+    response : aiohttp.ClientResponse
+        The response to read
+
+    Returns
+    -------
+    tuple[dict | str, int]
+        The JSON content of the response (or its raw text, for a non-JSON error response) and the status code
+
+    Raises
+    ------
+    ValueError
+        If a 200 response does not have a JSON body
+    """
+    try:
+        return await response.json(content_type=None), response.status
+    except ValueError:
+        # Error responses may not have a JSON body, so fall back to the raw text and let the status
+        # code check in get_request raise a CricinfoAPIException
+        if response.status == 200:
+            raise
+        return await response.text(), response.status
 
 
 def _format_route(route: str, params: dict[str, str] = {}) -> str:
@@ -361,8 +454,52 @@ async def _warm_page_session(session: aiohttp.ClientSession) -> None:
         "Sec-Fetch-User": "?1",
     }
 
-    async with session.get(yarl.URL(warmup_url, encoded=True), headers=warmup_headers):
-        return
+    response = await _get_following_redirects(session, yarl.URL(warmup_url, encoded=True), warmup_headers)
+    response.release()
+
+
+async def _get_following_redirects(
+    session: aiohttp.ClientSession, url: yarl.URL, headers: dict[str, str]
+) -> aiohttp.ClientResponse:
+    """
+    Make a GET request, following redirects without re-normalising the ``Location`` header.
+
+    aiohttp parses ``Location`` with ``yarl.URL(location)``, which decodes ``%2F`` in the query back to ``/``. Cricinfo
+    redirects split-season URLs (``season=2026/27``) to their encoded form (``season=2026%2F27``), so aiohttp's own
+    redirect handling requests the original URL again and loops until ``TooManyRedirects``.
+
+    Parameters
+    ----------
+    session : aiohttp.ClientSession
+        The session to make the request with
+    url : yarl.URL
+        The URL to request
+    headers : dict[str, str]
+        Headers to send with each request
+
+    Returns
+    -------
+    aiohttp.ClientResponse
+        The final, non-redirect response. The caller is responsible for releasing it.
+
+    Raises
+    ------
+    aiohttp.TooManyRedirects
+        If more than ``_MAX_REDIRECTS`` redirects are followed
+    """
+    history = []
+    for _ in range(_MAX_REDIRECTS + 1):
+        response = await session.get(url, headers=headers, allow_redirects=False)
+        location = response.headers.get("Location")
+        if response.status not in _REDIRECT_STATUSES or not location:
+            return response
+
+        response.release()
+        history.append(response)
+        url = url.join(yarl.URL(location, encoded=True))
+        logger.debug(f"Following {response.status} redirect to: {url}")
+
+    raise aiohttp.TooManyRedirects(history[0].request_info, tuple(history))
 
 
 def _output_response_to_file(response: str, route: str, sub_folder: str, file_extension: str) -> None:

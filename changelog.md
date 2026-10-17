@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Update GitHub Actions and Dockerfile to newer versions of libraries
 
+### Fixed
+- Requests for split-season pages failed with `TooManyRedirects` due to redirection URL encoding issues
+
 ## [1.0.0]
 ### Fixed
 - Bug fixes from a Claude review
