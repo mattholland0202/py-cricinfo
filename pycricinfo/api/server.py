@@ -1,3 +1,5 @@
+"""The FastAPI app, and the entry point for running it with uvicorn."""
+
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -40,14 +42,29 @@ app.include_router(team_router)
 
 
 @app.exception_handler(CricinfoAPIException)
-def overall_exception_handler(_: Request, exc: CricinfoAPIException):
+def overall_exception_handler(_: Request, exc: CricinfoAPIException) -> JSONResponse:
+    """
+    Return a failed request to Cricinfo as a JSON response, with the same status code.
+
+    Parameters
+    ----------
+    _ : Request
+        The request to this API
+    exc : CricinfoAPIException
+        The exception raised for the failed request to Cricinfo
+
+    Returns
+    -------
+    JSONResponse
+        The route and content of the failed request
+    """
     return JSONResponse(
         status_code=exc.status_code,
         content=exc.output(),
     )
 
 
-def start_api(reload: bool = False):
+def start_api(*, reload: bool = False) -> None:
     """
     Run the API with uvicorn, on the port from settings. Entry point for the `run_api` script.
 
@@ -56,7 +73,7 @@ def start_api(reload: bool = False):
     reload : bool, optional
         Whether to restart the server when code changes, for development, by default False
     """
-    uvicorn.run("pycricinfo.api.server:app", host="0.0.0.0", port=get_settings().port, reload=reload)
+    uvicorn.run("pycricinfo.api.server:app", host="0.0.0.0", port=get_settings().port, reload=reload)  # noqa: S104
 
 
 if __name__ == "__main__":

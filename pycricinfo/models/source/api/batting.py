@@ -1,3 +1,5 @@
+"""Models for a Player's batting innings."""
+
 from typing import Optional
 
 from pydantic import BaseModel, Field, computed_field, model_validator
@@ -7,12 +9,16 @@ from pycricinfo.models.source.api.dismissal import Dismissal
 
 
 class BattingRecent(CCBaseModel):
+    """Runs and balls faced by a batter over a recent span of overs."""
+
     balls: int
     over_span: int
     runs: int
 
 
 class PreferredShot(CCBaseModel):
+    """The shot a batter scored most with in their innings."""
+
     shot_name: str
     runs_summary: list[int]
     balls_faced: int
@@ -20,17 +26,23 @@ class PreferredShot(CCBaseModel):
 
 
 class BattingPvp(CCBaseModel):
+    """Player-versus-player (pvp) runs and balls for a batter."""
+
     balls: int
     runs: int
 
 
 class WagonZone(CCBaseModel):
+    """Runs scored by a batter in one zone of the wagon wheel."""
+
     runs_summary: list[int]
     scoring_shots: int
     runs: int
 
 
 class Wagon(BaseModel):
+    """A batter's wagon wheel, with each zone named, clockwise from long leg."""
+
     long_leg: WagonZone
     backward_square_leg: WagonZone
     mid_wicket: WagonZone
@@ -42,6 +54,8 @@ class Wagon(BaseModel):
 
 
 class BattingDetails(CCBaseModel):
+    """Extended details of a Player's batting innings."""
+
     active: bool
     active_name: str
     order: int
@@ -73,20 +87,33 @@ class BattingDetails(CCBaseModel):
     @computed_field
     @property
     def dismissal_text(self) -> Optional[str]:
+        """How the batter was dismissed, with the wicketkeeper's dagger symbol shown as a cross."""
         return self.out_details and self.out_details.short_text.replace("&dagger;", "\u271d").strip()
 
     @model_validator(mode="before")
     @classmethod
-    def generate_wagon(cls, data: dict):
+    def generate_wagon(cls, data: dict) -> dict:
         """
-        Generate a Wagon object from the raw wagonZone data in the API response, if present. The wagonZone data is a
-        list of 8 elements, corresponding to the 8 wagon zones in clockwise order from long leg.
+        Generate a Wagon object from the raw wagonZone data in the API response, if present.
+
+        The wagonZone data is a list of 8 elements, corresponding to the 8 wagon zones in clockwise order from long
+        leg.
+
+        Parameters
+        ----------
+        data : dict
+            The raw data for a batting innings
+
+        Returns
+        -------
+        dict
+            The data with the Wagon added, if the wagonZone data was present
         """
         wagon_fields = Wagon.model_fields.keys()
 
-        wagon_zone = data.get("wagonZone", None)
+        wagon_zone = data.get("wagonZone")
         if wagon_zone:
-            wagon = dict(zip(wagon_fields, wagon_zone))
+            wagon = dict(zip(wagon_fields, wagon_zone, strict=True))
             data["wagon"] = Wagon(**wagon)
 
         return data

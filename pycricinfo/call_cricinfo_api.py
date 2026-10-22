@@ -1,3 +1,5 @@
+"""Fetch players, teams, matches, scorecards and ball-by-ball commentary from the Cricinfo JSON APIs."""
+
 from typing import Optional
 
 import aiohttp
@@ -5,7 +7,15 @@ import aiohttp
 from pycricinfo.api_helper import get_and_parse, get_request
 from pycricinfo.config import BaseRoute, get_settings
 from pycricinfo.models.output.scorecard import CricinfoScorecard
-from pycricinfo.models.source import APIResponseCommentary, Commentary, Match, MatchBasic, Player, TeamFull
+from pycricinfo.models.source import (
+    APIResponseCommentary,
+    Commentary,
+    Match,
+    MatchBasic,
+    MatchCompetitorBasic,
+    Player,
+    TeamFull,
+)
 
 
 async def get_player(player_id: int, session: Optional[aiohttp.ClientSession] = None) -> Player:
@@ -64,6 +74,34 @@ async def get_match_basic(match_id: int, session: Optional[aiohttp.ClientSession
     """
     return await get_and_parse(
         get_settings().routes.match_basic, MatchBasic, params={"match_id": match_id}, session=session
+    )
+
+
+async def get_match_team(
+    match_id: int, team_id: int, session: Optional[aiohttp.ClientSession] = None
+) -> MatchCompetitorBasic:
+    """
+    Get one of the teams competing in a match.
+
+    Parameters
+    ----------
+    match_id : int
+        The ID of the match.
+    team_id : int
+        The ID of the team.
+    session : aiohttp.ClientSession, optional
+        An existing session to use for the request, by default None
+
+    Returns
+    -------
+    MatchCompetitorBasic
+        A parsed Pydantic model representing the team in the match, with links to its details.
+    """
+    return await get_and_parse(
+        get_settings().routes.match_team,
+        MatchCompetitorBasic,
+        params={"match_id": match_id, "team_id": team_id},
+        session=session,
     )
 
 
@@ -171,8 +209,8 @@ async def get_play_by_play(
         get_settings().routes.play_by_play_page,
         APIResponseCommentary,
         {"match_id": match_id, "page": page, "innings": innings},
-        True,
-        BaseRoute.site,
+        null_out_empty_dicts=True,
+        base_route=BaseRoute.site,
         session=session,
     )
     return response.commentary

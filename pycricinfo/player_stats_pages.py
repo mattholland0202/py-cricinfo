@@ -1,6 +1,8 @@
+"""Scrape a Player's career batting, bowling and fielding statistics from Statsguru (men's players only)."""
+
 import asyncio
 import re
-from typing import Optional, Type
+from typing import Optional
 
 import aiohttp
 from bs4 import BeautifulSoup, Tag
@@ -98,7 +100,7 @@ async def _fetch_stats_page(player_id: int, stat_type: str, session: aiohttp.Cli
     )
 
 
-def _parse_career_summary_rows(html: str, row_model: Type[CareerStatsBaseModel]) -> list[CareerStatsBaseModel]:
+def _parse_career_summary_rows(html: str, row_model: type[CareerStatsBaseModel]) -> list[CareerStatsBaseModel]:
     """
     Parse career rows from a Statsguru page into a typed list of models.
 
@@ -120,7 +122,7 @@ def _parse_career_summary_rows(html: str, row_model: Type[CareerStatsBaseModel])
     """
     try:
         rows = _extract_career_summary_rows(html)
-    except Exception:
+    except Exception:  # noqa: BLE001 - an unexpected page layout falls back to the Career averages table below
         rows = []
     result: list[CareerStatsBaseModel] = []
 
@@ -170,26 +172,14 @@ def _extract_overall_career_averages_row(html: str) -> Optional[CareerAveragesRo
     soup = BeautifulSoup(html, "html.parser")
 
     caption = soup.find("caption", string=re.compile(r"^Career averages$", re.IGNORECASE))
-    if not caption:
-        return None
-
-    table = caption.find_parent("table")
-    if table is None:
-        return None
-
-    thead = table.find("thead")
-    if thead is None:
-        return None
-
-    thead_row = thead.find("tr")
-    if thead_row is None:
+    table = caption.find_parent("table") if caption else None
+    thead = table.find("thead") if table else None
+    thead_row = thead.find("tr") if thead else None
+    tbody = table.find("tbody") if table else None
+    if thead_row is None or tbody is None:
         return None
 
     headers = [_extract_th_text(th) for th in thead_row.find_all("th")]
-
-    tbody = table.find("tbody")
-    if tbody is None:
-        return None
 
     for tr in tbody.find_all("tr"):
         cells = tr.find_all("td")
@@ -270,8 +260,7 @@ def _to_international_match_type(format_name: str) -> Optional[MatchTypeNames]:
 
 def _extract_career_summary_rows(html: str) -> list[tuple[str, list[str], list[str]]]:
     """
-    Find the Career summary table in an HTML stats page and return rows for the
-    supported international formats.
+    Find the Career summary table in an HTML stats page and return rows for the supported international formats.
 
     Returns a list of (format_name, cell_texts, header_texts) tuples, one per
     matched format row. The header and cell lists are aligned by column index.
@@ -330,6 +319,7 @@ def _extract_career_summary_rows(html: str) -> list[tuple[str, list[str], list[s
 def _extract_th_text(th: Tag) -> str:
     """
     Extract a column header's display text, ignoring any <img> alt text.
+
     Header cells contain anchor links whose text may be followed by a sort-indicator image.
 
     Parameters
@@ -350,8 +340,9 @@ def _extract_th_text(th: Tag) -> str:
 
 def _map_cells(headers: list[str], cells: list[str]) -> dict:
     """
-    Zip headers with cell values and produce a dict whose keys match model
-    validation aliases (which must match the table headers exactly).
+    Zip headers with cell values, into a dict whose keys match the model validation aliases.
+
+    The validation aliases must match the table headers exactly.
 
     Parameters
     ----------
@@ -365,4 +356,4 @@ def _map_cells(headers: list[str], cells: list[str]) -> dict:
     dict
         Mapping of non-empty header/value pairs.
     """
-    return {header: value for header, value in zip(headers, cells) if value}
+    return {header: value for header, value in zip(headers, cells, strict=False) if value}

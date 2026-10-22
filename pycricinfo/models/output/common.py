@@ -1,3 +1,5 @@
+"""Shared helpers for printing output models as tables."""
+
 import re
 
 from prettytable import PrettyTable
@@ -7,9 +9,11 @@ SNAKE_CASE_REGEX = re.compile(r"(?<!^)(?=[A-Z])")
 
 
 class HeaderlessTableMixin:
-    def print_headerless_table(self, rows: list[tuple[str, bool]]):
+    """Mixin which prints rows of text as a table with no header."""
+
+    def print_headerless_table(self, rows: list[tuple[str, bool]]) -> None:
         """
-        Print a PrettyTable with no header, with rows matching the supplied data
+        Print a PrettyTable with no header, with rows matching the supplied data.
 
         Parameters
         ----------
@@ -21,4 +25,4 @@ class HeaderlessTableMixin:
         table.header = False
         for row in rows:
             table.add_row([row[0]], divider=row[1])
-        print(table)
+        print(table)  # noqa: T201 - printing the table is the purpose of this method

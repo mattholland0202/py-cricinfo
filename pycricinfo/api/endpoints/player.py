@@ -1,3 +1,7 @@
+"""Endpoints for players."""
+
+from typing import Annotated
+
 from fastapi import APIRouter, Path, status
 
 from pycricinfo.call_cricinfo_api import get_player
@@ -9,7 +13,8 @@ router = APIRouter(prefix="/player", tags=["player"])
 
 
 @router.get("/{player_id}", responses={status.HTTP_200_OK: {"description": "The Player"}}, summary="Get Player")
-async def player(player_id: int = Path(description="The Player ID")) -> Player:
+async def player(player_id: Annotated[int, Path(description="The Player ID")]) -> Player:
+    """Get a Player's details."""
     return await get_player(player_id)
 
 
@@ -18,5 +23,6 @@ async def player(player_id: int = Path(description="The Player ID")) -> Player:
     responses={status.HTTP_200_OK: {"description": "The Player career stats"}},
     summary="Get Player career stats",
 )
-async def player_career(player_id: int = Path(description="The Player ID")) -> Career:
+async def player_career(player_id: Annotated[int, Path(description="The Player ID")]) -> Career:
+    """Get a Player's career batting, bowling and fielding statistics, from Statsguru."""
     return await get_player_career(player_id=player_id)

@@ -1,9 +1,13 @@
+"""Models for leagues."""
+
 from pydantic import Field
 
 from pycricinfo.models.source.api.common import CCBaseModel, Link
 
 
 class League(CCBaseModel):
+    """A league, which in Cricinfo's API represents a series or tournament."""
+
     id: int = Field(description="The Cricinfo ID for the league", examples=["123"])
     name: str = Field(description="The name of the league", examples=["Indian Premier League"])
     short_name: str = Field(description="A short name for the league", examples=["IPL"])

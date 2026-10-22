@@ -1,3 +1,5 @@
+"""Models for a Player's career statistics, scraped from Statsguru."""
+
 from abc import ABC
 from typing import Optional
 
@@ -7,12 +9,27 @@ from pycricinfo.types import MatchTypeNames
 
 
 class CareerStatsBaseModel(BaseModel, ABC):
+    """Abstract base class for a row of a Player's career statistics in one format."""
+
     format: MatchTypeNames
     model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
     @model_validator(mode="before")
     @classmethod
-    def normalize_empty_values(cls, data: dict):
+    def normalize_empty_values(cls, data: dict) -> dict:
+        """
+        Replace "-" cells, which Statsguru uses for no value, with None.
+
+        Parameters
+        ----------
+        data : dict
+            The table cells for the row, keyed by column header
+
+        Returns
+        -------
+        dict
+            The data, with "-" values replaced
+        """
         if not data:
             return data
 
@@ -24,6 +41,8 @@ class CareerStatsBaseModel(BaseModel, ABC):
 
 
 class CareerBattingRow(CareerStatsBaseModel):
+    """A Player's career batting statistics in one format."""
+
     matches: Optional[int] = Field(default=None, validation_alias=AliasChoices("Mat", "mat"))
     innings: Optional[int] = Field(default=None, validation_alias=AliasChoices("Inns", "inns"))
     not_outs: Optional[int] = Field(default=None, validation_alias=AliasChoices("NO", "no"))
@@ -44,6 +63,8 @@ class CareerBattingRow(CareerStatsBaseModel):
 
 
 class CareerFieldingRow(CareerStatsBaseModel):
+    """A Player's career fielding statistics in one format."""
+
     catches: Optional[int] = Field(default=None, validation_alias=AliasChoices("Ct", "ct"))
     stumpings: Optional[int] = Field(default=None, validation_alias=AliasChoices("St", "st"))
     dismissals: Optional[int] = Field(default=None, validation_alias=AliasChoices("Dis"))
@@ -56,6 +77,8 @@ class CareerFieldingRow(CareerStatsBaseModel):
 
 
 class CareerBowlingRow(CareerStatsBaseModel):
+    """A Player's career bowling statistics in one format."""
+
     format: MatchTypeNames
     matches: Optional[int] = Field(default=None, validation_alias=AliasChoices("Mat", "mat"))
     innings: Optional[int] = Field(default=None, validation_alias=AliasChoices("Inns", "inns"))
@@ -73,6 +96,8 @@ class CareerBowlingRow(CareerStatsBaseModel):
 
 
 class Career(BaseModel):
+    """A Player's career batting, bowling and fielding statistics, with one row per format."""
+
     batting: list[CareerBattingRow]
     bowling: list[CareerBowlingRow]
     fielding: list[CareerFieldingRow]

@@ -1,11 +1,11 @@
+"""Endpoints for matches."""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Path, status
 
-from pycricinfo.api_helper import get_request
-from pycricinfo.call_cricinfo_api import get_match, get_match_basic
-from pycricinfo.config import BaseRoute, get_settings
-from pycricinfo.models.source.api.match import Match, MatchBasic
+from pycricinfo.call_cricinfo_api import get_match, get_match_basic, get_match_team
+from pycricinfo.models.source.api.match import Match, MatchBasic, MatchCompetitorBasic
 
 router = APIRouter(prefix="/match", tags=["match"])
 
@@ -16,6 +16,7 @@ router = APIRouter(prefix="/match", tags=["match"])
     summary="Get basic match data from the '/events' API",
 )
 async def match_basic(match_id: Annotated[int, Path(description="The ID of the Match")]) -> MatchBasic:
+    """Get a match's basic data, parsed from the Core API's '/events' endpoint."""
     return await get_match_basic(match_id)
 
 
@@ -24,15 +25,12 @@ async def match_basic(match_id: Annotated[int, Path(description="The ID of the M
     responses={status.HTTP_200_OK: {"description": "A team from a Match"}},
     summary="Get a match's Team",
 )
-async def get_match_team(
+async def match_team(
     match_id: Annotated[int, Path(description="The ID of the Match")],
     team_id: Annotated[int, Path(description="The ID of the Team")],
-):
-    return await get_request(
-        get_settings().routes.match_team,
-        params={"match_id": match_id, "team_id": team_id},
-        base_route=BaseRoute.core,
-    )
+) -> MatchCompetitorBasic:
+    """Get one of the Teams in a match, with links to its score, roster, innings and statistics."""
+    return await get_match_team(match_id, team_id)
 
 
 @router.get(
@@ -44,4 +42,5 @@ async def match_api(
     series_id: Annotated[int, Path(description="The Series ID")],
     match_id: Annotated[int, Path(description="The Match ID")],
 ) -> Match:
+    """Get a match's full details, parsed from the Site API's match summary."""
     return await get_match(series_id, match_id)

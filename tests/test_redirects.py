@@ -1,3 +1,5 @@
+"""Tests for following redirects without decoding the Location header."""
+
 import asyncio
 
 import aiohttp
@@ -19,7 +21,7 @@ async def _season_handler(request: web.Request) -> web.Response:
     return web.Response(status=301, headers={"Location": ENCODED_SEASON_PATH})
 
 
-async def _loop_handler(request: web.Request) -> web.Response:
+async def _loop_handler(_: web.Request) -> web.Response:
     raise web.HTTPFound(location="/loop")
 
 
@@ -34,13 +36,15 @@ async def _fetch(path: str) -> tuple[int, str, str]:
             return response.status, await response.text(), response.url.raw_path_qs
 
 
-def test_redirect_keeps_encoded_location():
+def test_redirect_keeps_encoded_location() -> None:
+    """Test that a redirect to a percent-encoded URL is followed without decoding it, which would loop."""
     status, text, final_path = asyncio.run(_fetch("/ci/engine/series/index.html?season=2026/27;view=season"))
     assert status == 200
     assert text == "season page"
     assert final_path == ENCODED_SEASON_PATH
 
 
-def test_redirect_loop_raises_too_many_redirects():
+def test_redirect_loop_raises_too_many_redirects() -> None:
+    """Test that a genuine redirect loop still raises TooManyRedirects."""
     with pytest.raises(aiohttp.TooManyRedirects):
         asyncio.run(_fetch("/loop"))

@@ -1,3 +1,5 @@
+"""Fetch match, player and statistical data from ESPNCricinfo."""
+
 # ruff: noqa: F401, F403
 from pycricinfo.search import *
 

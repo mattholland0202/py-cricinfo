@@ -1,3 +1,5 @@
+"""Scrape a series' listing page for the matches in that series, with their scores and results."""
+
 import re
 
 from bs4 import BeautifulSoup
@@ -9,7 +11,7 @@ from pycricinfo.models.source.pages.series import MatchResult
 
 def _clean_text(text: str) -> str:
     """
-    Remove line breaks, extra spaces and normalise whitespace
+    Remove line breaks, extra spaces and normalise whitespace.
 
     Parameters
     ----------

@@ -1,3 +1,5 @@
+"""Models for a Player's bowling innings."""
+
 from typing import Optional
 
 from pydantic import AliasChoices, BaseModel, Field, model_validator
@@ -6,6 +8,8 @@ from pycricinfo.models.source.api.common import CCBaseModel
 
 
 class BowlingDetailsToHand(CCBaseModel):
+    """Bowling figures against either left- or right-handed batters."""
+
     deliveries: int = Field(validation_alias=AliasChoices("deliveries", "balls"))
     wickets: int
     economy_rate: float
@@ -13,12 +17,16 @@ class BowlingDetailsToHand(CCBaseModel):
 
 
 class PitchMapElement(BaseModel):
+    """Runs, wickets and deliveries for one line and length on a pitch map."""
+
     runs: int
     wickets: int
     deliveries: int
 
 
 class PitchMapLines(BaseModel):
+    """Pitch map data for each line, at one length."""
+
     wide_outside_off: PitchMapElement
     outside_off: PitchMapElement
     straight: PitchMapElement
@@ -27,6 +35,8 @@ class PitchMapLines(BaseModel):
 
 
 class PitchMapLengths(BaseModel):
+    """Pitch map data for each length, from full toss to short."""
+
     full_toss: PitchMapLines
     yorker: PitchMapLines
     full: PitchMapLines
@@ -36,6 +46,8 @@ class PitchMapLengths(BaseModel):
 
 
 class BowlingDetails(CCBaseModel):
+    """Extended details of a Player's bowling innings, including pitch maps."""
+
     active: bool
     active_name: str
     order: int
@@ -54,13 +66,12 @@ class BowlingDetails(CCBaseModel):
     @classmethod
     def generate_structured_pitch_maps(cls, data: dict) -> dict:
         """
-        Convert the unstructured pitch map data into a more fully described entity, with structured
-        fields for delivery data for each line and length
+        Convert the unstructured pitch map data into structured fields for each line and length.
 
         Parameters
         ----------
         data : dict
-            The raw fata for a bowling innings
+            The raw data for a bowling innings
 
         Returns
         -------
@@ -70,21 +81,25 @@ class BowlingDetails(CCBaseModel):
         pitch_map_line_fields = PitchMapLines.model_fields.keys()
         pitch_map_length_fields = PitchMapLengths.model_fields.keys()
 
-        pitchMapRhb = data.get("pitchMapRhb", None)
-        if pitchMapRhb:
-            data["pitchMapRight"] = cls._generate_pitch_map(pitch_map_length_fields, pitch_map_line_fields, pitchMapRhb)
+        pitch_map_rhb = data.get("pitchMapRhb")
+        if pitch_map_rhb:
+            data["pitchMapRight"] = cls._generate_pitch_map(
+                pitch_map_length_fields, pitch_map_line_fields, pitch_map_rhb
+            )
 
-        pitchMapLhb = data.get("pitchMapLhb", None)
-        if pitchMapLhb:
-            data["pitchMapLeft"] = cls._generate_pitch_map(pitch_map_length_fields, pitch_map_line_fields, pitchMapLhb)
+        pitch_map_lhb = data.get("pitchMapLhb")
+        if pitch_map_lhb:
+            data["pitchMapLeft"] = cls._generate_pitch_map(
+                pitch_map_length_fields, pitch_map_line_fields, pitch_map_lhb
+            )
         return data
 
+    @staticmethod
     def _generate_pitch_map(
         pitch_map_length_fields: list[str], pitch_map_line_fields: list[str], raw_pitch_map_data: list[list[list[int]]]
     ) -> PitchMapLengths:
         """
-        Take the names of each bowling length and line, and zip them together with the raw data to create an
-        enriched entity
+        Zip the names of each bowling length and line together with the raw pitch map data.
 
         Parameters
         ----------
@@ -107,9 +122,9 @@ class BowlingDetails(CCBaseModel):
                 element = PitchMapElement(runs=line[0], wickets=line[1], deliveries=line[2])
                 lines.append(element)
 
-            line_data = dict(zip(pitch_map_line_fields, lines))
+            line_data = dict(zip(pitch_map_line_fields, lines, strict=False))
             length_map = PitchMapLines(**line_data)
             lengths.append(length_map)
 
-        length_data = dict(zip(pitch_map_length_fields, lengths))
+        length_data = dict(zip(pitch_map_length_fields, lengths, strict=False))
         return PitchMapLengths(**length_data)

@@ -1,3 +1,5 @@
+"""Models for Team and Player innings."""
+
 from abc import ABC
 from typing import Literal, Optional
 
@@ -13,9 +15,7 @@ from pycricinfo.models.source.api.statistics import (
 
 
 class BaseInningsDetails(CCBaseModel, ABC):
-    """
-    Abstract base class for commong fields between a Team's Innings and individual Player innings
-    """
+    """Abstract base class for common fields between a Team's Innings and individual Player innings."""
 
     period: int = Field(description="Which period of the match this Innings is")
     statistics: StatsCategoryContainer = Field(
@@ -24,7 +24,7 @@ class BaseInningsDetails(CCBaseModel, ABC):
 
     def find(self, name: str) -> Optional[int | str | float]:
         """
-        Find a matching stat within the attached category
+        Find a matching stat within the attached category.
 
         Parameters
         ----------
@@ -41,53 +41,62 @@ class BaseInningsDetails(CCBaseModel, ABC):
 
 
 class PlayerInningsDetails(BaseInningsDetails):
+    """A Player's innings in a match, covering both their batting and bowling."""
+
     media_id: int = Field(description="A media ID for this innings")
     statistics: PlayerStatisticsCategoryContainer
 
     @computed_field
     @property
     def batted(self) -> bool:
+        """Whether the Player batted in this innings."""
         batted = self.find("batted")
         return bool(batted) and bool(int(batted))
 
     @computed_field
     @property
     def absent(self) -> bool:
+        """Whether the Player was absent and so did not bat."""
         return self.find("absentDescription") == "absent"
 
     @computed_field
     @property
     def retired_hurt(self) -> bool:
+        """Whether the Player retired hurt."""
         return (not self.absent) and self.find("retiredDescription") == "hurt"
 
     @computed_field
     @property
     def is_batting_innings(self) -> bool:
+        """Whether this innings should appear in the batting scorecard: the Player batted, or was absent."""
         return self.batted or self.absent
 
     @computed_field
     @property
     def bowled(self) -> bool:
+        """Whether the Player bowled in this innings."""
         bowled = self.find("bowled")
         return bool(bowled) and bool(int(bowled))
 
 
 class PartnershipBatter(CCBaseModel):
+    """A batter's contribution to a partnership."""
+
     athlete: Athlete
     balls: str | int
     runs: str | int
 
 
 class InningsState(BaseModel):
+    """The score of an innings at a point in time."""
+
     overs: str | float
     runs: str | int
     wickets: str | int
 
 
 class PartnershipFallOfWicketCommon(RefMixin, CCBaseModel, ABC):
-    """
-    Abstract base class for commong fields between a Partnership and a Fall of Wicket
-    """
+    """Abstract base class for common fields between a Partnership and a Fall of Wicket."""
 
     wicket_number: int = Field(description="Which number wicket in the innings this was")
     fow_type: Literal["out", "end of innings", "not out", "retired not out"] = Field(
@@ -97,9 +106,21 @@ class PartnershipFallOfWicketCommon(RefMixin, CCBaseModel, ABC):
 
     @field_validator("fow_type", mode="before")
     @classmethod
-    def strip_fow_type(cls, v):
+    def strip_fow_type(cls, v: object) -> object:
         """
-        In source data, fow_type has trailing whitespace on "retired not out", so trim it before validation.
+        Trim whitespace from fow_type before validation.
+
+        In source data, fow_type has trailing whitespace on "retired not out".
+
+        Parameters
+        ----------
+        v : object
+            The raw fow_type value
+
+        Returns
+        -------
+        object
+            The value, trimmed if it is a string
         """
         if isinstance(v, str):
             return v.strip()
@@ -107,6 +128,8 @@ class PartnershipFallOfWicketCommon(RefMixin, CCBaseModel, ABC):
 
 
 class Partnership(PartnershipFallOfWicketCommon):
+    """A partnership between two batters."""
+
     wicket_name: str
     overs: float
     run_rate: float
@@ -116,6 +139,8 @@ class Partnership(PartnershipFallOfWicketCommon):
 
 
 class FallOfWicket(PartnershipFallOfWicketCommon):
+    """The score when a wicket fell, and the batter who was out."""
+
     wicket_over: float
     runs_scored: int
     balls_faced: int
@@ -123,6 +148,8 @@ class FallOfWicket(PartnershipFallOfWicketCommon):
 
 
 class TeamInningsDetails(BaseInningsDetails):
+    """A Team's innings in a match."""
+
     wickets: int
     runs: int
     overs: float
@@ -141,4 +168,5 @@ class TeamInningsDetails(BaseInningsDetails):
     @computed_field
     @property
     def declared(self) -> bool:
+        """Whether the innings was declared."""
         return self.description.lower() == "declared"

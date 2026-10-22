@@ -1,3 +1,7 @@
+"""Tests for parsing career statistics from saved Statsguru pages."""
+
+from pathlib import Path
+
 import pytest
 
 from pycricinfo.models.source.pages.player import CareerBattingRow, CareerBowlingRow, CareerFieldingRow
@@ -58,13 +62,13 @@ PLAYER_CASES = [
 
 
 def _read(path: str) -> str:
-    with open(path, "r", encoding="utf-8") as f:
-        return f.read()
+    return Path(path).read_text(encoding="utf-8")
 
 
 # Batting tests
 @pytest.mark.parametrize("case", PLAYER_CASES, ids=[c["name"] for c in PLAYER_CASES])
-def test_parse_stats_batting_career_summary(case):
+def test_parse_stats_batting_career_summary(case: dict) -> None:
+    """Test that batting rows are parsed for exactly the formats the Player has played, with the right values."""
     rows = _parse_career_summary_rows(_read(case["batting"]), CareerBattingRow)
     present_formats = {fmt for fmt, expected in case["expected"].items() if expected is not None}
     row_formats = {r.format for r in rows}
@@ -80,7 +84,8 @@ def test_parse_stats_batting_career_summary(case):
 
 # Bowling tests (structure only, as expected values are not provided)
 @pytest.mark.parametrize("case", PLAYER_CASES, ids=[c["name"] for c in PLAYER_CASES])
-def test_parse_stats_bowling_career_summary(case):
+def test_parse_stats_bowling_career_summary(case: dict) -> None:
+    """Test that bowling pages parse into bowling rows."""
     if not case["bowling"]:
         return
     rows = _parse_career_summary_rows(_read(case["bowling"]), CareerBowlingRow)
@@ -89,7 +94,8 @@ def test_parse_stats_bowling_career_summary(case):
 
 # Fielding tests (structure only, as expected values are not provided)
 @pytest.mark.parametrize("case", PLAYER_CASES, ids=[c["name"] for c in PLAYER_CASES])
-def test_parse_stats_fielding_career_summary(case):
+def test_parse_stats_fielding_career_summary(case: dict) -> None:
+    """Test that fielding pages parse into fielding rows."""
     if not case["fielding"]:
         return
     rows = _parse_career_summary_rows(_read(case["fielding"]), CareerFieldingRow)

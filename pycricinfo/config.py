@@ -1,3 +1,5 @@
+"""Package settings: base URLs, route templates, request headers and match classes."""
+
 from enum import Enum, auto
 from functools import lru_cache
 
@@ -6,6 +8,8 @@ from pydantic_settings import BaseSettings
 
 
 class BaseRoute(Enum):
+    """The host a request is made to, which determines the base URL and whether the response is JSON or HTML."""
+
     core: str = auto()
     site: str = auto()
     page: str = auto()
@@ -13,6 +17,8 @@ class BaseRoute(Enum):
 
 
 class CoreAPIRoutes(BaseModel):
+    """Route templates for the JSON APIs, with `{placeholder}` parameters filled in per request."""
+
     team: str = "teams/{team_id}"
     team_players: str = "cricket/teams/{team_id}/athletes"
     player: str = "teams/0/athletes/{player_id}"
@@ -41,6 +47,8 @@ class CoreAPIRoutes(BaseModel):
 
 
 class PageRoutes(BaseModel):
+    """Route templates for HTML pages on the Cricinfo website and Statsguru."""
+
     player_profile: str = "cricketers/{player_slug}-{player_id}"
     series_in_season: str = "ci/engine/series/index.html?season={season_name};view=season"
     matches_in_series: str = "ci/engine/match/index/series.html?series={series_id}"
@@ -48,11 +56,15 @@ class PageRoutes(BaseModel):
 
 
 class PageHeaders(BaseModel):
+    """Browser headers sent with requests, so that they resemble a real browser."""
+
     user_agent: str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:157.0) Gecko/20100101 Firefox/157.0"
     accept: str = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
 
 
 class Settings(BaseSettings):
+    """Package settings, which can be overridden with environment variables."""
+
     core_base_route_v2: str = "http://core.espnuk.org/v2/sports/cricket/"
     site_base_route_v2: str = "http://site.api.espn.com/apis/site/v2/sports/cricket/"
     cricinfo_base_route: str = "https://www.espncricinfo.com/"
@@ -89,5 +101,13 @@ class Settings(BaseSettings):
 
 
 @lru_cache
-def get_settings():
+def get_settings() -> Settings:
+    """
+    Get the package settings, which are created once and then cached.
+
+    Returns
+    -------
+    Settings
+        The package settings
+    """
     return Settings()

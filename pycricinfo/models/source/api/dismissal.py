@@ -1,3 +1,5 @@
+"""Models for how a batter was dismissed."""
+
 from typing import Optional
 
 from pydantic import BaseModel
@@ -7,6 +9,8 @@ from pycricinfo.models.source.api.common import CCBaseModel
 
 
 class DismissalFielder(CCBaseModel):
+    """A fielder involved in a dismissal."""
+
     athlete: AthleteWithFirstAndLastName
     display_order: int
     is_keeper: int
@@ -14,15 +18,21 @@ class DismissalFielder(CCBaseModel):
 
 
 class DismissalDetailsInnings(BaseModel):
+    """The innings score at the point of a dismissal."""
+
     wickets: int
     runs: int
 
 
 class DismissalDetailsOver(BaseModel):
+    """The over in which a dismissal happened."""
+
     overs: float
 
 
 class DismissalDetails(CCBaseModel):
+    """Details of a dismissal, including when in the innings it happened."""
+
     id: str
     text: str
     short_text: str
@@ -31,6 +41,8 @@ class DismissalDetails(CCBaseModel):
 
 
 class Dismissal(CCBaseModel):
+    """How a batter was dismissed, including the bowler and any fielders involved."""
+
     bowler: Optional[AthleteWithFirstAndLastName] = None
     details: Optional[DismissalDetails] = None
     dismissal_card: str

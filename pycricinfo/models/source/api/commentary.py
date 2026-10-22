@@ -1,3 +1,5 @@
+"""Models for ball-by-ball commentary from the play-by-play API."""
+
 from typing import Optional
 
 from pydantic import AliasChoices, BaseModel, Field, computed_field
@@ -8,11 +10,15 @@ from pycricinfo.models.source.api.team import TeamWithName as Team
 
 
 class CommentaryPlayType(BaseModel):
+    """The type of a delivery, such as a dot ball, four or wicket."""
+
     id: str
     description: str
 
 
 class CommentaryBowler(BaseModel):
+    """The bowler of a delivery and their figures so far."""
+
     athlete: LeniantOptional[Athlete] = Field(default=None)
     team: Team
     maidens: int
@@ -23,6 +29,8 @@ class CommentaryBowler(BaseModel):
 
 
 class CommentaryBatter(CCBaseModel):
+    """A batter at the crease for a delivery and their innings so far."""
+
     athlete: Athlete
     team: Team
     total_runs: int
@@ -33,6 +41,8 @@ class CommentaryBatter(CCBaseModel):
 
 
 class CommentaryInnings(CCBaseModel):
+    """The state of the innings after a delivery."""
+
     id: str
     run_rate: float
     remaining_balls: int
@@ -57,10 +67,13 @@ class CommentaryInnings(CCBaseModel):
     @computed_field
     @property
     def current_score(self) -> str:
+        """The score of the innings, as runs/wickets."""
         return f"{self.runs}/{self.wickets}"
 
 
 class CommentaryOver(CCBaseModel):
+    """The state of the current over after a delivery."""
+
     ball: int
     balls: int
     complete: bool
@@ -79,14 +92,20 @@ class CommentaryOver(CCBaseModel):
 
 
 class CommentaryDismissalAthlete(CCBaseModel):
+    """A Player involved in a dismissal."""
+
     athlete: LeniantOptional[Athlete] = Field(default=None)
 
 
 class CommentaryFielderAthlete(CommentaryDismissalAthlete):
+    """A fielder involved in a dismissal."""
+
     is_keeper: bool
 
 
 class CommentaryDismissal(CCBaseModel):
+    """Details of a dismissal from a delivery, if there was one."""
+
     dismissal: bool
     bowled: bool
     type: str
@@ -99,6 +118,8 @@ class CommentaryDismissal(CCBaseModel):
 
 
 class CommentaryDelivery(CCBaseModel):
+    """A single delivery, with its commentary text and the state of the match after it."""
+
     id: str
     clock: str
     date: str
@@ -132,11 +153,12 @@ class CommentaryDelivery(CCBaseModel):
     @computed_field
     @property
     def short_summary(self) -> str:
+        """A one-line summary of the delivery: the over, the short commentary text, and the score."""
         return f"{self.over.overs}: {self.short_text} - {self.current_innings_score.current_score}"
 
 
 class Commentary(PagingModel):
-    """The data about the current page, and the list of deliveries"""
+    """The data about the current page, and the list of deliveries."""
 
     deliveries: list[CommentaryDelivery] = Field(validation_alias=AliasChoices("items", "deliveries"))
 

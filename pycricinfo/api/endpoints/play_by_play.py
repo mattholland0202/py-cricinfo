@@ -1,3 +1,5 @@
+"""Endpoints for ball-by-ball commentary."""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, status
@@ -15,6 +17,7 @@ router = APIRouter(prefix="", tags=["play_by_play"])
     summary="Get a page of ball-by-ball data",
 )
 async def match_play_by_play_api(
-    match_id: Annotated[int, Path(description="The Match ID")], pi: PageAndInningsQueryParameters = Depends()
+    match_id: Annotated[int, Path(description="The Match ID")], pi: Annotated[PageAndInningsQueryParameters, Depends()]
 ) -> Commentary:
+    """Get a page of ball-by-ball commentary for an innings of a match."""
     return await get_play_by_play(match_id, pi.innings, pi.page)

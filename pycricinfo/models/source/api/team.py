@@ -1,3 +1,5 @@
+"""Models for Teams, and the wickets and overs in a Team's innings."""
+
 from abc import ABC
 from typing import Optional
 
@@ -7,21 +9,29 @@ from pycricinfo.models.source.api.common import CCBaseModel, Event, RefMixin
 
 
 class TeamCommon(CCBaseModel, ABC):
+    """Abstract base class for common fields across the different shapes of Team in the API."""
+
     id: str
     abbreviation: str
     display_name: str
 
 
 class TeamWithName(TeamCommon):
+    """A Team with its full name."""
+
     name: str = Field(description="The full name of the Team")
 
 
 class TeamWithColorAndLogos(TeamCommon):
+    """A Team with its colour and logos, as included in match data."""
+
     color: str = Field(description="The hex colour for the Team", examples=["#790d1a"])
     logos: list[RefMixin]
 
 
 class TeamFull(TeamWithName):
+    """A Team's full details, as returned by the teams API."""
+
     # TODO: Format "classes" field onto what match type they represent
     color: str
     nickname: str
@@ -34,11 +44,15 @@ class TeamFull(TeamWithName):
 
 
 class TeamWicketDetails(CCBaseModel):
+    """The description of how a wicket fell."""
+
     text: str
     short_text: str
 
 
 class TeamWicket(CCBaseModel):
+    """A wicket that fell in an over, with the dismissed batter's innings."""
+
     details: TeamWicketDetails
     balls_faced: int
     dismissal_card: str
@@ -54,6 +68,8 @@ class TeamWicket(CCBaseModel):
 
 
 class TeamOver(CCBaseModel):
+    """An over in a Team's innings, with any wickets that fell in it."""
+
     number: int
     runs: int
     wicket: list[TeamWicket]

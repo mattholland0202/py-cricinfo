@@ -1,3 +1,5 @@
+"""Scrape a season's listing page for the series in that season, grouped by match type."""
+
 import re
 from typing import Optional
 from urllib.parse import quote
@@ -73,8 +75,10 @@ def parse_season_html(content: str) -> list[MatchTypeWithSeries]:
 
 def _process_match_type_page_section(section: _OneElement) -> MatchTypeWithSeries | None:
     """
-    Each page section representing a type of match should contian a h2 tag with the match type name,
-    and then the following section will be a list of series of that type within the season
+    Parse a section of the season page for one type of match.
+
+    Each page section representing a type of match should contain a h2 tag with the match type name, and then the
+    following section will be a list of series of that type within the season.
 
     Parameters
     ----------
@@ -88,7 +92,7 @@ def _process_match_type_page_section(section: _OneElement) -> MatchTypeWithSerie
     """
     h2_tag = section.find("h2")
     if not h2_tag:
-        return
+        return None
 
     h2_text = h2_tag.text.strip()
     match_type = MatchTypeWithSeries(name=h2_text)  # TODO: Store enum name in object
@@ -106,6 +110,7 @@ def _process_match_type_page_section(section: _OneElement) -> MatchTypeWithSerie
 def _process_series_blocks(series_blocks: list[_QueryResults]) -> list[MatchSeries]:
     """
     Process all sections matched by BeautifulSoup which have the classes representing series within a match type.
+
     Iterate over the blocks and, within each, find the data for the series_id, title, and useful links.
 
     Parameters

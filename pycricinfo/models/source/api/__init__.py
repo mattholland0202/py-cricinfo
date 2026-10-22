@@ -1,4 +1,6 @@
-# ruff: noqa F403
+"""Pydantic models mirroring Cricinfo API responses."""
+
+# ruff: noqa: F403
 
 from .athelete import *
 from .batting import *
@@ -8,8 +10,8 @@ from .common import *
 from .dismissal import *
 from .innings import *
 from .league import *
-from .match_note import *
 from .match import *
+from .match_note import *
 from .official import *
 from .player import *
 from .roster import *

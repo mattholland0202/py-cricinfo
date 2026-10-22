@@ -1,39 +1,39 @@
+"""Helpers for loading JSON into models, cleaning API responses and reading package metadata."""
+
 import importlib.util
 import json
 from importlib.metadata import metadata
-from typing import Any, Type, TypeVar
+from pathlib import Path
 
 from pydantic import BaseModel
 
-T = TypeVar("T", bound=BaseModel)
 
-
-def replace_empty_objects_with_null(data: Any) -> Any:
+def replace_empty_objects_with_null(data: object) -> object:
     """
     Recursively replace any dictionaries or lists that contain only None values with None.
+
     Any data that is not a dictionary or list will be returned as is.
 
     Parameters
     ----------
-    data : Any
+    data : object
         The data to check for empty dictionaries or lists
 
     Returns
     -------
-    Any
+    object
         The data with empty dictionaries or lists replaced with None
     """
     if isinstance(data, dict):
         if all(value is None for value in data.values()):
             return None
         return {key: replace_empty_objects_with_null(value) for key, value in data.items()}
-    elif isinstance(data, list):
+    if isinstance(data, list):
         return [replace_empty_objects_with_null(item) for item in data]
-    else:
-        return data
+    return data
 
 
-def load_file_and_validate_to_model(file_path: str, type_to_parse: Type[T]) -> T:
+def load_file_and_validate_to_model[T: BaseModel](file_path: str, type_to_parse: type[T]) -> T:
     """
     Load a JSON file from disk and validate its contents against a Pydantic model.
 
@@ -49,12 +49,11 @@ def load_file_and_validate_to_model(file_path: str, type_to_parse: Type[T]) -> T
     T
         An instance of the Pydantic model with the loaded data
     """
-    with open(file_path, "r") as content:
-        json_data = json.load(content)
-        return load_dict_to_model(json_data, type_to_parse)
+    json_data = json.loads(Path(file_path).read_text())
+    return load_dict_to_model(json_data, type_to_parse)
 
 
-def load_dict_to_model(json_data: dict, type_to_parse: Type[T]) -> T:
+def load_dict_to_model[T: BaseModel](json_data: dict, type_to_parse: type[T]) -> T:
     """
     Validate a dictionary against a Pydantic model.
 

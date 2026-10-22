@@ -5,8 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.1.0]
+### Added
+- Missing response model on the API route to get a Team for a Match
+
 ### Changed
 - Update GitHub Actions and Dockerfile to newer versions of libraries
+- Enable all Ruff lint rules, and fix the code to pass them. Mostly lots of missing or poorly formatted docstrings.
 
 ### Fixed
 - Requests for split-season pages failed with `TooManyRedirects` due to redirection URL encoding issues

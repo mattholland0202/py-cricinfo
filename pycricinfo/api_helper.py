@@ -1,12 +1,15 @@
+"""HTTP layer for Cricinfo's JSON APIs and HTML pages: requests, sessions and bot-protection handling."""
+
 import asyncio
 import json
 import logging
 import uuid
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
+from http import HTTPStatus
 from pathlib import Path
-from typing import Optional, Type, TypeVar
+from typing import Optional
 from urllib.parse import urljoin, urlparse
 
 import aiohttp
@@ -23,7 +26,6 @@ from pycricinfo.exceptions import CricinfoAPIException
 from pycricinfo.utils import replace_empty_objects_with_null
 
 logger = logging.getLogger("cricinfo")
-T = TypeVar("T", bound=BaseModel)
 
 
 _REDIRECT_STATUSES = (301, 302, 303, 307, 308)
@@ -37,16 +39,17 @@ _COMMON_BROWSER_HEADERS = {
 }
 
 
-async def get_and_parse(
+async def get_and_parse[T: BaseModel](  # noqa: PLR0913 - each argument is an independent request option
     route: str,
-    type_to_parse: Type[T],
-    params: dict = None,
+    type_to_parse: type[T],
+    params: Optional[dict] = None,
+    *,
     null_out_empty_dicts: bool = False,
     base_route: BaseRoute = BaseRoute.core,
     session: Optional[aiohttp.ClientSession] = None,
 ) -> T:
     """
-    Make a GET request to the API and parse the response to the supplied type
+    Make a GET request to the API and parse the response to the supplied type.
 
     Parameters
     ----------
@@ -64,28 +67,30 @@ async def get_and_parse(
         An existing session to use for the request. If None, a new session is created and
         closed after the request. Pass a session created by ``create_session()`` to persist
         cookies across multiple requests, by default None
+
     Returns
     -------
     T
         The response data parsed into the supplied model
     """
-    api_response = await get_request(route, params, base_route, session=session)
+    api_response = await get_request(route, params, base_route=base_route, session=session)
 
     if null_out_empty_dicts:
         api_response = replace_empty_objects_with_null(api_response)
 
     try:
         return type_to_parse.model_validate(api_response)
-    except ValidationError as ex:
-        logger.error(ex)
+    except ValidationError:
+        logger.exception("Failed to parse response from '%s' into %s", route, type_to_parse.__name__)
         raise
 
 
-async def get_request(
+async def get_request(  # noqa: PLR0913 - each argument is an independent request option
     route: str,
     params: Optional[dict[str, str]] = None,
     base_route: BaseRoute = BaseRoute.core,
-    response_output_sub_folder: str = None,
+    *,
+    response_output_sub_folder: Optional[str] = None,
     warm_session: bool = False,
     session: Optional[aiohttp.ClientSession] = None,
 ) -> dict | str:
@@ -109,6 +114,7 @@ async def get_request(
         An existing session to use for the request. If None, a new session is created and
         closed after the request. Pass a session created by ``create_session()`` to persist
         cookies across multiple requests, by default None
+
     Returns
     -------
     dict | str
@@ -130,13 +136,13 @@ async def get_request(
 
     headers = _get_request_headers(base_route=base_route, referer=referer)
 
-    logger.debug(f"Querying: {full_route}", extra={"cricket_stats.request_id": request_id})
+    logger.debug("Querying: %s", full_route, extra={"cricket_stats.request_id": request_id})
 
-    async with _session_scope(session) as session:
+    async with _session_scope(session) as request_session:
         if warm_session and base_route == BaseRoute.page:
-            await _warm_page_session(session)
+            await _warm_page_session(request_session)
 
-        response = await _get_following_redirects(session, yarl.URL(full_route, encoded=True), headers)
+        response = await _get_following_redirects(request_session, yarl.URL(full_route, encoded=True), headers)
         async with response:
             if is_page:
                 output, response_status = await _read_page_response(
@@ -158,9 +164,11 @@ async def get_request(
 
     _output_response_to_file(output_for_file, route, response_output_sub_folder, response_output_file_extension)
 
-    if response_status != 200:
+    if response_status != HTTPStatus.OK:
         logger.error(
-            f"Status Code '{response_status}' returned for '{full_route}'",
+            "Status Code '%s' returned for '%s'",
+            response_status,
+            full_route,
             extra=response_logging_extras,
         )
         raise CricinfoAPIException(status_code=response_status, route=full_route, content=output)
@@ -170,7 +178,7 @@ async def get_request(
 
 def _get_base_url(base_route: BaseRoute) -> str:
     """
-    Get the base URL for a base route type
+    Get the base URL for a base route type.
 
     Parameters
     ----------
@@ -192,9 +200,9 @@ def _get_base_url(base_route: BaseRoute) -> str:
 
 
 @asynccontextmanager
-async def _session_scope(session: Optional[aiohttp.ClientSession]) -> AsyncIterator[aiohttp.ClientSession]:
+async def _session_scope(session: Optional[aiohttp.ClientSession]) -> AsyncGenerator[aiohttp.ClientSession]:
     """
-    Yield the supplied session, or a new one that is closed on exit if none was supplied
+    Yield the supplied session, or a new one that is closed on exit if none was supplied.
 
     Parameters
     ----------
@@ -203,7 +211,7 @@ async def _session_scope(session: Optional[aiohttp.ClientSession]) -> AsyncItera
 
     Returns
     -------
-    AsyncIterator[aiohttp.ClientSession]
+    AsyncGenerator[aiohttp.ClientSession]
         The session to make requests with
     """
     if session is not None:
@@ -221,7 +229,7 @@ async def _read_page_response(
     response: aiohttp.ClientResponse, full_route: str, referer: str, origin: str, logging_extras: dict[str, str]
 ) -> tuple[str, int]:
     """
-    Read an HTML page response, retrying with browser TLS impersonation if blocked by bot protection
+    Read an HTML page response, retrying with browser TLS impersonation if blocked by bot protection.
 
     Parameters
     ----------
@@ -244,15 +252,15 @@ async def _read_page_response(
     response_status = response.status
     output = await response.text()
 
-    if response_status == 403 or _is_bot_protection_page(output):
+    if response_status == HTTPStatus.FORBIDDEN or _is_bot_protection_page(output):
         fallback_output = await _retry_with_browser_tls(full_route=full_route, referer=referer, origin=origin)
         if fallback_output is not None:
             output = fallback_output
-            response_status = 200
+            response_status = HTTPStatus.OK
             logging_extras["cricket_stats.transport_fallback"] = "curl_cffi"
 
     if _is_bot_protection_page(output):
-        response_status = 403
+        response_status = HTTPStatus.FORBIDDEN
         logging_extras["cricket_stats.block_reason"] = "bot_protection_page"
 
     return output, response_status
@@ -260,7 +268,7 @@ async def _read_page_response(
 
 async def _read_api_response(response: aiohttp.ClientResponse) -> tuple[dict | str, int]:
     """
-    Read a JSON API response
+    Read a JSON API response.
 
     Parameters
     ----------
@@ -282,14 +290,14 @@ async def _read_api_response(response: aiohttp.ClientResponse) -> tuple[dict | s
     except ValueError:
         # Error responses may not have a JSON body, so fall back to the raw text and let the status
         # code check in get_request raise a CricinfoAPIException
-        if response.status == 200:
+        if response.status == HTTPStatus.OK:
             raise
         return await response.text(), response.status
 
 
-def _format_route(route: str, params: dict[str, str] = {}) -> str:
+def _format_route(route: str, params: Optional[dict[str, str]] = None) -> str:
     """
-    Format the route with the provided parameters
+    Format the route with the provided parameters.
 
     Parameters
     ----------
@@ -303,12 +311,12 @@ def _format_route(route: str, params: dict[str, str] = {}) -> str:
     str
         The formatted route
     """
+    if params is None:
+        params = {}
     for key, value in params.items():
-        if not key.startswith("{"):
-            key = "{" + key
-        if not key.endswith("}"):
-            key = key + "}"
-        route = route.replace(key, str(value))
+        placeholder = key if key.startswith("{") else "{" + key
+        placeholder = placeholder if placeholder.endswith("}") else placeholder + "}"
+        route = route.replace(placeholder, str(value))
     return route
 
 
@@ -396,17 +404,14 @@ async def _retry_with_browser_tls(full_route: str, referer: str, origin: str) ->
                 impersonate="firefox",
                 timeout=20,
             )
-            if response.status_code != 200:
-                return None
-
-            response_text = response.text
-            if _is_bot_protection_page(response_text):
-                return None
-
-            return response_text
-        except Exception as ex:
+        except curl_requests.RequestsError as ex:
             logger.warning("Fallback page request failed: %s", ex)
             return None
+
+        if response.status_code != HTTPStatus.OK or _is_bot_protection_page(response.text):
+            return None
+
+        return response.text
 
     return await asyncio.to_thread(_do_request)
 
@@ -497,14 +502,14 @@ async def _get_following_redirects(
         response.release()
         history.append(response)
         url = url.join(yarl.URL(location, encoded=True))
-        logger.debug(f"Following {response.status} redirect to: {url}")
+        logger.debug("Following %s redirect to: %s", response.status, url)
 
     raise aiohttp.TooManyRedirects(history[0].request_info, tuple(history))
 
 
 def _output_response_to_file(response: str, route: str, sub_folder: str, file_extension: str) -> None:
     """
-    Output the content of the response to a file
+    Output the content of the response to a file.
 
     Parameters
     ----------
@@ -514,8 +519,9 @@ def _output_response_to_file(response: str, route: str, sub_folder: str, file_ex
         The route that was called
     """
     folder = Path(get_settings().api_response_output_folder)
-    today = datetime.today().strftime("%Y%m%d")
-    file_name = f"{datetime.now(UTC).time().strftime('%H%M%S')}_{route.replace('/', '_')}.{file_extension}"
+    now = datetime.now(UTC)
+    today = now.strftime("%Y%m%d")
+    file_name = f"{now.strftime('%H%M%S')}_{route.replace('/', '_')}.{file_extension}"
 
     if sub_folder:
         folder = folder / sub_folder
@@ -523,5 +529,4 @@ def _output_response_to_file(response: str, route: str, sub_folder: str, file_ex
     folder.mkdir(parents=True, exist_ok=True)
 
     file_path = (folder / file_name).resolve()
-    with open(file_path, "w") as file:
-        file.write(response)
+    file_path.write_text(response)

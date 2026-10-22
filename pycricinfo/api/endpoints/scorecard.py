@@ -1,3 +1,7 @@
+"""Endpoints for match scorecards."""
+
+from typing import Annotated
+
 from fastapi import APIRouter, Path, status
 
 from pycricinfo.call_cricinfo_api import (
@@ -14,6 +18,8 @@ router = APIRouter(prefix="/scorecard", tags=["scorecard"])
     summary="Get a match scorecard",
 )
 async def scorecard(
-    series_id: int = Path(description="The Series ID"), match_id: int = Path(description="The Match ID")
+    series_id: Annotated[int, Path(description="The Series ID")],
+    match_id: Annotated[int, Path(description="The Match ID")],
 ) -> CricinfoScorecard:
+    """Get a match's scorecard, with each innings and its batting and bowling."""
     return await get_scorecard(series_id, match_id)

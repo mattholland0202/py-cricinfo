@@ -1,3 +1,5 @@
+"""Models for match notes, such as close of play scores and player replacements."""
+
 from typing import Optional
 
 from pydantic import Field
@@ -8,7 +10,9 @@ from pycricinfo.types.match_types import MatchNoteType
 
 class MatchNoteItem(CCBaseModel):
     """
-    An item in a match note, which is used for player replacement notes. It contains the team name and the text
+    An item in a match note, which is used for player replacement notes.
+
+    It contains the team name and the text
     describing the replacement.
     """
 
@@ -20,9 +24,10 @@ class MatchNoteItem(CCBaseModel):
 
 class MatchNote(DateMixin, RefMixin):
     """
-    A match note, which covers various types of event from the match, such as close of play scores, scoring milestones,
-    and player replacements. The type of the note is determined by the 'type' field, and the content of the note is
-    determined by the 'text' and 'items' fields.
+    A match note, which covers various types of event from the match.
+
+    Examples are close of play scores, scoring milestones, and player replacements. The type of the note is
+    determined by the 'type' field, and the content of the note is determined by the 'text' and 'items' fields.
     """
 
     id: Optional[str | int] = Field(default=None, description="Optional Cricinfo ID of the match note, if available")
@@ -42,10 +47,10 @@ class MatchNote(DateMixin, RefMixin):
         ),
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Get the text of the note."""
         if self.text:
             return self.text
-        elif self.items:
+        if self.items:
             return self.items[0].text[0]  # This is the format for player replacement notes
-        else:
-            return f"MatchNote(id={self.id}, type={self.type})"
+        return f"MatchNote(id={self.id}, type={self.type})"

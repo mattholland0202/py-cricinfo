@@ -1,15 +1,21 @@
+"""Output models for a match scorecard, built from the source models."""
+
 import html
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from pydantic import BaseModel, Field, model_validator
 
 from pycricinfo.models.output.common import HeaderlessTableMixin
 from pycricinfo.models.output.innings import CricinfoBattingInnings, CricinfoBowlingInnings, CricinfoInnings, Innings
-from pycricinfo.models.source.api.match import Match
 from pycricinfo.models.source.api.roster import MatchPlayer, TeamLineup
+
+if TYPE_CHECKING:
+    from pycricinfo.models.source.api.match import Match
 
 
 class Scorecard(BaseModel, HeaderlessTableMixin):
+    """A match scorecard, with a title, result summary and each innings."""
+
     title: Optional[str] = Field(
         description="The title for the scorecard, usually match details, including teams"
         "and dates. e.g.) 3rd Test, West Indies tour of England at Birmingham, Jul 26-28 2024 "
@@ -17,13 +23,13 @@ class Scorecard(BaseModel, HeaderlessTableMixin):
     summary: Optional[str] = Field(description="A summary of the result of the match, e.g.) 'India won by 5 wickets'")
     innings: list[Innings]
 
-    def show(self, **kwargs):
+    def show(self, **kwargs: bool) -> None:
         """
         Print the scorecard as a PrettyTable, including the title and summary.
 
         Parameters
         ----------
-        kwargs
+        **kwargs : bool
             Supports parameters to customise the columns of the scorecard table:
             - include_batting_minutes : bool
             - include_bowling_dots : bool
@@ -35,6 +41,8 @@ class Scorecard(BaseModel, HeaderlessTableMixin):
 
 
 class CricinfoScorecard(Scorecard):
+    """A match scorecard, built from a Match from the Cricinfo API."""
+
     @model_validator(mode="before")
     @classmethod
     def create(cls, data: dict) -> dict:
@@ -61,7 +69,8 @@ class CricinfoScorecard(Scorecard):
         """
         match: Match = data["match"]
         if not match:
-            raise ValueError("Match data is required to create a CricinfoScorecard.")
+            msg = "Match data is required to create a CricinfoScorecard."
+            raise ValueError(msg)
 
         data["title"] = html.unescape(match.header.description)
         data["summary"] = html.unescape(match.summary)
@@ -94,10 +103,11 @@ class CricinfoScorecard(Scorecard):
         return data
 
     @classmethod
-    def _enrich_innings_with_lineups(cls, innings: dict[int, CricinfoInnings], lineup: TeamLineup):
+    def _enrich_innings_with_lineups(cls, innings: dict[int, CricinfoInnings], lineup: TeamLineup) -> None:
         """
-        Enrich the innings with player data from the team lineup. The innings will be updated in
-        place, adding batters and bowlers based on the players in the lineup.
+        Enrich the innings with player data from the team lineup.
+
+        The innings will be updated in place, adding batters and bowlers based on the players in the lineup.
 
         Parameters
         ----------
@@ -110,10 +120,11 @@ class CricinfoScorecard(Scorecard):
             cls._enrich_innings_for_player(innings, player)
 
     @classmethod
-    def _enrich_innings_for_player(cls, innings: dict[int, CricinfoInnings], player: MatchPlayer):
+    def _enrich_innings_for_player(cls, innings: dict[int, CricinfoInnings], player: MatchPlayer) -> None:
         """
-        Enrich the innings with data for a specific player. The innings will be updated in
-        place, adding batters or bowlers records based on this player's data.
+        Enrich the innings with data for a specific player.
+
+        The innings will be updated in place, adding batting or bowling rows based on this player's data.
 
         Parameters
         ----------

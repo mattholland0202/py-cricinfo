@@ -21,7 +21,10 @@ kept in sync with `pyproject.toml`. Run `uv lock` after changing dependencies.
 
 ## Code style
 
-- Ruff, line length 120, double quotes, rules `E`, `F`, `I`, `W`. `pycricinfo` is first-party for import sorting.
+- Ruff, line length 120, double quotes, with all lint rules enabled (`select = ["ALL"]`). The ignores in
+  `pyproject.toml` are only for rules that conflict with the formatter or with project conventions (such as
+  `Optional[...]` over `X | None`). Prefer fixing a violation; where a rule must be broken, use a line-level
+  `# noqa: <code> - <reason>`. `pycricinfo` is first-party for import sorting.
 - Docstrings use the numpy format (`Parameters`, `Returns`, `Raises` sections with `----------` underlines). Public
   functions and model validators are expected to have them.
 - Type hints are used throughout. Fields that default to `None` must be typed `Optional[...]`.
@@ -35,7 +38,7 @@ pycricinfo/
   __init__.py             Public API: re-exports get_* functions, create_session, output models and types
   config.py               Settings (pydantic-settings): base URLs, route templates, headers, match classes
   api_helper.py           HTTP layer: get_request / get_and_parse, session creation, bot-protection handling
-  call_cricinfo_api.py    get_player, get_team, get_match, get_scorecard, get_play_by_play, etc.
+  call_cricinfo_api.py    get_player, get_team, get_match, get_match_team, get_scorecard, get_play_by_play, etc.
   player_stats_pages.py   get_player_career: scrapes Statsguru batting/bowling/fielding pages (men's players only)
   search/                 Scrapes season and series listing pages
   output.py               CLI entry points (print_scorecard, print_ballbyball)

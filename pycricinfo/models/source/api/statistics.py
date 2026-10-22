@@ -1,3 +1,5 @@
+"""Models for the lists of named statistics attached to Team and Player innings."""
+
 from abc import ABC
 from typing import Optional
 
@@ -98,9 +100,7 @@ TEAM_STAT_NAMES: list[str] = [
 
 
 class BasicStatistic(CCBaseModel):
-    """
-    Details of a single statistic entry, such as balls bowled or runs scored
-    """
+    """Details of a single statistic entry, such as balls bowled or runs scored."""
 
     name: str = Field(
         description=(
@@ -117,16 +117,14 @@ class BasicStatistic(CCBaseModel):
 
 
 class StatsCategory(BaseModel):
-    """
-    A category of statistics
-    """
+    """A category of statistics."""
 
     name: str = Field(description="The name of this group of statistics, such as 'general', 'batting' or 'bowling'")
     stats: list[BasicStatistic] = Field(description="The list of stats in this category")
 
     def get_stat(self, name: str) -> Optional[int | str | float]:
         """
-        Find a matching stat within this category
+        Find a matching stat within this category.
 
         Parameters
         ----------
@@ -143,9 +141,10 @@ class StatsCategory(BaseModel):
 
 class StatsCategoryContainer(ABC, BaseModel):
     """
-    A container for a category of statistics, because source data nests this to an extra level, and in theory there
-    could be more than one category of stats, although in practice this never seems to be the case. This layer of
-    model isn't really needed.
+    A container for a category of statistics.
+
+    Source data nests this to an extra level, and in theory there could be more than one category of stats, although
+    in practice this never seems to be the case. This layer of model isn't really needed.
     """
 
     id: str = Field(description="The ID of this container of stats categories, which seems to always be 0")
@@ -160,13 +159,12 @@ class StatsCategoryContainer(ABC, BaseModel):
     @computed_field
     @property
     def first_category(self) -> StatsCategory:
-        """The first category in this container"""
-        first = next(iter(self.categories), None)
-        return first
+        """The first category in this container."""
+        return next(iter(self.categories), None)
 
     def find(self, name: str) -> Optional[int | str | float]:
         """
-        Find a matching stat within the first category
+        Find a matching stat within the first category.
 
         Parameters
         ----------
@@ -183,8 +181,9 @@ class StatsCategoryContainer(ABC, BaseModel):
 
 class PlayerStatisticsCategoryContainer(StatsCategoryContainer):
     """
-    A container for a category of statistics specific to a Player's innings, adding optional properties for batting or
-    bowling depending on the innings type
+    A container for a category of statistics specific to a Player's innings.
+
+    It adds optional properties for batting or bowling, depending on the innings type.
     """
 
     batting: Optional[BattingDetails] = Field(
@@ -198,8 +197,7 @@ class PlayerStatisticsCategoryContainer(StatsCategoryContainer):
 
     def find(self, name: str) -> Optional[int | str | float]:
         """
-        Find a statistic, either within the primary category from the base container, or by the matching attribute
-        within the batting or bowling extensions
+        Find a statistic in the primary category, or an attribute of the batting or bowling extensions.
 
         Parameters
         ----------
@@ -221,12 +219,11 @@ class PlayerStatisticsCategoryContainer(StatsCategoryContainer):
 
         if split[0] == ("bowling"):
             return self.bowling and getattr(self.bowling, split[1])
+        return None
 
 
 class TeamStatisticsCategory(StatsCategoryContainer):
-    """
-    A container for a category of statistics specific to a Team's innings, adding an optional property for Overs
-    """
+    """A container for a category of statistics specific to a Team's innings, adding an optional property for Overs."""
 
     overs: list[list[TeamOver]] = Field(
         description=(

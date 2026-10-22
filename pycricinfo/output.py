@@ -1,7 +1,9 @@
+"""Command line entry points for printing scorecards and ball-by-ball commentary."""
+
 import asyncio
 import sys
 from argparse import ArgumentParser, BooleanOptionalAction, Namespace
-from typing import Optional, Type, TypeVar
+from typing import Optional
 
 from pydantic import BaseModel, ValidationError
 
@@ -11,23 +13,32 @@ from pycricinfo.models.source.api.commentary import APIResponseCommentary, Comme
 from pycricinfo.models.source.api.match import Match
 from pycricinfo.utils import load_file_and_validate_to_model
 
-T = TypeVar("T", bound=BaseModel)
-
 
 def print_scorecard(
-    file_path: str = None,
-    match_id: int = None,
-    series_id: int = None,
+    file_path: Optional[str] = None,
+    match_id: Optional[int] = None,
+    series_id: Optional[int] = None,
+    *,
     include_batting_minutes: Optional[bool] = None,
     include_bowling_dots: Optional[bool] = None,
-):
+) -> None:
     """
-    Prints the scorecard of a match, either by passing a file path or loading from command line arguments
+    Print the scorecard of a match, either by passing a file path or loading from command line arguments.
 
     Parameters
     ----------
     file_path : str, optional
         The path to a JSON file containing match data. If not provided, it will be taken from command line arguments.
+    match_id : int, optional
+        The ID of the match to fetch from the API. If not provided, it will be taken from command line arguments.
+    series_id : int, optional
+        The ID of the series of the match. If not provided, it will be taken from command line arguments.
+    include_batting_minutes : bool, optional
+        Whether to include minutes batted. If not provided, it will be taken from command line arguments, which
+        default to True.
+    include_bowling_dots : bool, optional
+        Whether to include dot balls bowled. If not provided, it will be taken from command line arguments, which
+        default to False.
     """
     args = parse_scorecard_args()
 
@@ -40,14 +51,23 @@ def print_scorecard(
     series_id = series_id or args.series_id
 
     if file_path or args.file:
-        _print_scorecard_from_file(file_path or args.file, include_batting_minutes, include_bowling_dots)
+        _print_scorecard_from_file(
+            file_path or args.file,
+            include_batting_minutes=include_batting_minutes,
+            include_bowling_dots=include_bowling_dots,
+        )
     elif match_id and series_id:
-        _print_scorecard_from_match_id(series_id, match_id, include_batting_minutes, include_bowling_dots)
+        _print_scorecard_from_match_id(
+            series_id,
+            match_id,
+            include_batting_minutes=include_batting_minutes,
+            include_bowling_dots=include_bowling_dots,
+        )
     else:
         print("Please provide either a file path or match & series IDs")
 
 
-def _load_file_or_exit(file_path: str, type_to_parse: Type[T]) -> T:
+def _load_file_or_exit[T: BaseModel](file_path: str, type_to_parse: type[T]) -> T:
     try:
         return load_file_and_validate_to_model(file_path, type_to_parse)
     except ValidationError as ex:
@@ -56,20 +76,26 @@ def _load_file_or_exit(file_path: str, type_to_parse: Type[T]) -> T:
 
 
 def _print_scorecard_from_file(
-    file_path: str, include_batting_minutes: bool = True, include_bowling_dots: bool = False
-):
+    file_path: str, *, include_batting_minutes: bool = True, include_bowling_dots: bool = False
+) -> None:
     model = _load_file_or_exit(file_path, Match)
-    _print_scorecard_from_match(model, include_batting_minutes, include_bowling_dots)
+    _print_scorecard_from_match(
+        model, include_batting_minutes=include_batting_minutes, include_bowling_dots=include_bowling_dots
+    )
 
 
 def _print_scorecard_from_match_id(
-    series_id: int, match_id: int, include_batting_minutes: bool = True, include_bowling_dots: bool = False
-):
+    series_id: int, match_id: int, *, include_batting_minutes: bool = True, include_bowling_dots: bool = False
+) -> None:
     model = asyncio.run(get_match(series_id, match_id))
-    _print_scorecard_from_match(model, include_batting_minutes, include_bowling_dots)
+    _print_scorecard_from_match(
+        model, include_batting_minutes=include_batting_minutes, include_bowling_dots=include_bowling_dots
+    )
 
 
-def _print_scorecard_from_match(match: Match, include_batting_minutes: bool = True, include_bowling_dots: bool = False):
+def _print_scorecard_from_match(
+    match: Match, *, include_batting_minutes: bool = True, include_bowling_dots: bool = False
+) -> None:
     try:
         sc = CricinfoScorecard(match=match)
         sc.show(include_batting_minutes=include_batting_minutes, include_bowling_dots=include_bowling_dots)
@@ -80,7 +106,7 @@ def _print_scorecard_from_match(match: Match, include_batting_minutes: bool = Tr
 
 def parse_scorecard_args() -> Namespace:
     """
-    Parse command line arguments
+    Parse command line arguments.
 
     Returns
     -------
@@ -98,16 +124,20 @@ def parse_scorecard_args() -> Namespace:
         default=True,
     )
     parser.add_argument("--include_bowling_dots", help="Include bowling dots in the scorecard", action="store_true")
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def print_ball_by_ball(
-    file_path: str = None, match_id: int = None, innings: Optional[int] = None, page: Optional[int] = None
-):
+    file_path: Optional[str] = None,
+    match_id: Optional[int] = None,
+    innings: Optional[int] = None,
+    page: Optional[int] = None,
+) -> None:
     """
-    Prints a page of ball by ball commentary of a match, either by passing a file path or loading from command line
-    arguments
+    Print a page of ball by ball commentary of a match.
+
+    The match is either loaded from a file path or fetched from the API, with both taken from command line arguments
+    if not provided.
 
     Parameters
     ----------
@@ -135,24 +165,24 @@ def print_ball_by_ball(
         print("Please provide either a file path or match ID and innings/page parameters.")
 
 
-def _print_ball_by_ball_from_file(file_path: str):
+def _print_ball_by_ball_from_file(file_path: str) -> None:
     model = _load_file_or_exit(file_path, APIResponseCommentary)
     _print_ball_by_ball_from_commentary_model(model.commentary)
 
 
-def _print_ball_by_ball_from_match_id(match_id: int, innings: int, page: int):
+def _print_ball_by_ball_from_match_id(match_id: int, innings: int, page: int) -> None:
     model = asyncio.run(get_play_by_play(match_id, innings, page))
     _print_ball_by_ball_from_commentary_model(model)
 
 
-def _print_ball_by_ball_from_commentary_model(model: Commentary):
+def _print_ball_by_ball_from_commentary_model(model: Commentary) -> None:
     for item in model.deliveries:
         print(f"{item.over.overs}: {item.short_text} - {item.current_innings_score.current_score}")
 
 
 def parse_ball_by_ball_args() -> Namespace:
     """
-    Parse command line arguments
+    Parse command line arguments.
 
     Returns
     -------
@@ -164,5 +194,4 @@ def parse_ball_by_ball_args() -> Namespace:
     parser.add_argument("--match_id", help="ID of the match to fetch from the API")
     parser.add_argument("--innings", help="The innings of the game to get data from", type=int, default=1)
     parser.add_argument("--page", help="The page of commentary to return from that innings", type=int, default=1)
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()

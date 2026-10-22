@@ -1,5 +1,7 @@
+"""Base model and common fields shared by the API source models."""
+
 from abc import ABC
-from typing import Annotated, Any, Optional, TypeVar
+from typing import Annotated, Optional, TypeVar
 
 from pydantic import (
     AliasChoices,
@@ -16,9 +18,10 @@ from pydantic.alias_generators import to_camel
 
 class CCBaseModel(ABC, BaseModel):
     """
-    Abstract base class for Common Cricinfo (CC) models, which adds a validator so that the source data which
-    contains camelCased fields can be deserialised into models with snake_case fields, and which sets any fields
-    whose values are empty dictionaries to have a value of None
+    Abstract base class for Common Cricinfo (CC) models.
+
+    It generates aliases so that the source data, which contains camelCased fields, can be deserialised into models
+    with snake_case fields, and adds a validator which sets any fields whose values are empty dictionaries to None.
     """
 
     model_config = ConfigDict(
@@ -27,7 +30,20 @@ class CCBaseModel(ABC, BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def set_empty_dicts_to_none(self, data: dict):
+    def set_empty_dicts_to_none(cls, data: dict) -> dict:
+        """
+        Replace any empty dictionaries in the source data with None.
+
+        Parameters
+        ----------
+        data : dict
+            The source data being validated
+
+        Returns
+        -------
+        dict
+            The data, with empty dictionaries replaced
+        """
         if not data:
             return data
 
@@ -40,7 +56,20 @@ class CCBaseModel(ABC, BaseModel):
 T = TypeVar("T")
 
 
-def falsy_to_none(x: Any) -> Any:
+def falsy_to_none(x: object) -> object:
+    """
+    Replace a falsy value, such as an empty dictionary or string, with None.
+
+    Parameters
+    ----------
+    x : object
+        The value to check
+
+    Returns
+    -------
+    object
+        The value, or None if it was falsy
+    """
     return x or None
 
 
@@ -48,9 +77,7 @@ LeniantOptional = Annotated[Optional[T], BeforeValidator(falsy_to_none)]
 
 
 class PagingModel(CCBaseModel):
-    """
-    Details of paging information, included in any APIs which page their responses
-    """
+    """Details of paging information, included in any APIs which page their responses."""
 
     count: int
     page_index: int
@@ -59,9 +86,7 @@ class PagingModel(CCBaseModel):
 
 
 class RefMixin(CCBaseModel):
-    """
-    Mixin property of a URL included within models as a direct link to that entity
-    """
+    """Mixin property of a URL included within models as a direct link to that entity."""
 
     ref: Optional[HttpUrl] = Field(
         default=None,
@@ -71,25 +96,19 @@ class RefMixin(CCBaseModel):
 
 
 class DateMixin(CCBaseModel):
-    """
-    Mixin property for a date
-    """
+    """Mixin property for a date."""
 
     date: Optional[str] = None
 
 
 class DisplayNameMixin(BaseModel):
-    """
-    Mixin property for a display name
-    """
+    """Mixin property for a display name."""
 
     display_name: str
 
 
 class Link(CCBaseModel):
-    """
-    All details of a link to an entity
-    """
+    """All details of a link to an entity."""
 
     language: Optional[str] = None
     rel: Optional[list[str] | str] = None
@@ -101,28 +120,20 @@ class Link(CCBaseModel):
 
 
 class Position(RefMixin):
-    """
-    A Player's position, which can represent both their overall role and their position within a match
-    """
+    """A Player's position, which can represent both their overall role and their position within a match."""
 
-    displayName: Optional[str] = None
+    display_name: Optional[str] = None
     id: Optional[str] = None
     name: Optional[str] = None
     abbreviation: Optional[str] = None
 
 
 class Event(RefMixin, DateMixin):
-    """
-    An event, containing a link and a date
-    """
-
-    pass
+    """An event, containing a link and a date."""
 
 
 class MatchClass(CCBaseModel):
-    """
-    The class (i.e. level and type) of a match
-    """
+    """The class (i.e. level and type) of a match."""
 
     name: str
     event_type: str
@@ -133,9 +144,7 @@ class MatchClass(CCBaseModel):
 
 
 class FlagMixin(RefMixin):
-    """
-    Mixin property for a flag, for a person's nationality
-    """
+    """Mixin property for a flag, for a person's nationality."""
 
     alt: str
     rel: list[str]

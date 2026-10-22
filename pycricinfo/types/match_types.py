@@ -1,9 +1,13 @@
+"""Enums for match types, match note types and delivery play types."""
+
 from enum import Enum
 
 from aenum import MultiValueEnum
 
 
-class MatchTypeNames(str, MultiValueEnum):
+class MatchTypeNames(str, MultiValueEnum):  # noqa: SLOT000 - ruff only exempts enum.Enum, not aenum
+    """Names of the types of match, with the alternative names Cricinfo uses for each."""
+
     TESTS = "Tests", "Test matches"
     ODIs = "One-Day Internationals", "ODIs"
     T20Is = "Twenty20 Internationals", "T20Is"
@@ -23,7 +27,9 @@ class MatchTypeNames(str, MultiValueEnum):
     OTHER_T20_MATCHES = "Other Twenty20 matches"
 
 
-class MatchNoteType(str, MultiValueEnum):
+class MatchNoteType(str, MultiValueEnum):  # noqa: SLOT000 - ruff only exempts enum.Enum, not aenum
+    """Types of match note, with the alternative names Cricinfo uses for each."""
+
     SERIES_NOTE = "seriesnote", "Series note"
     POINTS = "points", "Points"
     MATCH_NUMBER = "matchnumber", "Match number"
@@ -40,6 +46,8 @@ class MatchNoteType(str, MultiValueEnum):
 
 
 class DeliveryPlayTypes(int, Enum):
+    """The IDs of each type of delivery outcome in ball-by-ball commentary."""
+
     RUN = 1
     NO_RUN = 2
     FOUR = 3
