@@ -1,7 +1,6 @@
 """Scrape a season's listing page for the series in that season, grouped by match type."""
 
 import re
-from typing import Optional
 from urllib.parse import quote
 
 from bs4 import BeautifulSoup
@@ -14,7 +13,7 @@ from pycricinfo.types.match_types import MatchTypeNames
 
 
 async def get_match_types_in_season(
-    season_name: str | int, type_filter: Optional[MatchTypeNames] = None
+    season_name: str | int, type_filter: MatchTypeNames | None = None
 ) -> list[MatchTypeWithSeries]:
     """
     Get the Cricinfo web page which lists all series in a given season, and parse out their details.

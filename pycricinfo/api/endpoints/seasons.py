@@ -1,6 +1,6 @@
 """Endpoints for searching seasons and series."""
 
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Path, Query, status
 
@@ -26,7 +26,7 @@ async def match_types_in_season(
         int | str, Path(description='The name of the season to get matches for, e.g. "2024" or "2020-21"')
     ],
     match_type_name: Annotated[
-        Optional[MatchTypeNames], Query(description="Filter the response to just matches of the named type")
+        MatchTypeNames | None, Query(description="Filter the response to just matches of the named type")
     ] = None,
 ) -> list[MatchTypeWithSeries]:
     """Get the series in a season, grouped by match type."""

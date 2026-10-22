@@ -1,7 +1,7 @@
 """Output models for innings, and the batting and bowling rows within them, built from the source models."""
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from prettytable import PrettyTable
 from pydantic import AliasChoices, BaseModel, Field, computed_field, model_validator
@@ -102,24 +102,24 @@ class PlayerInningsCommon(BaseModel, ABC):
 class BattingInnings(PlayerInningsCommon):
     """A row in a batting scorecard."""
 
-    innings_id: Optional[int] = Field(
+    innings_id: int | None = Field(
         default=None,
         description="The unique identifier for the innings that this batting performance belongs to",
         validation_alias=AliasChoices("innings_id", "battingId", "batting_id"),
     )
     display_name: str
     dismissal_text: str
-    captain: Optional[bool] = None
-    keeper: Optional[bool] = None
+    captain: bool | None = None
+    keeper: bool | None = None
     runs: int
-    balls_faced: Optional[int] = None
-    fours: Optional[int] = None
-    sixes: Optional[int] = None
-    minutes: Optional[int] = None
+    balls_faced: int | None = None
+    fours: int | None = None
+    sixes: int | None = None
+    minutes: int | None = None
     not_out: bool = Field(validation_alias=AliasChoices("not_out", "notouts"))
-    strike_rate: Optional[float | str] = Field(default=None, validation_alias=AliasChoices("strike_rate", "strikeRate"))
-    absent: Optional[bool] = None
-    retired_hurt: Optional[bool] = None
+    strike_rate: float | str | None = Field(default=None, validation_alias=AliasChoices("strike_rate", "strikeRate"))
+    absent: bool | None = None
+    retired_hurt: bool | None = None
 
     @computed_field
     @property
@@ -178,7 +178,7 @@ class BattingInnings(PlayerInningsCommon):
 class BowlingInnings(PlayerInningsCommon):
     """A row in a bowling scorecard."""
 
-    innings_id: Optional[int] = Field(
+    innings_id: int | None = Field(
         default=None,
         description="The unique identifier for the innings that this batting performance belongs to",
         validation_alias=AliasChoices("innings_id", "bowlingId", "bowling_id"),
@@ -188,16 +188,12 @@ class BowlingInnings(PlayerInningsCommon):
     maidens: int
     runs: int = Field(validation_alias=AliasChoices("runs", "conceded"))
     wickets: int
-    dots: Optional[int] = None
-    no_balls: Optional[int] = Field(default=None, validation_alias=AliasChoices("no_balls", "noballs"))
-    wides: Optional[int] = None
-    economy_rate: Optional[float] = Field(validation_alias=AliasChoices("economy_rate", "economyRate"))
-    fours_conceded: Optional[int] = Field(
-        default=None, validation_alias=AliasChoices("fours_conceded", "foursConceded")
-    )
-    sixes_conceded: Optional[int] = Field(
-        default=None, validation_alias=AliasChoices("sixes_conceded", "sixesConceded")
-    )
+    dots: int | None = None
+    no_balls: int | None = Field(default=None, validation_alias=AliasChoices("no_balls", "noballs"))
+    wides: int | None = None
+    economy_rate: float | None = Field(validation_alias=AliasChoices("economy_rate", "economyRate"))
+    fours_conceded: int | None = Field(default=None, validation_alias=AliasChoices("fours_conceded", "foursConceded"))
+    sixes_conceded: int | None = Field(default=None, validation_alias=AliasChoices("sixes_conceded", "sixesConceded"))
 
     @computed_field
     @property
@@ -253,15 +249,15 @@ class Innings(BaseModel, HeaderlessTableMixin):
     declared: bool = Field(default=False)
     follow_on: bool = Field(default=False)
     wickets: int
-    overs: Optional[float] = None
+    overs: float | None = None
     batters: list[BattingInnings] = Field(default_factory=list)
     bowlers: list[BowlingInnings] = Field(default_factory=list)
-    extras: Optional[int] = None
-    byes: Optional[int] = None
-    wides: Optional[int] = None
-    leg_byes: Optional[int] = Field(default=None, validation_alias=AliasChoices("legbyes", "leg_byes"))
-    no_balls: Optional[int] = Field(default=None, validation_alias=AliasChoices("noballs", "no_balls"))
-    penalties: Optional[int] = None
+    extras: int | None = None
+    byes: int | None = None
+    wides: int | None = None
+    leg_byes: int | None = Field(default=None, validation_alias=AliasChoices("legbyes", "leg_byes"))
+    no_balls: int | None = Field(default=None, validation_alias=AliasChoices("noballs", "no_balls"))
+    penalties: int | None = None
 
     @computed_field
     @property
@@ -347,7 +343,7 @@ class Innings(BaseModel, HeaderlessTableMixin):
         self,
         field_names: list[str],
         items: list[PlayerInningsCommon],
-        field_names_to_left_align: Optional[list[str]] = None,
+        field_names_to_left_align: list[str] | None = None,
         **kwargs: bool,
     ) -> None:
         """

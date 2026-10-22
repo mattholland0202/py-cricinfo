@@ -39,7 +39,6 @@ api = [
     "fastapi>=0.115.12",
     "uvicorn>=0.34.2",
 ]
-dev = ["pytest>=8.4.1", "ruff>=0.11.0"]
 
 [project.scripts]
 print_scorecard = 'pycricinfo.output:print_scorecard'
@@ -57,7 +56,6 @@ ignore = [
     "COM812", # Conflicts with the formatter
     "ISC001", # Conflicts with the formatter
     "CPY001", # No copyright headers in source files
-    "UP045",  # Fields that default to None are typed Optional[...] by convention
     "TD002",  # TODOs don't need an author
     "TD003",  # TODOs don't need an issue link
     "FIX002", # TODOs are allowed
@@ -74,9 +72,6 @@ ignore = [
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
-
-[tool.ruff.lint.pep8-naming]
-classmethod-decorators = ["pydantic.field_validator", "pydantic.model_validator"]
 
 [tool.ruff.lint.flake8-type-checking]
 runtime-evaluated-base-classes = ["pydantic.BaseModel", "pycricinfo.models.source.api.common.CCBaseModel"]
@@ -96,4 +91,4 @@ known-first-party = ["pycricinfo"]
 packages = ["pycricinfo"]
 
 [dependency-groups]
-dev = ["pytest>=8.4.1", "ruff>=0.11.11"]
+dev = ["pytest>=8.4.1", "ruff>=0.17.1"]

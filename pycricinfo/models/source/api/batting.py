@@ -1,7 +1,5 @@
 """Models for a Player's batting innings."""
 
-from typing import Optional
-
 from pydantic import BaseModel, Field, computed_field, model_validator
 
 from pycricinfo.models.source.api.common import CCBaseModel
@@ -67,16 +65,16 @@ class BattingDetails(CCBaseModel):
     )
     dot_ball_percentage: int
     batting_recent: BattingRecent
-    preferred_shot: Optional[PreferredShot] = None
-    scoring_shots: Optional[int] = Field(default=None, description="Number of scoring shots in the innings")
-    control_percentage: Optional[int] = Field(
+    preferred_shot: PreferredShot | None = None
+    scoring_shots: int | None = Field(default=None, description="Number of scoring shots in the innings")
+    control_percentage: int | None = Field(
         default=None,
         description="Percentage of deliveries where the batter played a controlled shot",
     )
-    wagon_zone: Optional[list[WagonZone]] = Field(
+    wagon_zone: list[WagonZone] | None = Field(
         default=None, description="Raw data of list of wagon areas, clockwise from long leg", max_length=8
     )
-    wagon: Optional[Wagon] = Field(
+    wagon: Wagon | None = Field(
         default=None,
         description=(
             "Processed Wagon object containing details of named wagon zones, only present if wagonZone field "
@@ -86,7 +84,7 @@ class BattingDetails(CCBaseModel):
 
     @computed_field
     @property
-    def dismissal_text(self) -> Optional[str]:
+    def dismissal_text(self) -> str | None:
         """How the batter was dismissed, with the wicketkeeper's dagger symbol shown as a cross."""
         return self.out_details and self.out_details.short_text.replace("&dagger;", "\u271d").strip()
 

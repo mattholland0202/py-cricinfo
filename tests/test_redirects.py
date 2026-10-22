@@ -1,6 +1,7 @@
 """Tests for following redirects without decoding the Location header."""
 
 import asyncio
+from http import HTTPStatus
 
 import aiohttp
 import pytest
@@ -39,7 +40,7 @@ async def _fetch(path: str) -> tuple[int, str, str]:
 def test_redirect_keeps_encoded_location() -> None:
     """Test that a redirect to a percent-encoded URL is followed without decoding it, which would loop."""
     status, text, final_path = asyncio.run(_fetch("/ci/engine/series/index.html?season=2026/27;view=season"))
-    assert status == 200
+    assert status == HTTPStatus.OK
     assert text == "season page"
     assert final_path == ENCODED_SEASON_PATH
 

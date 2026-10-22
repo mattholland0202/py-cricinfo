@@ -3,7 +3,6 @@
 import asyncio
 import sys
 from argparse import ArgumentParser, BooleanOptionalAction, Namespace
-from typing import Optional
 
 from pydantic import BaseModel, ValidationError
 
@@ -15,12 +14,12 @@ from pycricinfo.utils import load_file_and_validate_to_model
 
 
 def print_scorecard(
-    file_path: Optional[str] = None,
-    match_id: Optional[int] = None,
-    series_id: Optional[int] = None,
+    file_path: str | None = None,
+    match_id: int | None = None,
+    series_id: int | None = None,
     *,
-    include_batting_minutes: Optional[bool] = None,
-    include_bowling_dots: Optional[bool] = None,
+    include_batting_minutes: bool | None = None,
+    include_bowling_dots: bool | None = None,
 ) -> None:
     """
     Print the scorecard of a match, either by passing a file path or loading from command line arguments.
@@ -128,10 +127,10 @@ def parse_scorecard_args() -> Namespace:
 
 
 def print_ball_by_ball(
-    file_path: Optional[str] = None,
-    match_id: Optional[int] = None,
-    innings: Optional[int] = None,
-    page: Optional[int] = None,
+    file_path: str | None = None,
+    match_id: int | None = None,
+    innings: int | None = None,
+    page: int | None = None,
 ) -> None:
     """
     Print a page of ball by ball commentary of a match.

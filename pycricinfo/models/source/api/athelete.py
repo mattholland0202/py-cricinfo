@@ -1,7 +1,7 @@
 """Models for players (athletes) as they appear in API responses."""
 
 from abc import ABC
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -23,13 +23,13 @@ class Style(CCBaseModel):
 class Headshot(RefMixin):
     """A link to a photo of a Player."""
 
-    alt: Optional[str] = Field(default=None, description="The alt text for the image. Contains the name of the Player.")
+    alt: str | None = Field(default=None, description="The alt text for the image. Contains the name of the Player.")
 
 
 class ShortNameMixin(BaseModel):
     """Mixin property for a Player's short name."""
 
-    short_name: Optional[str] = Field(
+    short_name: str | None = Field(
         default=None, description="Short variant of the Player's name, usually just their last name"
     )
 
@@ -37,13 +37,13 @@ class ShortNameMixin(BaseModel):
 class FullNameMixin(BaseModel):
     """Mixin property for a Player's full name."""
 
-    full_name: Optional[str] = Field(default=None, description="Full name of the Player, including any middle names")
+    full_name: str | None = Field(default=None, description="Full name of the Player, including any middle names")
 
 
 class FirstNameMixin(BaseModel):
     """Mixin property for a Player's first name."""
 
-    first_name: Optional[str] = Field(default=None, description="First name of the player")
+    first_name: str | None = Field(default=None, description="First name of the player")
 
 
 class LastNameMixin(BaseModel):
@@ -71,16 +71,16 @@ class AthleteWithFirstAndLastName(AthleteCommon, FirstNameMixin, LastNameMixin):
 class Athlete(AthleteWithFirstAndLastName, ShortNameMixin):
     """A Player, as included in match rosters and innings."""
 
-    guid: Optional[str] = Field(default=None, description="Unique identifier for the Player, in GUID format")
+    guid: str | None = Field(default=None, description="Unique identifier for the Player, in GUID format")
     uid: str = Field(
         description="Unique identifier for the Player, in a format custom to Cricinfo", examples=["s:200~a:931581"]
     )
     name: str = Field(description="Another variant of the name of the Player, usually just first and last names")
-    style: Optional[list[Style]] = None
-    position: Optional[Position] = None
+    style: list[Style] | None = None
+    position: Position | None = None
     batting_name: str
     fielding_name: str
-    headshot: Optional[Headshot] = None
+    headshot: Headshot | None = None
     links: list[Link]
 
     def __str__(self) -> str:

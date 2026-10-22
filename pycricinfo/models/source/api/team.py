@@ -1,7 +1,6 @@
 """Models for Teams, and the wickets and overs in a Team's innings."""
 
 from abc import ABC
-from typing import Optional
 
 from pydantic import AliasChoices, Field
 
@@ -39,8 +38,8 @@ class TeamFull(TeamWithName):
     is_national: bool
     is_active: bool
     classes: list[int] = Field(description="The classes of match that this Team plays in")
-    current_match: Optional[Event] = Field(default=None, validation_alias=AliasChoices("event"))
-    current_players_link: Optional[RefMixin] = Field(default=None, validation_alias=AliasChoices("athletes"))
+    current_match: Event | None = Field(default=None, validation_alias=AliasChoices("event"))
+    current_players_link: RefMixin | None = Field(default=None, validation_alias=AliasChoices("athletes"))
 
 
 class TeamWicketDetails(CCBaseModel):
@@ -58,7 +57,7 @@ class TeamWicket(CCBaseModel):
     dismissal_card: str
     fours: int
     fow: str
-    minutes: Optional[int | str] = None  # TODO: Can be empty string - parse to null in that case
+    minutes: int | str | None = None  # TODO: Can be empty string - parse to null in that case
     number: int
     over: float
     runs: int

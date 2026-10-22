@@ -1,7 +1,5 @@
 """Models for match notes, such as close of play scores and player replacements."""
 
-from typing import Optional
-
 from pydantic import Field
 
 from pycricinfo.models.source.api.common import CCBaseModel, DateMixin, RefMixin
@@ -30,16 +28,14 @@ class MatchNote(DateMixin, RefMixin):
     determined by the 'type' field, and the content of the note is determined by the 'text' and 'items' fields.
     """
 
-    id: Optional[str | int] = Field(default=None, description="Optional Cricinfo ID of the match note, if available")
-    day_number: Optional[str | int] = Field(
+    id: str | int | None = Field(default=None, description="Optional Cricinfo ID of the match note, if available")
+    day_number: str | int | None = Field(
         default=None,
         description="The day number of the match which the note refers to. Usually present for 'close of play' notes",
     )
-    text: Optional[str] = Field(
-        default=None, description="The text of the match note, for non-player replacement notes"
-    )
+    text: str | None = Field(default=None, description="The text of the match note, for non-player replacement notes")
     type: MatchNoteType = Field(description="The type of the match note")
-    items: Optional[list[MatchNoteItem]] = Field(
+    items: list[MatchNoteItem] | None = Field(
         default=None,
         description=(
             "For player replacement notes, the format is a list of items with the team name and the text "

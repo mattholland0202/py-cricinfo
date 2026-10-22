@@ -2,7 +2,7 @@
 
 from abc import ABC
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import AliasChoices, BaseModel, Field, computed_field
 
@@ -55,7 +55,7 @@ class MatchCompetitonCommon(CCBaseModel, ABC):
     limited_overs: bool
     reduced_overs: bool
     date: datetime = Field(description="The start date and time of the match in UTC", examples=["2024-07-26T10:00:00Z"])
-    end_date: Optional[datetime] = Field(
+    end_date: datetime | None = Field(
         default=None, description="The end date and time of the match in UTC", examples=["2024-07-30T16:00:00Z"]
     )
     match_class: MatchClass = Field(validation_alias=AliasChoices("match_class", "class"))
@@ -120,7 +120,7 @@ class MatchHeader(MatchHeaderAndBasicCommon):
 
     def get_batting_innings_by_number(
         self, innings_number: int
-    ) -> Optional[tuple[TeamWithColorAndLogos, TeamInningsDetails]]:
+    ) -> tuple[TeamWithColorAndLogos, TeamInningsDetails] | None:
         """
         Get the batting innings data for a specific innings number.
 
@@ -131,7 +131,7 @@ class MatchHeader(MatchHeaderAndBasicCommon):
 
         Returns
         -------
-        Optional[tuple[TeamWithColorAndLogos, TeamInningsDetails]]
+        tuple[TeamWithColorAndLogos, TeamInningsDetails] | None
             The team and innings details for the specified innings number, or None if not found.
         """
         for competitor in self.competition.competitors:
@@ -164,7 +164,7 @@ class MatchInfo(BaseModel):
     """Information about the match, including venue, attendance and officials."""
 
     venue: Venue
-    attendance: Optional[int] = None
+    attendance: int | None = None
     officials: list[Official]
 
 

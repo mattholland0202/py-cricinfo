@@ -9,7 +9,6 @@ from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from http import HTTPStatus
 from pathlib import Path
-from typing import Optional
 from urllib.parse import urljoin, urlparse
 
 import aiohttp
@@ -42,11 +41,11 @@ _COMMON_BROWSER_HEADERS = {
 async def get_and_parse[T: BaseModel](  # noqa: PLR0913 - each argument is an independent request option
     route: str,
     type_to_parse: type[T],
-    params: Optional[dict] = None,
+    params: dict | None = None,
     *,
     null_out_empty_dicts: bool = False,
     base_route: BaseRoute = BaseRoute.core,
-    session: Optional[aiohttp.ClientSession] = None,
+    session: aiohttp.ClientSession | None = None,
 ) -> T:
     """
     Make a GET request to the API and parse the response to the supplied type.
@@ -87,12 +86,12 @@ async def get_and_parse[T: BaseModel](  # noqa: PLR0913 - each argument is an in
 
 async def get_request(  # noqa: PLR0913 - each argument is an independent request option
     route: str,
-    params: Optional[dict[str, str]] = None,
+    params: dict[str, str] | None = None,
     base_route: BaseRoute = BaseRoute.core,
     *,
-    response_output_sub_folder: Optional[str] = None,
+    response_output_sub_folder: str | None = None,
     warm_session: bool = False,
-    session: Optional[aiohttp.ClientSession] = None,
+    session: aiohttp.ClientSession | None = None,
 ) -> dict | str:
     """
     Make a GET request to the Cricinfo API or page routes.
@@ -200,7 +199,7 @@ def _get_base_url(base_route: BaseRoute) -> str:
 
 
 @asynccontextmanager
-async def _session_scope(session: Optional[aiohttp.ClientSession]) -> AsyncGenerator[aiohttp.ClientSession]:
+async def _session_scope(session: aiohttp.ClientSession | None) -> AsyncGenerator[aiohttp.ClientSession]:
     """
     Yield the supplied session, or a new one that is closed on exit if none was supplied.
 
@@ -295,7 +294,7 @@ async def _read_api_response(response: aiohttp.ClientResponse) -> tuple[dict | s
         return await response.text(), response.status
 
 
-def _format_route(route: str, params: Optional[dict[str, str]] = None) -> str:
+def _format_route(route: str, params: dict[str, str] | None = None) -> str:
     """
     Format the route with the provided parameters.
 

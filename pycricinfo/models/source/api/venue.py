@@ -1,7 +1,5 @@
 """Models for venues."""
 
-from typing import Optional
-
 from pycricinfo.models.source.api.common import CCBaseModel, Link, RefMixin
 
 
@@ -9,8 +7,8 @@ class Address(CCBaseModel):
     """The address of a venue."""
 
     city: str
-    state: Optional[str] = None
-    zip_code: Optional[str] = None
+    state: str | None = None
+    zip_code: str | None = None
     country: str
     summary: str
 

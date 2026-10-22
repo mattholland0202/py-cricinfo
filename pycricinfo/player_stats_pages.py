@@ -2,7 +2,6 @@
 
 import asyncio
 import re
-from typing import Optional
 
 import aiohttp
 from bs4 import BeautifulSoup, Tag
@@ -31,7 +30,7 @@ class CareerAveragesRow(BaseModel):
 
 async def get_player_career(
     player_id: int,
-    session: Optional[aiohttp.ClientSession] = None,
+    session: aiohttp.ClientSession | None = None,
 ) -> Career:
     """
     Fetch and parse a player's international career stats from the Statsguru pages.
@@ -155,7 +154,7 @@ def _parse_career_summary_rows(html: str, row_model: type[CareerStatsBaseModel])
     return result
 
 
-def _extract_overall_career_averages_row(html: str) -> Optional[CareerAveragesRow]:
+def _extract_overall_career_averages_row(html: str) -> CareerAveragesRow | None:
     """
     Extract the overall row from the Career averages table.
 
@@ -166,7 +165,7 @@ def _extract_overall_career_averages_row(html: str) -> Optional[CareerAveragesRo
 
     Returns
     -------
-    Optional[CareerAveragesRow]
+    CareerAveragesRow | None
         The overall row cells and table headers, or None if not present.
     """
     soup = BeautifulSoup(html, "html.parser")
@@ -195,7 +194,7 @@ def _extract_overall_career_averages_row(html: str) -> Optional[CareerAveragesRo
     return None
 
 
-def _extract_single_format_from_stats_tab(html: str) -> Optional[MatchTypeNames]:
+def _extract_single_format_from_stats_tab(html: str) -> MatchTypeNames | None:
     """
     Extract the single international format label from the statsTab navigation.
 
@@ -206,7 +205,7 @@ def _extract_single_format_from_stats_tab(html: str) -> Optional[MatchTypeNames]
 
     Returns
     -------
-    Optional[MatchTypeNames]
+    MatchTypeNames | None
         The mapped international match type if exactly one valid format is present,
         otherwise None.
     """
@@ -232,7 +231,7 @@ def _extract_single_format_from_stats_tab(html: str) -> Optional[MatchTypeNames]
     return labels[0]
 
 
-def _to_international_match_type(format_name: str) -> Optional[MatchTypeNames]:
+def _to_international_match_type(format_name: str) -> MatchTypeNames | None:
     """
     Normalize a stats-page label to an international match type.
 
@@ -243,7 +242,7 @@ def _to_international_match_type(format_name: str) -> Optional[MatchTypeNames]:
 
     Returns
     -------
-    Optional[MatchTypeNames]
+    MatchTypeNames | None
         The corresponding international match type, or None when the label is not
         one of the supported international formats.
     """

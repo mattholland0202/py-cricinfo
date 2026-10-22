@@ -1,7 +1,7 @@
 """Models for Team and Player innings."""
 
 from abc import ABC
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import AliasChoices, BaseModel, Field, computed_field, field_validator
 
@@ -22,7 +22,7 @@ class BaseInningsDetails(CCBaseModel, ABC):
         description="The stats category container for this innings. Expected to be overridden by Player or Team stats"
     )
 
-    def find(self, name: str) -> Optional[int | str | float]:
+    def find(self, name: str) -> int | str | float | None:
         """
         Find a matching stat within the attached category.
 
@@ -34,7 +34,7 @@ class BaseInningsDetails(CCBaseModel, ABC):
 
         Returns
         -------
-        Optional[int | str | float]
+        int | str | float | None
             The value of the matching stat, if found, otherwise None
         """
         return self.statistics.find(name)
@@ -154,14 +154,14 @@ class TeamInningsDetails(BaseInningsDetails):
     runs: int
     overs: float
     is_batting: bool
-    fours: Optional[int] = None
-    sixes: Optional[int] = None
+    fours: int | None = None
+    sixes: int | None = None
     description: str
     target: int
     follow_on: int
-    statistics: Optional[TeamStatisticsCategory]
-    partnerships: Optional[list[Partnership]] = None
-    fall_of_wicket: Optional[list[FallOfWicket]] = Field(
+    statistics: TeamStatisticsCategory | None
+    partnerships: list[Partnership] | None = None
+    fall_of_wicket: list[FallOfWicket] | None = Field(
         default=None, validation_alias=AliasChoices("fall_of_wicket", "fow")
     )
 

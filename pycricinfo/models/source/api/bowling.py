@@ -1,7 +1,5 @@
 """Models for a Player's bowling innings."""
 
-from typing import Optional
-
 from pydantic import AliasChoices, BaseModel, Field, model_validator
 
 from pycricinfo.models.source.api.common import CCBaseModel
@@ -51,16 +49,16 @@ class BowlingDetails(CCBaseModel):
     active: bool
     active_name: str
     order: int
-    overall_lhb: Optional[BowlingDetailsToHand] = None
-    overall_rhb: Optional[BowlingDetailsToHand] = None
-    pitch_map_lhb_raw: Optional[list[list[list[int]]]] = Field(
+    overall_lhb: BowlingDetailsToHand | None = None
+    overall_rhb: BowlingDetailsToHand | None = None
+    pitch_map_lhb_raw: list[list[list[int]]] | None = Field(
         default=None, validation_alias=AliasChoices("pitch_map_lhb_raw", "pitchMapLhb")
     )
-    pitch_map_rhb_raw: Optional[list[list[list[int]]]] = Field(
+    pitch_map_rhb_raw: list[list[list[int]]] | None = Field(
         default=None, validation_alias=AliasChoices("pitch_map_rhb_raw", "pitchMapRhb")
     )
-    pitch_map_right: Optional[PitchMapLengths] = None
-    pitch_map_left: Optional[PitchMapLengths] = None
+    pitch_map_right: PitchMapLengths | None = None
+    pitch_map_left: PitchMapLengths | None = None
 
     @model_validator(mode="before")
     @classmethod

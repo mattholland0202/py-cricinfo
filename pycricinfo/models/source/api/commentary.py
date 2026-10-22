@@ -1,7 +1,5 @@
 """Models for ball-by-ball commentary from the play-by-play API."""
 
-from typing import Optional
-
 from pydantic import AliasChoices, BaseModel, Field, computed_field
 
 from pycricinfo.models.source.api.athelete import AthleteWithNameAndShortName as Athlete
@@ -111,9 +109,9 @@ class CommentaryDismissal(CCBaseModel):
     type: str
     bowler: CommentaryDismissalAthlete
     batter: CommentaryDismissalAthlete = Field(validation_alias=AliasChoices("batter", "batsman"))
-    fielder: Optional[CommentaryFielderAthlete] = None
+    fielder: CommentaryFielderAthlete | None = None
     text: str
-    minutes: Optional[int | str] = None
+    minutes: int | str | None = None
     retired_text: str
 
 
@@ -137,10 +135,10 @@ class CommentaryDelivery(CCBaseModel):
     score_value: int
     sequence: int
     athletes_involved: list[Athlete]
-    speed_kph: Optional[float] = None
-    speed_mph: Optional[float] = None
+    speed_kph: float | None = None
+    speed_mph: float | None = None
     bowler: CommentaryBowler
-    other_bowler: Optional[CommentaryBowler] = None
+    other_bowler: CommentaryBowler | None = None
     batter: CommentaryBatter = Field(validation_alias=AliasChoices("batter", "batsman"))
     other_batter: CommentaryBatter = Field(
         validation_alias=AliasChoices("other_batter", "other_batsman", "otherBatsman")

@@ -1,7 +1,5 @@
 """Models for series and match listings, scraped from season and series pages."""
 
-from typing import Optional
-
 from pydantic import BaseModel, Field
 
 
@@ -19,7 +17,7 @@ class MatchTypeWithSeries(BaseModel):
     """A type of match, such as Tests or ODIs, with the series of that type in a season."""
 
     name: str
-    series: Optional[list[MatchSeries]] = Field(default_factory=list)
+    series: list[MatchSeries] | None = Field(default_factory=list)
 
 
 class MatchResult(BaseModel):
@@ -27,6 +25,6 @@ class MatchResult(BaseModel):
 
     id: int
     description: str
-    innings_1_info: Optional[str] = None
-    innings_2_info: Optional[str] = None
-    status: Optional[str] = None
+    innings_1_info: str | None = None
+    innings_2_info: str | None = None
+    status: str | None = None

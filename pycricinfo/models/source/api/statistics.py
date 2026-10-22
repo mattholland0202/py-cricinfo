@@ -1,7 +1,6 @@
 """Models for the lists of named statistics attached to Team and Player innings."""
 
 from abc import ABC
-from typing import Optional
 
 from pydantic import BaseModel, Field, computed_field
 
@@ -108,7 +107,7 @@ class BasicStatistic(CCBaseModel):
             "BOWLING_STAT_NAMES or TEAM_STAT_NAMES"
         )
     )
-    display_value: Optional[str] = Field(
+    display_value: str | None = Field(
         default=None, description="How this value should be displayed, if different from the raw value itself"
     )
     value: int | str | float = Field(
@@ -122,7 +121,7 @@ class StatsCategory(BaseModel):
     name: str = Field(description="The name of this group of statistics, such as 'general', 'batting' or 'bowling'")
     stats: list[BasicStatistic] = Field(description="The list of stats in this category")
 
-    def get_stat(self, name: str) -> Optional[int | str | float]:
+    def get_stat(self, name: str) -> int | str | float | None:
         """
         Find a matching stat within this category.
 
@@ -133,7 +132,7 @@ class StatsCategory(BaseModel):
 
         Returns
         -------
-        Optional[int | str | float]
+        int | str | float | None
             The value of the matching stat, if found, otherwise None
         """
         return next((s.value for s in self.stats if s.name == name), None)
@@ -162,7 +161,7 @@ class StatsCategoryContainer(ABC, BaseModel):
         """The first category in this container."""
         return next(iter(self.categories), None)
 
-    def find(self, name: str) -> Optional[int | str | float]:
+    def find(self, name: str) -> int | str | float | None:
         """
         Find a matching stat within the first category.
 
@@ -173,7 +172,7 @@ class StatsCategoryContainer(ABC, BaseModel):
 
         Returns
         -------
-        Optional[int | str | float]
+        int | str | float | None
             The value of the matching stat, if found, otherwise None
         """
         return self.first_category and self.first_category.get_stat(name)
@@ -186,16 +185,16 @@ class PlayerStatisticsCategoryContainer(StatsCategoryContainer):
     It adds optional properties for batting or bowling, depending on the innings type.
     """
 
-    batting: Optional[BattingDetails] = Field(
+    batting: BattingDetails | None = Field(
         default=None,
         description="Extra statistics representing a batting innings, such as shot locations and runs breakdown",
     )
-    bowling: Optional[BowlingDetails] = Field(
+    bowling: BowlingDetails | None = Field(
         default=None,
         description="Extra statistics representing a bowling innings, such as delivery pitch map details",
     )
 
-    def find(self, name: str) -> Optional[int | str | float]:
+    def find(self, name: str) -> int | str | float | None:
         """
         Find a statistic in the primary category, or an attribute of the batting or bowling extensions.
 
@@ -207,7 +206,7 @@ class PlayerStatisticsCategoryContainer(StatsCategoryContainer):
 
         Returns
         -------
-        Optional[int | str | float]
+        int | str | float | None
             The value of the matching stat, if found, otherwise None
         """
         split: list[str] = name.split(".")

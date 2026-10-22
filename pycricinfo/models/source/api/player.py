@@ -1,7 +1,5 @@
 """Models for a Player's full details."""
 
-from typing import Optional
-
 from pydantic import Field
 
 from pycricinfo.models.source.api.athelete import Athlete
@@ -19,7 +17,7 @@ class Player(Athlete):
     """A Player's full details, as returned by the athletes API."""
 
     date_of_birth: str
-    date_of_death: Optional[str] = Field(default=None)
+    date_of_death: str | None = Field(default=None)
     active: bool
     gender: str
     position: Position

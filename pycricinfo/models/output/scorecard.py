@@ -1,7 +1,7 @@
 """Output models for a match scorecard, built from the source models."""
 
 import html
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -16,11 +16,11 @@ if TYPE_CHECKING:
 class Scorecard(BaseModel, HeaderlessTableMixin):
     """A match scorecard, with a title, result summary and each innings."""
 
-    title: Optional[str] = Field(
+    title: str | None = Field(
         description="The title for the scorecard, usually match details, including teams"
         "and dates. e.g.) 3rd Test, West Indies tour of England at Birmingham, Jul 26-28 2024 "
     )
-    summary: Optional[str] = Field(description="A summary of the result of the match, e.g.) 'India won by 5 wickets'")
+    summary: str | None = Field(description="A summary of the result of the match, e.g.) 'India won by 5 wickets'")
     innings: list[Innings]
 
     def show(self, **kwargs: bool) -> None:

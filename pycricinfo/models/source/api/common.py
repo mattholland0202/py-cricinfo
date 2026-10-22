@@ -1,7 +1,7 @@
 """Base model and common fields shared by the API source models."""
 
 from abc import ABC
-from typing import Annotated, Optional, TypeVar
+from typing import Annotated, TypeVar
 
 from pydantic import (
     AliasChoices,
@@ -73,7 +73,7 @@ def falsy_to_none(x: object) -> object:
     return x or None
 
 
-LeniantOptional = Annotated[Optional[T], BeforeValidator(falsy_to_none)]
+LeniantOptional = Annotated[T | None, BeforeValidator(falsy_to_none)]
 
 
 class PagingModel(CCBaseModel):
@@ -88,7 +88,7 @@ class PagingModel(CCBaseModel):
 class RefMixin(CCBaseModel):
     """Mixin property of a URL included within models as a direct link to that entity."""
 
-    ref: Optional[HttpUrl] = Field(
+    ref: HttpUrl | None = Field(
         default=None,
         validation_alias=AliasChoices("ref", "$ref", "href"),
         description="The url to the entity, which is usually a link to ESPN's CDN",
@@ -98,7 +98,7 @@ class RefMixin(CCBaseModel):
 class DateMixin(CCBaseModel):
     """Mixin property for a date."""
 
-    date: Optional[str] = None
+    date: str | None = None
 
 
 class DisplayNameMixin(BaseModel):
@@ -110,22 +110,22 @@ class DisplayNameMixin(BaseModel):
 class Link(CCBaseModel):
     """All details of a link to an entity."""
 
-    language: Optional[str] = None
-    rel: Optional[list[str] | str] = None
+    language: str | None = None
+    rel: list[str] | str | None = None
     href: HttpUrl
     text: str
-    short_text: Optional[str] = None
-    is_external: Optional[bool] = None
-    is_premium: Optional[bool] = None
+    short_text: str | None = None
+    is_external: bool | None = None
+    is_premium: bool | None = None
 
 
 class Position(RefMixin):
     """A Player's position, which can represent both their overall role and their position within a match."""
 
-    display_name: Optional[str] = None
-    id: Optional[str] = None
-    name: Optional[str] = None
-    abbreviation: Optional[str] = None
+    display_name: str | None = None
+    id: str | None = None
+    name: str | None = None
+    abbreviation: str | None = None
 
 
 class Event(RefMixin, DateMixin):
@@ -138,9 +138,9 @@ class MatchClass(CCBaseModel):
     name: str
     event_type: str
     general_class_id: int
-    general_class_card: Optional[str] = None
-    international_class_id: Optional[int] = None
-    international_class_card: Optional[str] = None
+    general_class_card: str | None = None
+    international_class_id: int | None = None
+    international_class_card: str | None = None
 
 
 class FlagMixin(RefMixin):

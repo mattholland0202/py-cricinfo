@@ -1,7 +1,5 @@
 """Fetch players, teams, matches, scorecards and ball-by-ball commentary from the Cricinfo JSON APIs."""
 
-from typing import Optional
-
 import aiohttp
 
 from pycricinfo.api_helper import get_and_parse, get_request
@@ -18,7 +16,7 @@ from pycricinfo.models.source import (
 )
 
 
-async def get_player(player_id: int, session: Optional[aiohttp.ClientSession] = None) -> Player:
+async def get_player(player_id: int, session: aiohttp.ClientSession | None = None) -> Player:
     """
     Get a player by their ID.
 
@@ -37,7 +35,7 @@ async def get_player(player_id: int, session: Optional[aiohttp.ClientSession] = 
     return await get_and_parse(get_settings().routes.player, Player, params={"player_id": player_id}, session=session)
 
 
-async def get_team(team_id: int, session: Optional[aiohttp.ClientSession] = None) -> TeamFull:
+async def get_team(team_id: int, session: aiohttp.ClientSession | None = None) -> TeamFull:
     """
     Get a team by its ID.
 
@@ -56,7 +54,7 @@ async def get_team(team_id: int, session: Optional[aiohttp.ClientSession] = None
     return await get_and_parse(get_settings().routes.team, TeamFull, params={"team_id": team_id}, session=session)
 
 
-async def get_match_basic(match_id: int, session: Optional[aiohttp.ClientSession] = None) -> MatchBasic:
+async def get_match_basic(match_id: int, session: aiohttp.ClientSession | None = None) -> MatchBasic:
     """
     Get basic match information by match ID.
 
@@ -78,7 +76,7 @@ async def get_match_basic(match_id: int, session: Optional[aiohttp.ClientSession
 
 
 async def get_match_team(
-    match_id: int, team_id: int, session: Optional[aiohttp.ClientSession] = None
+    match_id: int, team_id: int, session: aiohttp.ClientSession | None = None
 ) -> MatchCompetitorBasic:
     """
     Get one of the teams competing in a match.
@@ -105,7 +103,7 @@ async def get_match_team(
     )
 
 
-async def get_match(series_id: int, match_id: int, session: Optional[aiohttp.ClientSession] = None) -> Match:
+async def get_match(series_id: int, match_id: int, session: aiohttp.ClientSession | None = None) -> Match:
     """
     Get detailed match information by match ID.
 
@@ -132,7 +130,7 @@ async def get_match(series_id: int, match_id: int, session: Optional[aiohttp.Cli
     )
 
 
-async def get_match_raw(series_id: int, match_id: int, session: Optional[aiohttp.ClientSession] = None) -> dict:
+async def get_match_raw(series_id: int, match_id: int, session: aiohttp.ClientSession | None = None) -> dict:
     """
     Get raw match data by match ID.
 
@@ -160,7 +158,7 @@ async def get_match_raw(series_id: int, match_id: int, session: Optional[aiohttp
 
 
 async def get_scorecard(
-    series_id: int, match_id: int, session: Optional[aiohttp.ClientSession] = None
+    series_id: int, match_id: int, session: aiohttp.ClientSession | None = None
 ) -> CricinfoScorecard:
     """
     Get a match and generate and return a scorecard for it.
@@ -184,7 +182,7 @@ async def get_scorecard(
 
 
 async def get_play_by_play(
-    match_id: int, innings: int = 1, page: int = 1, session: Optional[aiohttp.ClientSession] = None
+    match_id: int, innings: int = 1, page: int = 1, session: aiohttp.ClientSession | None = None
 ) -> Commentary:
     """
     Get a page of ball-by-ball data for a match, processed into a list of CommentaryItems.
@@ -217,7 +215,7 @@ async def get_play_by_play(
 
 
 async def get_play_by_play_raw(
-    match_id: int, page: int = 1, innings: int = 1, session: Optional[aiohttp.ClientSession] = None
+    match_id: int, page: int = 1, innings: int = 1, session: aiohttp.ClientSession | None = None
 ) -> dict:
     """
     Get a page of ball-by-ball data for a match.

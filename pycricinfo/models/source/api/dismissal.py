@@ -1,7 +1,5 @@
 """Models for how a batter was dismissed."""
 
-from typing import Optional
-
 from pydantic import BaseModel
 
 from pycricinfo.models.source.api.athelete import AthleteWithFirstAndLastName
@@ -43,8 +41,8 @@ class DismissalDetails(CCBaseModel):
 class Dismissal(CCBaseModel):
     """How a batter was dismissed, including the bowler and any fielders involved."""
 
-    bowler: Optional[AthleteWithFirstAndLastName] = None
-    details: Optional[DismissalDetails] = None
+    bowler: AthleteWithFirstAndLastName | None = None
+    details: DismissalDetails | None = None
     dismissal_card: str
     fielders: list[DismissalFielder]
     short_text: str

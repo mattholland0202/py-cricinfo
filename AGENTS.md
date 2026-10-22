@@ -23,11 +23,11 @@ kept in sync with `pyproject.toml`. Run `uv lock` after changing dependencies.
 
 - Ruff, line length 120, double quotes, with all lint rules enabled (`select = ["ALL"]`). The ignores in
   `pyproject.toml` are only for rules that conflict with the formatter or with project conventions (such as
-  `Optional[...]` over `X | None`). Prefer fixing a violation; where a rule must be broken, use a line-level
+  TODOs without authors or issue links). Prefer fixing a violation; where a rule must be broken, use a line-level
   `# noqa: <code> - <reason>`. `pycricinfo` is first-party for import sorting.
 - Docstrings use the numpy format (`Parameters`, `Returns`, `Raises` sections with `----------` underlines). Public
   functions and model validators are expected to have them.
-- Type hints are used throughout. Fields that default to `None` must be typed `Optional[...]`.
+- Type hints are used throughout. Fields that default to `None` must be typed `X | None`, not `Optional[X]`.
 - Public functions that make HTTP requests are `async` and accept an optional `session: aiohttp.ClientSession`. If
   none is passed, they create and close their own. Keep this pattern for new fetch functions.
 
